@@ -29,22 +29,26 @@
     </p>
 
     <h2>Back Story</h2>
+        Our story follows the life of an aspiring knight who was drafted into a a long lasting war against the demons.
+        Our knight fought on the front lines but he was unfortunately too inexperienced. He died a valiant death ... until a mysterious Lich encountered his dead body.
+        The Lich did some stuff and experimented on the knight. When the knight woke up, he lost all resemblance of a human but he has magic shadow powers now.
     <p>
 
     </p>
 
     <h2>Objective</h2>
+        The Shadow Knight's objective is to survive in an unknown land. With his newfound powers and a fragile body, he must eliminate enemies and escape to reach the Lich.
     <p>
 
     </p>
 
     <h2>Gameplay</h2>
     <p>
-        The game is a mix of side-scroller and platformer in which the main objective of each level is to kill the enemies.
+        The game is a mix of side-scroller and platformer in which the main objective of each level is to kill all enemies before proceeding to the next level.
 
-        Each level is split into two: a "training" area and the boss area which is required to reach the next level. In the training area,
-        the player can kill enemies for rewards in the form of experience and skill points. This area is meant to be used as preparation for
-        the boss fight. The boss area will contain puzzles that the player must solve in order to reach the boss.
+        Each level is either a training level or a boss level. In the training levels,
+        the player can kill enemies for rewards in the form of experience and skill points. These levels are meant to be used as preparation for
+        the boss fight. The boss level will contain puzzles that the player must solve in order to reach the boss.
         Once within the boss area, players can no longer change their loadout. Preparation should be made before entering the boss level.
 
         <br/><br/>
@@ -59,11 +63,11 @@
         The game will be played using both a keyboard and mouse. Following are the keybindings:
         <table>
             <tr>
-                <th>Key</th>
-                <th>Function</th>
+                <th align="Left">Key</th>
+                <th align="Left">Function</th>
             </tr>
             <tr>
-                <td>W</td>
+                <td>W, Space</td>
                 <td>Jump Up</td>
             </tr>
             <tr>
@@ -77,6 +81,10 @@
             <tr>
                 <td>D</td>
                 <td>Move Right</td>
+            </tr>
+            <tr>
+                <td>Left Shift</td>
+                <td>Dash</td>
             </tr>
             <tr>
                 <td>U,I,O,P</td>
@@ -95,9 +103,100 @@
 
     <h2>Graphical User Interface</h2>
 
+    <p>All GUI components include the following</p>
+
+    <ul>
+    <li><strong>Splash Screen</strong> - The splash screen GUI simply presents a game logo and temps the user to proceed.</li>
+    <br />
+
+    <li><strong>Main Menu</strong> - After the splash screen is clicked, the main menu provides options to start the game:
+        <ul>
+        <li><strong>Play</strong> - If pressed, create a new game starting from the beginning.</li>
+        <li><strong>Choose Level</strong> - If pressed, the game will display an level selection screen.</li>
+        <li><strong>Controls</strong> - If pressed, the game will display an info screen that includes a description of all the game controls.</li>
+        <li><strong>Help</strong> - If pressed, the game will display an info screen with information about the backstory, game authors, and cheat codes.</li>
+        </ul></li>
+    <br />
+
+    <li><strong>Levels Selection Screen</strong> - If pressed, the game will display an level selection screen.</li>
+    <li><strong>Controls Screen</strong> - If pressed, the game will display an info screen that includes a description of all the game controls.</li>
+    <li><strong>Help Screen</strong> - If pressed, the game will display an info screen with information about the backstory, game authors, and cheat codes.</li>
+
+    <li><strong>In-Game Menu</strong> - While the game is in progress, we'll always have a game menu that allows the player to pause the game and select from the following options:
+        <ul>
+        <li><strong>New Game</strong> - If a game is in progress, first we'll pop up a dialog to make sure the user really wants to quit the current game. If we conclude the user really wants to start a game, then the game state is reset and begun.</li>
+        <li><strong>Display Controls</strong> - If pressed, the game will display an info screen that includes a description of all game controls.</li>
+        <li><strong>About</strong> - If pressed, the game will display an info screen with information about the game authors.</li>
+        <li><strong>Exit</strong> - If pressed, the game program will exit and the player is returned to the splash screen.</li>
+        </ul></li>
+    <br />
+
+    <li><strong>Skill Book</strong> - While the game in progress, the skill book allows the player to view and upgrade their skills.</li>
+
+    <li><strong>In-Game GUI</strong> - Once a game starts, the following will be displayed at all times:
+        <ul>
+        <li>Health Bar</li>
+        <li>Shadow Bar</li>
+        <li>Currency Count</li>
+        </ul>
+    </ul>
+    <br />
+
     <h2>Artwork</h2>
+
+    <p>The following needs to be created:</p>
+
+    <ul>
+        <li><strong>Shadow Knight</strong> - A knight that requires animations for:
+         <ul>
+          <li>Walking Left</li>
+          <li>Walking Right</li>
+          <li>Jumping Up</li>
+          <li>Dashing Left</li>
+          <li>Dashing Right</li>
+          <li>Attacking Left</li>
+          <li>Attacking Right</li>
+          <li>Taking Damage</li>
+          <li>Dying</li>
+         </ul></li>
+     <br />
+        <li><strong>Melee, Ranged, Flying &amp; Boss Enemies</strong> - Enemy sprites, each require animations for:
+         <ul>
+          <li>Walking Left</li>
+          <li>Walking Right</li>
+          <li>Attacking Left</li>
+          <li>Attacking Right</li>
+          <li>Taking Damage</li>
+          <li>Dying</li>
+         </ul></li>
+     <br />
+     
+        <li><strong>Exit Door</strong> - Each level will have an exit door that lets them advance to the next level after completing the current level.</li>
+     <br />
+     
+        <li><strong>Floor &amp; Wall Tiles</strong> - Training and boss levels will have collidable walls and walkable platforms.</li>
+     <br />
+     
+        <li><strong>Chamber Background Tiles</strong> - Our level backgrounds will be made with non-collidable tiles.</li>
+       </ul>
+     <br />
 
     <h2>Sound Effects</h2>
 
+    <p>All sound effects will be original. Sounds will be made to coincide with each of the following events:</p>
+    <ul>
+        <li><strong>Walking</strong></li>
+        <li><strong>Jumping</strong></li>
+        <li><strong>Dashing</strong></li>
+        <li><strong>Attacking</strong></li>
+        <li><strong>Enemy Attacking</strong></li>
+        <li><strong>Taking Damage</strong></li>
+        <li><strong>Dying</strong></li>
+        <li><strong>Level Clear</strong></li>
+    </ul>
+    <br />
+
     <h2>Music</h2>
+
+    <p>There will probably be music for each level.</p>
 </body>
