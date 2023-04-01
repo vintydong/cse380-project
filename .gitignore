@@ -65,4 +65,13 @@ node_modules/
 # dotenv environment variables file
 .env
 
+# other config files
 .prettierrc
+.vscode
+
+# Project specific
+dist/*
+
+!dist/builtin
+
+!dist/hw4_assets/
