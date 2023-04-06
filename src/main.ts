@@ -9,7 +9,7 @@ import { PlayerControls } from "./AI/Player/PlayerController";
 
     // Set up options for our game
     let options = {
-        canvasSize: {x: 1024, y: 1024},          // The size of the game
+        canvasSize: {x: 1366, y: 768},          // The size of the game
         clearColor: {r: 0.1, g: 0.1, b: 0.1},   // The color the game clears to
         inputs: [
             {name: PlayerControls.MOVE_UP, keys: ["w"]},
