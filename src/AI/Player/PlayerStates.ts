@@ -17,7 +17,7 @@ export abstract class PlayerState extends State {
     public constructor(parent: PlayerController, owner: AnimatedSprite) {
         super(parent);
         this.owner = owner;
-        this.gravity = 500;
+        this.gravity = 1000;
     }
 
     public abstract onEnter(options: Record<string, any>): void;
@@ -38,9 +38,9 @@ export abstract class PlayerState extends State {
     public update(deltaT: number): void {
         // This updates the direction the player sprite is facing (left or right)
         let direction = this.parent.moveDir;
-        if (direction.x !== 0) {
-            this.owner.invertX = MathUtils.sign(direction.x) < 0;
-        }
+        // if (direction.x !== 0) {
+        //     this.owner.invertX = MathUtils.sign(direction.x) < 0;
+        // }
     }
 
     public abstract onExit(): Record<string, any>;
@@ -63,8 +63,6 @@ export class Dash extends PlayerState {
 
     public onEnter(options: Record<string, any>): void {
         this.parent.speed = this.parent.MAX_SPEED;
-        this.owner.animation.playIfNotAlready(PlayerAnimations.WALK);
-
         this.timestepsLeft = 10;
     }
 
@@ -75,7 +73,11 @@ export class Dash extends PlayerState {
         let moveDir = this.parent.moveDir;
         let faceDir = this.parent.faceDir;
 
+        // Dash in direction of movement or cursor, normalized to 1/-1 so fixed distance
         let dx = moveDir.isZero() ? faceDir.x : moveDir.x;
+        dx = dx > 0 ? 1 : -1
+
+        this.owner.animation.playIfNotAlready(dx < 0 ? PlayerAnimations.RUNNING_LEFT : PlayerAnimations.RUNNING_RIGHT);
         
         this.parent.velocity.y += this.gravity * deltaT;
         this.parent.velocity.x = dx * 2 * this.parent.speed
@@ -173,7 +175,7 @@ export class Idle extends PlayerState {
 
 export class Jump extends PlayerState {
     public onEnter(options: Record<string, any>): void {
-        this.parent.velocity.y = -200;
+        this.parent.velocity.y = -400;
     }
 
     public handleInput(event: GameEvent): void { }
@@ -200,7 +202,8 @@ export class Jump extends PlayerState {
 export class Walk extends PlayerState {
     public onEnter(options: Record<string, any>): void {
         this.parent.speed = this.parent.MIN_SPEED;
-        this.owner.animation.playIfNotAlready(PlayerAnimations.WALK);
+        let dir = this.parent.moveDir;
+        this.owner.animation.playIfNotAlready(dir.x < 0 ? PlayerAnimations.RUNNING_LEFT : PlayerAnimations.RUNNING_RIGHT);
     }
 
     public handleInput(event: GameEvent): void { }

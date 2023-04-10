@@ -37,8 +37,12 @@ export enum PlayerStates {
 
 export enum PlayerAnimations {
     IDLE = "IDLE",
-    WALK = "WALK",
-    
+    RUNNING_LEFT = "RUNNING_LEFT",
+    RUNNING_RIGHT = "RUNNING_RIGHT",
+    ATTACKING_LEFT = "ATTACKING_LEFT",
+    ATTACKING_RIGHT = "ATTACKING_RIGHT",
+    TAKING_DAMAGE = "TAKING_DAMAGE",
+    DEAD = "DEAD",    
 }
 
 export default class PlayerController extends StateMachineAI {
