@@ -18,6 +18,9 @@ export default class DemoLevel extends Level {
     public static readonly TILEMAP_PATH = "assets/tilemaps/demo_tilemap.json";
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
+    public static readonly ABILITY_ICONS_KEY = "ABILITY_ICONS_KEY";
+    public static readonly ABILITY_ICONS_PATH = "assets/sprites/ability_icons.png";
+
     // public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
     // public static readonly LEVEL_MUSIC_PATH = "hw4_assets/music/hw5_level_music.wav";
 
@@ -39,6 +42,8 @@ export default class DemoLevel extends Level {
         // Set the player's spawn
         this.playerSpawn = DemoLevel.PLAYER_SPAWN;
 
+        this.abilityIconsKey = DemoLevel.ABILITY_ICONS_KEY;
+
         // Music and sound
     }
 
@@ -50,6 +55,9 @@ export default class DemoLevel extends Level {
         this.load.tilemap(this.tilemapKey, DemoLevel.TILEMAP_PATH);
         // Load in the player's sprite
         this.load.spritesheet(this.playerSpriteKey, DemoLevel.PLAYER_SPRITE_PATH);
+        // Load in ability icons
+        this.load.image(this.abilityIconsKey, DemoLevel.ABILITY_ICONS_PATH);
+
         // Audio and music
     }
 

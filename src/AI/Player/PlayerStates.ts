@@ -129,7 +129,10 @@ export class Fall extends PlayerState {
             // TODO: If we want fall damage or not
             // this.parent.health -= Math.floor(this.parent.velocity.y / 200);
             this.finished(PlayerStates.IDLE);
-        } else {
+        } 
+        else if (Input.isPressed(PlayerControls.DASH))
+            this.finished(PlayerStates.DASH);
+        else {
             let dir = this.parent.moveDir;
             this.parent.velocity.x += dir.x * this.parent.speed / 3.5 - 0.3 * this.parent.velocity.x;
             this.parent.velocity.y += this.gravity * deltaT;

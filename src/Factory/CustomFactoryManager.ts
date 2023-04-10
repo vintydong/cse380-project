@@ -5,6 +5,8 @@ import AnimatedSprite from "../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Sprite from "../Wolfie2D/Nodes/Sprites/Sprite";
 import Tilemap from "../Wolfie2D/Nodes/Tilemap";
 import UIElement from "../Wolfie2D/Nodes/UIElement";
+import Button from "../Wolfie2D/Nodes/UIElements/Button";
+import Label from "../Wolfie2D/Nodes/UIElements/Label";
 import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import FactoryManager from "../Wolfie2D/Scene/Factories/FactoryManager";
 
@@ -18,8 +20,19 @@ export default class CustomFactoryManager extends FactoryManager {
     //     return null;
     // }
 
-    public addButton(layer: LevelLayer, position: Vec2, text?: string){
-        return super.uiElement(UIElementType.BUTTON, layer, {position, text})
+    public addButton(layer: LevelLayer, position: Vec2, text?: string): Button{
+        return super.uiElement(UIElementType.BUTTON, layer, {position, text}) as Button
+    }
+
+    public addLabel(layer: LevelLayer, position: Vec2, text?: string): Label{
+        return super.uiElement(UIElementType.LABEL, layer, {position, text}) as Label
+    }
+
+    public addSprite(key, layer: LevelLayer, offset?: Vec2): Sprite {
+        let sprite = super.sprite(key, layer);
+        if(offset !== undefined)
+            sprite.setImageOffset(offset);
+        return sprite
     }
 
     // public addUIElement(type: string, layer: LevelLayer, options?: Record<string, any>): UIElement{
