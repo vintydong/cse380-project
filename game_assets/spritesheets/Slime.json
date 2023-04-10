@@ -1,0 +1,124 @@
+{
+	"name": "Shadow_Knight",
+	"spriteSheetImage": "Shadow_Knight.png",
+	"spriteWidth": 32,
+	"spriteHeight": 32,
+	"leftBuffer": 0,
+	"rightBuffer": 0,
+	"topBuffer": 0,
+	"bottomBuffer": 0,
+	"columns": 4,
+	"rows": 5,
+	"animations": [
+		{
+			"name": "IDLE",
+			"repeat": true,
+			"frames": [
+				{
+					"index": 0,
+					"duration": 200
+				},
+				{
+					"index": 1,
+					"duration": 200
+				},
+				{
+					"index": 2,
+					"duration": 200
+				},
+				{
+					"index": 3,
+					"duration": 200
+				}
+			]
+		},
+		{
+			"name": "RUNNING_LEFT",
+			"repeat": true,
+			"frames": [
+				{
+					"index": 4,
+					"duration": 150
+				},
+				{
+					"index": 5,
+					"duration": 150
+				},
+				{
+					"index": 6,
+					"duration": 150
+				},
+				{
+					"index": 7,
+					"duration": 150
+				}
+			]
+		},
+		{
+			"name": "RUNNING_RIGHT",
+			"repeat": true,
+			"frames": [
+				{
+					"index": 8,
+					"duration": 150
+				},
+				{
+					"index": 9,
+					"duration": 150
+				},
+				{
+					"index": 10,
+					"duration": 150
+				},
+				{
+					"index": 11,
+					"duration": 150
+				}
+			]
+		},
+		{
+			"name": "TAKING_DAMAGE",
+			"repeat": false,
+			"frames": [
+				{
+					"index": 12,
+					"duration": 200
+				},
+				{
+					"index": 13,
+					"duration": 200
+				},
+				{
+					"index": 14,
+					"duration": 200
+				},
+				{
+					"index": 15,
+					"duration": 200
+				}
+			]
+		},
+		{
+			"name": "DEAD",
+			"repeat": false,
+			"frames": [
+				{
+					"index": 16,
+					"duration": 150
+				},
+				{
+					"index": 17,
+					"duration": 150
+				},
+				{
+					"index": 18,
+					"duration": 150
+				},
+				{
+					"index": 19,
+					"duration": 150
+				}
+			]
+		}
+	]
+}
