@@ -16,7 +16,7 @@ export default class SplashScreen extends Scene{
 
     public loadScene(): void {
         /** Images/Sprites */
-        this.load.image("splashBg", "assets/sprites/splash.png");
+        this.load.image("splashBg", "assets/sprites/menus/splash.png");
     }
 
     /**
