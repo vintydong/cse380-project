@@ -12,10 +12,11 @@ import { PlayerControls } from "./AI/Player/PlayerController";
         canvasSize: {x: 1366, y: 768},          // The size of the game
         clearColor: {r: 0.1, g: 0.1, b: 0.1},   // The color the game clears to
         inputs: [
-            {name: PlayerControls.MOVE_UP, keys: ["w"]},
+            {name: PlayerControls.MOVE_UP, keys: ["w", "space"]},
             {name: PlayerControls.MOVE_DOWN, keys: ["s"]},
             {name: PlayerControls.MOVE_LEFT, keys: ["a"]},
             {name: PlayerControls.MOVE_RIGHT, keys: ["d"]},
+            {name: PlayerControls.DASH, keys: ["shift"]},
             {name: PlayerControls.SKILL_ONE, keys: ["u"]},
             {name: PlayerControls.SKILL_TWO, keys: ["i"]},
             {name: PlayerControls.SKILL_THREE, keys: ["o"]},
