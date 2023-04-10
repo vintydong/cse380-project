@@ -103,10 +103,10 @@ export default class CanvasNodeFactory {
 	 * @param layerName The layer on which to add the sprite
 	 * @returns A new AnimatedSprite
 	 */
-	addAnimatedSprite = <T extends AnimatedSprite>(constr: new (s: Spritesheet) => T, key: string, layerName: string): T => {
+	addAnimatedSprite = (key: string, layerName: string): AnimatedSprite => {
 		let layer = this.scene.getLayer(layerName);
 		let spritesheet = this.resourceManager.getSpritesheet(key);
-		let instance = new constr(spritesheet);
+		let instance = new AnimatedSprite(spritesheet);
 
 		// Add instance fo scene
 		instance.setScene(this.scene);
