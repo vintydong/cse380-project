@@ -10,6 +10,8 @@ import Scene from "../Wolfie2D/Scene/Scene";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import PlayerController from "../AI/Player/PlayerController";
+import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
+import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
 
 export const LevelLayers = {
     PRIMARY: "PRIMARY",
@@ -39,7 +41,7 @@ export default abstract class Level extends Scene {
     private healthBarBg: Label;
 
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
-        super(viewport, sceneManager, renderingManager, {...options});
+        super(viewport, sceneManager, renderingManager, {...options, physics: PhysicsCollisionMap });
 
         this.factory = new CustomFactoryManager(this, this.tilemaps);
     }
@@ -64,18 +66,20 @@ export default abstract class Level extends Scene {
         // TODO: this.initPlayer(this.playerSpriteKey);
         if(this.playerSpawn === undefined) throw new Error("Player weapon system must be initialized before initializing the player!");
         this.player = this.factory.animatedSprite(this.playerSpriteKey, LevelLayers.PRIMARY);
-        this.player.scale.set(1,1);
+        this.player.scale.set(2,2);
         this.player.position.copy(this.playerSpawn)
-        this.player.addAI(PlayerController);
+        this.player.addAI(PlayerController, {tilemap: this.tilemapKey});
 
-        // Need to add physics
+        // Need to add physics 
+        this.player.addPhysics(new AABB(this.player.position.clone(), this.player.boundary.getHalfSize().clone()))
+        this.player.setGroup(PhysicsGroups.PLAYER);
 
         // this.initViewport();
         if (this.player === undefined) {
             throw new Error("Player must be initialized before setting the viewport to folow the player");
         }
         this.viewport.follow(this.player);
-        this.viewport.setZoomLevel(4);
+        this.viewport.setZoomLevel(1);
         this.viewport.setBounds(0, 0, 1366, 768);
 
         // this.subscribeEvents();

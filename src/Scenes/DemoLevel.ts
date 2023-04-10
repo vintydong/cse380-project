@@ -10,7 +10,7 @@ import Level from "./Level";
  */
 export default class DemoLevel extends Level {
 
-    public static readonly PLAYER_SPAWN = new Vec2(32, 32);
+    public static readonly PLAYER_SPAWN = new Vec2(32, 128);
     public static readonly PLAYER_SPRITE_KEY = "PLAYER_SPRITE_KEY";
     public static readonly PLAYER_SPRITE_PATH = "assets/sprites/Hero.json";
 

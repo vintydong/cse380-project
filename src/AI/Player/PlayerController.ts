@@ -3,6 +3,7 @@ import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Input from "../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
+import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 import { Attack, Dead, Fall, Idle, Jump, Walk } from './PlayerStates';
 
 /**
@@ -33,17 +34,21 @@ export enum PlayerStates {
     DEAD = "DEAD",
 }
 
+export enum PlayerAnimations {
+    IDLE = "IDLE",
+}
+
 export default class PlayerController extends StateMachineAI {
     public readonly MAX_SPEED: number = 200;
     public readonly MIN_SPEED: number = 100;
 
     protected owner: AnimatedSprite;
 
-    protected health: number;
-    protected maxHealth: number;
+    protected _health: number;
+    protected _maxHealth: number;
 
-    protected velocity: Vec2;
-    protected speed: number;
+    protected _velocity: Vec2;
+    protected _speed: number;
 
     // protected weapon: PlayerWeapon;
     protected tilemap: OrthogonalTilemap;
@@ -95,4 +100,27 @@ export default class PlayerController extends StateMachineAI {
      * @return a number representing how much the player should be rotated
      */
     public get rotation(): number { return Vec2.UP.angleToCCW(this.faceDir); }
+
+    /** Getters and Setters to enable access in PlayerStates */
+    public get velocity(): Vec2 { return this._velocity; }
+    public set velocity(velocity: Vec2) { this._velocity = velocity; }
+
+    public get speed(): number { return this._speed; }
+    public set speed(speed: number) { this._speed = speed; }
+
+    public get maxHealth(): number { return this._maxHealth; }
+    public set maxHealth(maxHealth: number) { 
+        this._maxHealth = maxHealth; 
+        // When the health changes, fire an event up to the scene.
+        // this.emitter.fireEvent(HW3Events.HEALTH_CHANGE, {curhp: this.health, maxhp: this.maxHealth});
+    }
+
+    public get health(): number { return this._health; }
+    public set health(health: number) { 
+        this._health = MathUtils.clamp(health, 0, this.maxHealth);
+        // When the health changes, fire an event up to the scene.
+        // this.emitter.fireEvent(HW3Events.HEALTH_CHANGE, {curhp: this.health, maxhp: this.maxHealth});
+        // If the health hit 0, change the state of the player
+        if (this.health === 0) { this.changeState(PlayerStates.DEAD); }
+    }
 }
