@@ -12,6 +12,8 @@ import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import PlayerController from "../AI/Player/PlayerController";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
+import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
+import Color from "../Wolfie2D/Utils/Color";
 
 export const LevelLayers = {
     PRIMARY: "PRIMARY",
@@ -36,9 +38,14 @@ export default abstract class Level extends Scene {
     protected player: AnimatedSprite;
     protected playerSpawn: Vec2;
 
-    private healthLabel: Label;
+    /** Attributes for the UI */
+    // private healthLabel: Label;
     private healthBar: Label;
-    private healthBarBg: Label;
+    // private resourceLabel: Label;
+    private resourceBar: Label;
+    private abilityBar: Label;
+
+    protected abilityIconsKey: string;
 
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, {...options, physics: PhysicsCollisionMap });
@@ -46,9 +53,8 @@ export default abstract class Level extends Scene {
         this.factory = new CustomFactoryManager(this, this.tilemaps);
     }
 
+    /** Common initializations between all levels */
     public startScene(): void {
-        /** Common initializations between all levels */
-
         // this.initLayers();
         this.addLayer(LevelLayers.PRIMARY);
         this.addUILayer(LevelLayers.UI);
@@ -62,8 +68,52 @@ export default abstract class Level extends Scene {
         // TODO: this.initWeapon();
 
         // TODO: this.initUI();
+        // this.healthLabel = this.factory.addLabel(LevelLayers.UI, new Vec2(50, 20), "HP");
+        // this.healthLabel.size.set(300, 30);
+        // this.healthLabel.textColor = Color.RED;
+		// this.healthLabel.fontSize = 24;
+		// this.healthLabel.font = "Courier";
 
-        // TODO: this.initPlayer(this.playerSpriteKey);
+        this.healthBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 20), "");
+        this.healthBar.size = new Vec2(200, 25);
+		this.healthBar.backgroundColor = Color.GREEN;
+        this.healthBar.borderColor = Color.BLACK;
+
+        // Resource Bar
+        this.resourceBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 65), "");
+        this.resourceBar.size = new Vec2(200, 25);
+		this.resourceBar.backgroundColor = Color.BLACK;
+        this.resourceBar.borderColor = Color.MAGENTA;
+
+        // Ability Bar
+        const abilityBarCenter = new Vec2(150, 725);
+        const abilityBarSize = new Vec2(300, 50);
+        this.abilityBar = this.factory.addLabel(LevelLayers.UI, abilityBarCenter, "");
+        this.abilityBar.size = abilityBarSize;
+		this.abilityBar.backgroundColor = Color.TRANSPARENT;
+        // this.abilityBar.borderColor = Color.MAGENTA
+
+        const abilityBarPadding = 15;
+        const abilitySquareSize = 40;
+        const abilityBarStart = new Vec2(abilityBarCenter.x - abilityBarSize.x/2, abilityBarCenter.y - abilityBarSize.y/2);
+
+        const abilityPositions = [new Vec2(0,0), new Vec2(16,0), new Vec2(0,16), new Vec2(16,16)]
+
+        for(let i = 1; i < 6; i++){
+            let squarePos = new Vec2(abilityBarStart.x + abilitySquareSize * i + abilityBarPadding * (i-1), abilityBarCenter.y)
+            let square = this.factory.addLabel(LevelLayers.UI, squarePos, "")
+            square.size = new Vec2(abilitySquareSize, abilitySquareSize);
+            square.backgroundColor = new Color(115, 115, 115);
+
+            let offset = i < abilityPositions.length ? abilityPositions[i - 1] : abilityPositions[abilityPositions.length - 1]
+            let ability = this.factory.addSprite(this.abilityIconsKey, LevelLayers.UI, offset);
+            ability.position = squarePos;
+            ability.size = new Vec2(16,16);
+            ability.scale = new Vec2(2,2);
+        }
+
+
+        // this.initPlayer(this.playerSpriteKey);
         if(this.playerSpawn === undefined) throw new Error("Player weapon system must be initialized before initializing the player!");
         this.player = this.factory.animatedSprite(this.playerSpriteKey, LevelLayers.PRIMARY);
         this.player.scale.set(2,2);
@@ -89,7 +139,7 @@ export default abstract class Level extends Scene {
 
         // Fire events to start game (e.g. music)
 
-        Input.disableInput();
+        // Input.disableInput();
     }
 
     public updateScene(deltaT: number) {
