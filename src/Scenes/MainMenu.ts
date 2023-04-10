@@ -14,7 +14,6 @@ import DemoLevel from "./DemoLevel";
 export default class MainMenu extends Scene {
     // Need layers for multiple scenes such as mainMenu, about, control, help, levels, etc.
     private mainMenu: Layer;
-
     private splashScreen: Layer;
     
     private splashBg: Sprite;
@@ -78,7 +77,7 @@ export default class MainMenu extends Scene {
         demo.backgroundColor = Color.TRANSPARENT;
         demo.onClickEventId = "demo";
 
-        this.receiver.subscribe("play");
+        this.receiver.subscribe("demo");
     }
 
     public updateScene(){
@@ -89,8 +88,9 @@ export default class MainMenu extends Scene {
 
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
-            case "play":
-                console.log("PLAY CLICKED");
+            case "demo":
+                this.sceneManager.changeToScene(DemoLevel);
+                break;
             default:
                 throw new Error(`Event handler not implemented for event type ${event.type}`)
         }

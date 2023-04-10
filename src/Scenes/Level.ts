@@ -9,6 +9,7 @@ import FactoryManager from "../Wolfie2D/Scene/Factories/FactoryManager";
 import Scene from "../Wolfie2D/Scene/Scene";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
+import PlayerController from "../AI/Player/PlayerController";
 
 export const LevelLayers = {
     PRIMARY: "PRIMARY",
@@ -18,7 +19,7 @@ export const LevelLayers = {
 export type LevelLayer = typeof LevelLayers[keyof typeof LevelLayers]
 
 export default abstract class Level extends Scene {
-    public factory: CustomFactoryManager
+    public factory: CustomFactoryManager;
 
     /** Attributes for the level */
     protected tilemapKey: string;
@@ -44,7 +45,45 @@ export default abstract class Level extends Scene {
     }
 
     public startScene(): void {
-        this.initialize();
+        /** Common initializations between all levels */
+
+        // this.initLayers();
+        this.addLayer(LevelLayers.PRIMARY);
+        this.addUILayer(LevelLayers.UI);
+
+        // this.initTilemaps();
+        if(this.tilemapKey === undefined || this.tilemapScale === undefined)
+            throw new Error("Missing tilemap key or scale");
+        
+        this.factory.tilemap(this.tilemapKey, this.tilemapScale);
+
+        // TODO: this.initWeapon();
+
+        // TODO: this.initUI();
+
+        // TODO: this.initPlayer(this.playerSpriteKey);
+        if(this.playerSpawn === undefined) throw new Error("Player weapon system must be initialized before initializing the player!");
+        this.player = this.factory.animatedSprite(this.playerSpriteKey, LevelLayers.PRIMARY);
+        this.player.scale.set(1,1);
+        this.player.position.copy(this.playerSpawn)
+        this.player.addAI(PlayerController);
+
+        // Need to add physics
+
+        // this.initViewport();
+        if (this.player === undefined) {
+            throw new Error("Player must be initialized before setting the viewport to folow the player");
+        }
+        this.viewport.follow(this.player);
+        this.viewport.setZoomLevel(4);
+        this.viewport.setBounds(0, 0, 1366, 768);
+
+        // this.subscribeEvents();
+
+        // TODO: Probably want a level transition here
+        // See hw3
+
+        // Fire events to start game (e.g. music)
 
         Input.disableInput();
     }
@@ -67,20 +106,5 @@ export default abstract class Level extends Scene {
                 throw new Error(`Unhandled event caught in scene with type ${event.type}`)
             }
         }
-    }
-
-    /** Common initializations between all levels */
-    protected initialize() {
-        // Things to initialize
-        // this.initLayers();
-        // this.initTilemaps();
-        // this.initWeapon();
-        // this.initUI();
-        // this.initPlayer(this.playerSpriteKey);
-
-        // this.initViewport();
-        // this.subscribeEvents();
-        
-        throw new Error("Method not implemented.");
     }
 }
