@@ -1,7 +1,10 @@
 import Game from "./Wolfie2D/Loop/Game";
 import MainMenu from "./Scenes/MainMenu";
+import RegistryManager from "./Wolfie2D/Registry/RegistryManager";
 import { PlayerControls } from "./AI/Player/PlayerController";
 import SplashScreen from "./Scenes/SplashScreen";
+
+import BubbleShaderType from "./Shaders/BubbleShaderType"
 
 // The main function is your entrypoint into Wolfie2D. Specify your first scene and any options here.
 (function main(){
@@ -27,6 +30,16 @@ import SplashScreen from "./Scenes/SplashScreen";
         showDebug: false                      // Whether to show debug messages. You can change this to true if you want
     }
 
+    // We have a custom shader, so lets add it to the registry and preload it
+    // The registry essentially just ensures that we can locate items by name later, rather than needing
+    // the class constructor. Here, we additionally make sure to preload the data so our
+    // shader is available throughout the application
+    RegistryManager.shaders.registerAndPreloadItem(
+        BubbleShaderType.KEY,   // The key of the shader program
+        BubbleShaderType,           // The constructor of the shader program
+        BubbleShaderType.VSHADER,   // The path to the vertex shader
+        BubbleShaderType.FSHADER  // the path to the fragment shader*/
+    );
     // Create a game with the options specified
     const game = new Game(options);
 
