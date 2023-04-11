@@ -14,6 +14,7 @@ import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
 import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import Color from "../Wolfie2D/Utils/Color";
+import Layer from "../Wolfie2D/Scene/Layer";
 
 export const LevelLayers = {
     PRIMARY: "PRIMARY",
@@ -45,6 +46,8 @@ export default abstract class Level extends Scene {
     private resourceBar: Label;
     private abilityBar: Label;
 
+    private primary: Layer;
+
     protected abilityIconsKey: string;
 
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
@@ -56,7 +59,7 @@ export default abstract class Level extends Scene {
     /** Common initializations between all levels */
     public startScene(): void {
         // this.initLayers();
-        this.addLayer(LevelLayers.PRIMARY);
+        this.primary = this.addLayer(LevelLayers.PRIMARY);
         this.addUILayer(LevelLayers.UI);
 
         // this.initTilemaps();
@@ -86,7 +89,7 @@ export default abstract class Level extends Scene {
         this.resourceBar.borderColor = Color.MAGENTA;
 
         // Ability Bar
-        const abilityBarCenter = new Vec2(150, 483);
+        const abilityBarCenter = new Vec2(150, 735);
         const abilityBarSize = new Vec2(300, 50);
         this.abilityBar = this.factory.addLabel(LevelLayers.UI, abilityBarCenter, "");
         this.abilityBar.size = abilityBarSize;
@@ -129,7 +132,7 @@ export default abstract class Level extends Scene {
             throw new Error("Player must be initialized before setting the viewport to folow the player");
         }
         this.viewport.follow(this.player);
-        this.viewport.setZoomLevel(1.5);
+        this.viewport.setZoomLevel(1);
         this.viewport.setBounds(0, 0, 1366, 768);
 
         // this.subscribeEvents();
