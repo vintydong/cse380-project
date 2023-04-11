@@ -1,0 +1,64 @@
+{
+    "positions": [
+        {
+            "height": 0,
+            "id": 1,
+            "name": "",
+            "point": true,
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 0,
+            "x": 128.333333333333,
+            "y": 45.6666666666667
+        },
+        {
+            "height": 0,
+            "id": 2,
+            "name": "",
+            "point": true,
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 0,
+            "x": 66.6666666666667,
+            "y": 89.6666666666667
+        },
+        {
+            "height": 0,
+            "id": 3,
+            "name": "",
+            "point": true,
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 0,
+            "x": 174,
+            "y": 113.333333333333
+        },
+        {
+            "height": 0,
+            "id": 4,
+            "name": "",
+            "point": true,
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 0,
+            "x": 136.666666666667,
+            "y": 115.333333333333
+        },
+        {
+            "height": 0,
+            "id": 5,
+            "name": "",
+            "point": true,
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 0,
+            "x": 167,
+            "y": 60.6666666666667
+        }
+    ]
+}
