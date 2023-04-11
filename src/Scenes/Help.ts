@@ -22,7 +22,6 @@ export default class Help extends Scene{
 
     public startScene(): void {
         const center = this.viewport.getCenter();
-
         this.helpMenu = this.addUILayer("helpMenu");
         this.help = this.add.sprite("help", "helpMenu");
         this.help.position.set(center.x, center.y);
