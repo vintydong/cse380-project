@@ -278,6 +278,12 @@ export default class DemoLevel extends Level {
         while(this.receiver.hasNextEvent()){
             this.handleEvent(this.receiver.getNextEvent());
         }
+
+        for(let i = 0; i < this.allEnemies.length; i++){
+            if(this.allEnemies[i].visible) return
+        }
+
+        this.sceneManager.changeToScene(MainMenu);
     }
 
     /**
