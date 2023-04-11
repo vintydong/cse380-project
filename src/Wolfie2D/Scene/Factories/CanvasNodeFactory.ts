@@ -121,6 +121,31 @@ export default class CanvasNodeFactory {
 
 		return instance;
 	}
+	
+	/**
+	 * Adds an AnimatedSprite to the current scene
+	 * @param key The key of the image the sprite will represent
+	 * @param layerName The layer on which to add the sprite
+	 * @returns A new AnimatedSprite
+	 */
+	addGenericAnimatedSprite = <T extends AnimatedSprite>(constr: new (s: Spritesheet) => T, key: string, layerName: string): T => {
+		let layer = this.scene.getLayer(layerName);
+		let spritesheet = this.resourceManager.getSpritesheet(key);
+		let instance = new constr(spritesheet);
+
+		// Add instance fo scene
+		instance.setScene(this.scene);
+		instance.id = this.scene.generateId();
+		
+		if(!(this.scene.isParallaxLayer(layerName) || this.scene.isUILayer(layerName))){
+			this.scene.getSceneGraph().addNode(instance);
+		}
+
+		// Add instance to layer
+		layer.addNode(instance);
+
+		return instance;
+	}
 
 	/**
 	 * Adds a new graphic element to the current Scene

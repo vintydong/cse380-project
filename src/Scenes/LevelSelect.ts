@@ -17,7 +17,7 @@ export default class LevelSelect extends Scene{
     private levels: Sprite;
 
     public loadScene(): void{
-        this.load.image("levels", "assets/sprites/levelSelect.png");
+        this.load.image("levels", "assets/sprites/menus/levelSelect.png");
     }
 
     public startScene(): void {

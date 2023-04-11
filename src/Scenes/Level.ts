@@ -65,7 +65,7 @@ export default abstract class Level extends Scene {
         
         this.factory.tilemap(this.tilemapKey, this.tilemapScale);
 
-        // TODO: this.initWeapon();
+        // this.initWeapon();
 
         // TODO: this.initUI();
         // this.healthLabel = this.factory.addLabel(LevelLayers.UI, new Vec2(50, 20), "HP");
@@ -74,19 +74,19 @@ export default abstract class Level extends Scene {
 		// this.healthLabel.fontSize = 24;
 		// this.healthLabel.font = "Courier";
 
-        this.healthBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 20), "");
+        this.healthBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 60), "");
         this.healthBar.size = new Vec2(200, 25);
 		this.healthBar.backgroundColor = Color.GREEN;
         this.healthBar.borderColor = Color.BLACK;
 
         // Resource Bar
-        this.resourceBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 65), "");
+        this.resourceBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 105), "");
         this.resourceBar.size = new Vec2(200, 25);
 		this.resourceBar.backgroundColor = Color.BLACK;
         this.resourceBar.borderColor = Color.MAGENTA;
 
         // Ability Bar
-        const abilityBarCenter = new Vec2(150, 725);
+        const abilityBarCenter = new Vec2(150, 483);
         const abilityBarSize = new Vec2(300, 50);
         this.abilityBar = this.factory.addLabel(LevelLayers.UI, abilityBarCenter, "");
         this.abilityBar.size = abilityBarSize;
@@ -116,7 +116,7 @@ export default abstract class Level extends Scene {
         // this.initPlayer(this.playerSpriteKey);
         if(this.playerSpawn === undefined) throw new Error("Player weapon system must be initialized before initializing the player!");
         this.player = this.factory.animatedSprite(this.playerSpriteKey, LevelLayers.PRIMARY);
-        this.player.scale.set(2,2);
+        this.player.scale.set(2, 2);
         this.player.position.copy(this.playerSpawn)
         this.player.addAI(PlayerController, {tilemap: this.tilemapKey});
 
@@ -129,7 +129,7 @@ export default abstract class Level extends Scene {
             throw new Error("Player must be initialized before setting the viewport to folow the player");
         }
         this.viewport.follow(this.player);
-        this.viewport.setZoomLevel(1);
+        this.viewport.setZoomLevel(1.5);
         this.viewport.setBounds(0, 0, 1366, 768);
 
         // this.subscribeEvents();

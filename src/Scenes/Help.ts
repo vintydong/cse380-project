@@ -17,7 +17,7 @@ export default class Help extends Scene{
     
     public loadScene(): void {
         /** Images/Sprites */
-        this.load.image("help", "assets/sprites/help.png");
+        this.load.image("help", "assets/sprites/menus/help.png");
     }
 
     public startScene(): void {

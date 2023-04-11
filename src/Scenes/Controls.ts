@@ -17,7 +17,7 @@ export default class Controls extends Scene{
     
     public loadScene(): void {
         /** Images/Sprites */
-        this.load.image("controls", "assets/sprites/controls.png");
+        this.load.image("controls", "assets/sprites/menus/controls.png");
     }
 
     public startScene(): void {

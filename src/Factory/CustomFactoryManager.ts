@@ -1,4 +1,5 @@
 import Level, { LevelLayer } from "../Scenes/Level";
+import Spritesheet from "../Wolfie2D/DataTypes/Spritesheet";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import Graphic from "../Wolfie2D/Nodes/Graphic";
 import AnimatedSprite from "../Wolfie2D/Nodes/Sprites/AnimatedSprite";
@@ -38,6 +39,10 @@ export default class CustomFactoryManager extends FactoryManager {
     // public addUIElement(type: string, layer: LevelLayer, options?: Record<string, any>): UIElement{
     //     return super.uiElement(type, layer, options);
     // }
+
+    public addAnimatedSprite<T extends AnimatedSprite>(constr: new (s: Spritesheet) => T, key: string, layerName: string): AnimatedSprite {
+        return this.genericAnimatedSprite(constr, key, layerName);
+    }
 
     public graphic(type: string, layer: LevelLayer, options?: Record<string, any>): Graphic {
         return super.graphic(type, layer, options);

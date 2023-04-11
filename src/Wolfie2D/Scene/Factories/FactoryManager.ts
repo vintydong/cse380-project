@@ -58,6 +58,10 @@ export default class FactoryManager {
         return this.canvasNodeFactory.addAnimatedSprite(key, layerName);
     }
 
+    genericAnimatedSprite<T extends AnimatedSprite>(constr: new (s: Spritesheet) => T, key: string, layerName: string): T {
+        return this.canvasNodeFactory.addGenericAnimatedSprite(constr, key, layerName);
+    }
+
     /**
 	 * Adds a new graphic element to the current Scene
 	 * @param type The type of graphic to add

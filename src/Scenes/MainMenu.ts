@@ -24,8 +24,8 @@ export default class MainMenu extends Scene {
         /** Audio */
 
         /** Images/Sprites */
-        this.load.image("splashBg", "assets/sprites/splash.png");
-        this.load.image("menu", "assets/sprites/menu.png");
+        this.load.image("splashBg", "assets/sprites/menus/splash.png");
+        this.load.image("menu", "assets/sprites/menus/menu.png");
     }
 
     /**
