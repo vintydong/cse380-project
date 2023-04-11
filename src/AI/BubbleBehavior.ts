@@ -33,6 +33,7 @@ export default class BubbleBehavior implements AI {
 
         this.receiver = new Receiver();
         // this.receiver.subscribe(HW2Events.PLAYER_BUBBLE_COLLISION);
+        this.receiver.subscribe('ENEMY_HIT');
 
         this.currentXSpeed = 50;
         this.xSpeedIncrement = 0;
@@ -55,6 +56,15 @@ export default class BubbleBehavior implements AI {
 
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
+            case 'ENEMY_HIT':
+                // console.log(event.data);
+                let id = event.data.get('other');
+                if(id === this.owner.id){
+                    this.owner.position.copy(Vec2.ZERO);
+                    this.owner._velocity.copy(Vec2.ZERO);
+                    this.owner.visible = false;
+                }
+                break;
             // case GameEvents.ENEMY_BUBBLE_COLLISION: {
             //     this.handleEnemyBubbleCollision(event);
             //     break;

@@ -53,6 +53,7 @@ export default class demoEnemyController extends StateMachineAI  {
         this.addState(PlayerStates.JUMP, new Jump(this, this.owner));
 		this.addState(PlayerStates.WALK, new Walk(this, this.owner));
 
+        this.receiver.subscribe('ENEMY_HIT');
         this.initialize(PlayerStates.FALL);
     }
 
@@ -72,6 +73,14 @@ export default class demoEnemyController extends StateMachineAI  {
             //     this.handleLasergunFired(event.data.get("actorId"), event.data.get("to"), event.data.get("from"));
             //     break;
             // }
+            case 'ENEMY_HIT':
+                // console.log(event.data);
+                let id = event.data.get('node');
+                if(id === this.owner.id){
+                    this.owner.position = new Vec2(3000,3000);
+                    this.owner.visible = false;
+                }
+                break;
             default: {
                 super.handleEvent(event);
                 break;
