@@ -23,9 +23,6 @@ import Help from "./Help";
 import MainMenu from "./MainMenu";
 import Graphic from "../Wolfie2D/Nodes/Graphic";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
-import Color from "../Wolfie2D/Utils/Color";
-import GameEvent from "../Wolfie2D/Events/GameEvent";
-
 import BubbleShaderType from "../Shaders/BubbleShaderType";
 
 import BubbleAI from "../AI/BubbleBehavior";
@@ -283,6 +280,12 @@ export default class DemoLevel extends Level {
         }
     }
 
+    /**
+	 * This method helps with handling events. 
+	 * 
+	 * @param event the event to be handled
+	 * @see GameEvent
+	 */
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
             //Main menu options
@@ -341,40 +344,16 @@ export default class DemoLevel extends Level {
                 this.sceneManager.changeToScene(MainMenu);
                 break;
 
+            case GameEvents.SKILL_1_FIRED: {
+                console.log(event.data.get("direction"));
+                this.spawnBubble(event.data.get("direction"));
+                break;
+            }
+
             default:
                 throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
     }
-
-    public updateScene(deltaT: number) {
-        // Handle all game events
-        while (this.receiver.hasNextEvent()) {
-            this.handleEvent(this.receiver.getNextEvent());
-        }
-
-        
-        // for (let bubble of this.bubbles) if (bubble.visible) this.handleScreenDespawn(bubble);
-    }
-
-    /**
-	 * This method helps with handling events. 
-	 * 
-	 * @param event the event to be handled
-	 * @see GameEvent
-	 */
-	protected handleEvent(event: GameEvent){
-		switch(event.type) {
-			case GameEvents.SKILL_1_FIRED: {
-                console.log(event.data.get("direction"));
-				this.spawnBubble(event.data.get("direction"));
-                break;
-			}
-			default: {
-				throw new Error(`Unhandled event with type ${event.type} caught in ${this.constructor.name}`);
-			}
-		}
-
-	}
 
     /**
 	 * This method initializes each of the object pools for this scene.
