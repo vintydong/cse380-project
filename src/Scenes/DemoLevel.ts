@@ -1,18 +1,28 @@
+import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
+import demoEnemyController from "../AI/demo_enemy/demoEnemyController";
+import { PhysicsGroups } from "../Physics";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
+import Spritesheet from "../Wolfie2D/DataTypes/Spritesheet";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
-import Level from "./Level";
+import Level, { LevelLayers } from "./Level";
 
 /**
  * The first level for HW4 - should be the one with the grass and the clouds.
  */
 export default class DemoLevel extends Level {
 
-    public static readonly PLAYER_SPAWN = new Vec2(32, 128);
+    public static readonly PLAYER_SPAWN = new Vec2(128, 256);
     public static readonly PLAYER_SPRITE_KEY = "PLAYER_SPRITE_KEY";
     public static readonly PLAYER_SPRITE_PATH = "assets/sprites/Shadow_Knight.json";
+
+    public static readonly ENEMY_SPRITE_KEY = "DEMO_ENEMY_KEY";
+    public static readonly ENEMY_SPRITE_PATH = "assets/sprites/Slime.json";
+    public static readonly ENEMY_POSITIONS_KEY = "DEMO_ENEMY_POSITIONS";
+    public static readonly ENEMY_POSIITIONS_PATH = "assets/data/demo_enemy.json";
+
 
     public static readonly TILEMAP_KEY = "DemoLevel";
     public static readonly TILEMAP_PATH = "assets/tilemaps/demo_tilemap.json";
@@ -58,6 +68,10 @@ export default class DemoLevel extends Level {
         // Load in ability icons
         this.load.image(this.abilityIconsKey, DemoLevel.ABILITY_ICONS_PATH);
 
+        // Load in demo level enemies
+        this.load.spritesheet(DemoLevel.ENEMY_SPRITE_KEY, DemoLevel.ENEMY_SPRITE_PATH);
+        this.load.object(DemoLevel.ENEMY_POSITIONS_KEY, DemoLevel.ENEMY_POSIITIONS_PATH);
+
         // Audio and music
     }
 
@@ -70,6 +84,25 @@ export default class DemoLevel extends Level {
 
     public startScene(): void {
         super.startScene();
+
+        // Initialize demo_level enemies
+        let enemies = this.load.getObject(DemoLevel.ENEMY_POSITIONS_KEY);
+        console.log(enemies.positions[0].x);
+        for(let i = 0; i < enemies.positions.length; i++){
+            let enemy = this.factory.addAnimatedSprite(demoEnemyActor, DemoLevel.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as demoEnemyActor
+            enemy.position.set(enemies.positions[i].x * 6, enemies.positions[i].y * 6);
+            enemy.addPhysics(new AABB(enemy.position.clone(), enemy.boundary.getHalfSize().clone()), null, true);
+            enemy.navkey = "navmesh";
+            
+            console.log("Enemy", enemy);
+            // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
+            // this.healthbars.set(npc.id, healthbar);
+
+            enemy.addAI(demoEnemyController, {tilemap: this.tilemapKey});
+            enemy.setGroup(PhysicsGroups.NPC);
+            enemy.animation.play("IDLE");
+        }
+
         // Set the next level to be Level2
         // this.nextLevel = null;
     }

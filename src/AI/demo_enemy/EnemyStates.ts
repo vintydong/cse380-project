@@ -4,20 +4,21 @@ import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Input from "../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
-import PlayerController, { PlayerAnimations, PlayerControls, PlayerStates } from "./PlayerController";
+import PlayerController, { PlayerAnimations, PlayerControls, PlayerStates } from "../Player/PlayerController";
+import demoEnemyController from "./demoEnemyController";
 
 /**
  * An abstract state for the PlayerController 
  */
-export abstract class PlayerState extends State {
-    protected parent: PlayerController;
+export abstract class EnemyState extends State {
+    protected parent: demoEnemyController;
     protected owner: AnimatedSprite;
     protected gravity: number;
 
-    public constructor(parent: PlayerController, owner: AnimatedSprite) {
+    public constructor(parent: demoEnemyController, owner: AnimatedSprite) {
         super(parent);
         this.owner = owner;
-        this.gravity = 525;
+        this.gravity = 1000;
     }
 
     public abstract onEnter(options: Record<string, any>): void;
@@ -46,7 +47,7 @@ export abstract class PlayerState extends State {
     public abstract onExit(): Record<string, any>;
 }
 
-export class Attack extends PlayerState {
+export class Attack extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         options.key
     }
@@ -58,7 +59,7 @@ export class Attack extends PlayerState {
     public onExit(): Record<string, any> { return {}; }
 }
 
-export class Dash extends PlayerState {
+export class Dash extends EnemyState {
     private timestepsLeft: number;
 
     public onEnter(options: Record<string, any>): void {
@@ -103,7 +104,7 @@ export class Dash extends PlayerState {
     }
 }
 
-export class Dead extends PlayerState {
+export class Dead extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         
     }
@@ -117,7 +118,7 @@ export class Dead extends PlayerState {
     public onExit(): Record<string, any> { return {}; }
 }
 
-export class Fall extends PlayerState {
+export class Fall extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         this.parent.velocity.y = 0;
     }
@@ -128,6 +129,7 @@ export class Fall extends PlayerState {
         if (this.owner.onGround) {
             // TODO: If we want fall damage or not
             // this.parent.health -= Math.floor(this.parent.velocity.y / 200);
+            console.log("On Ground")
             this.finished(PlayerStates.IDLE);
         } 
         else if (Input.isPressed(PlayerControls.DASH))
@@ -143,31 +145,45 @@ export class Fall extends PlayerState {
     public onExit(): Record<string, any> { return {}; }
 }
 
-export class Idle extends PlayerState {
+export class Idle extends EnemyState {
+    private dir: number = null;
+    private time: number = 100;
+
     public onEnter(options: Record<string, any>): void {
         this.owner.animation.play(PlayerAnimations.IDLE);
         this.parent.speed = this.parent.MIN_SPEED;
-        this.parent.velocity.x = 0;
-        this.parent.velocity.y = 0;
+        // this.parent.velocity.x = 0;
+        // this.parent.velocity.y = 0;
+        console.log("Enter IDLE");
     }
 
     public handleInput(event: GameEvent): void { }
 
     public update(deltaT: number): void {
         super.update(deltaT);
-        let dir = this.parent.moveDir;
-        if (!dir.isZero() && dir.y === 0)
-            this.finished(PlayerStates.WALK);
-        else if (Input.isJustPressed(PlayerControls.MOVE_UP))
-            this.finished(PlayerStates.JUMP);
-        else if (Input.isJustPressed(PlayerControls.DASH))
-            this.finished(PlayerStates.DASH);
-        else if (!this.owner.onGround && this.parent.velocity.y > 0)
-            this.finished(PlayerStates.FALL);
-        else {
-            this.parent.velocity.y += this.gravity * deltaT;
+        // console.log(this.owner.onGround, this.parent.velocity);
+        // if (!this.owner.onGround && this.owner.position.y > 0)
+        if(this.dir && this.time > 0){
             this.owner.move(this.parent.velocity.scaled(deltaT));
+            this.time -= 1;
         }
+        else{
+            this.time = 100;
+            this.dir = (Math.random() - 0.5) * 40;
+            this.parent.velocity.x = this.dir;
+        }
+
+        // if (!dir.isZero() && dir.y === 0)
+        //     this.finished(PlayerStates.WALK);
+        // else if (Input.isJustPressed(PlayerControls.MOVE_UP))
+        //     this.finished(PlayerStates.JUMP);
+        // else if (Input.isJustPressed(PlayerControls.DASH))
+        //     this.finished(PlayerStates.DASH);
+        
+        // else {
+        //     this.parent.velocity.y += this.gravity * deltaT;
+        //     this.owner.move(this.parent.velocity.scaled(deltaT));
+        // }
     }
 
     public onExit(): Record<string, any> {
@@ -176,7 +192,7 @@ export class Idle extends PlayerState {
     }
 }
 
-export class Jump extends PlayerState {
+export class Jump extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         this.parent.velocity.y = -400;
     }
@@ -202,7 +218,7 @@ export class Jump extends PlayerState {
     public onExit(): Record<string, any> { return {}; }
 }
 
-export class Walk extends PlayerState {
+export class Walk extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         this.parent.speed = this.parent.MIN_SPEED;
         let dir = this.parent.moveDir;
