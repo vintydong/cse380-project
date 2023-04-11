@@ -16,7 +16,7 @@ export enum PlayerControls {
     MOVE_LEFT = "MOVE_LEFT",
     MOVE_RIGHT = "MOVE_RIGHT",
     DASH = "DASH",
-    ATTACKING = "ATTACKING",
+    // ATTACKING = "ATTACKING",
     SKILL_ONE = "SKILL_ONE",
     SKILL_TWO = "SKILL_TWO",
     SKILL_THREE = "SKILL_THREE",

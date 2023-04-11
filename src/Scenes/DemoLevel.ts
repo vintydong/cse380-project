@@ -9,6 +9,7 @@ import Input from "../Wolfie2D/Input/Input";
 import { TweenableProperties } from "../Wolfie2D/Nodes/GameNode";
 import Sprite from "../Wolfie2D/Nodes/Sprites/Sprite";
 import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
+import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import Layer from "../Wolfie2D/Scene/Layer";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
@@ -20,6 +21,32 @@ import Button from "../Wolfie2D/Nodes/UIElements/Button";
 import Controls from "./Controls";
 import Help from "./Help";
 import MainMenu from "./MainMenu";
+import Graphic from "../Wolfie2D/Nodes/Graphic";
+import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
+import Color from "../Wolfie2D/Utils/Color";
+import GameEvent from "../Wolfie2D/Events/GameEvent";
+
+import BubbleShaderType from "../Shaders/BubbleShaderType";
+
+import BubbleAI from "../AI/BubbleBehavior";
+
+import { GameEvents } from "../GameEvents";
+import CanvasNode from "../Wolfie2D/Nodes/CanvasNode";
+
+/**
+ * A type for layers in the HW3Scene. It seems natural to want to use some kind of enum type to
+ * represent the different layers in the HW3Scene, however, it is generally bad practice to use
+ * Typescripts enums. As an alternative, I'm using a const object.
+ * 
+ * @author PeteyLumpkins
+ * 
+ * {@link https://www.typescriptlang.org/docs/handbook/enums.html#objects-vs-enums}
+ */
+export const HW2Layers = {
+	PRIMARY: "PRIMARY",
+	BACKGROUND: "BACKGROUND", 
+	UI: "UI"
+} as const;
 
 /**
  * The first level for HW4 - should be the one with the grass and the clouds.
@@ -58,6 +85,12 @@ export default class DemoLevel extends Level {
     // public static readonly TILE_DESTROYED_KEY = "TILE_DESTROYED";
     // public static readonly TILE_DESTROYED_PATH = "hw4_assets/sounds/switch.wav";
 
+    // Object pool for bubbles
+	private bubbles: Array<Graphic>;
+    
+    // The padding of the world
+	private worldPadding: Vec2;
+
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);
 
@@ -85,6 +118,13 @@ export default class DemoLevel extends Level {
         this.load.spritesheet(this.playerSpriteKey, DemoLevel.PLAYER_SPRITE_PATH);
         // Load in ability icons
         this.load.image(this.abilityIconsKey, DemoLevel.ABILITY_ICONS_PATH);
+        
+        // Load in the shader for bubble.
+      this.load.shader(
+        BubbleShaderType.KEY,
+        BubbleShaderType.VSHADER,
+        BubbleShaderType.FSHADER
+      );
 
         // Load in demo level enemies
         this.load.spritesheet(DemoLevel.ENEMY_SPRITE_KEY, DemoLevel.ENEMY_SPRITE_PATH);
@@ -92,6 +132,7 @@ export default class DemoLevel extends Level {
 
         //Load Escape menu
         this.load.image("esc", "assets/sprites/menus/escMenu.png");
+        
         // Audio and music
     }
 
@@ -105,6 +146,8 @@ export default class DemoLevel extends Level {
     public startScene(): void {
         super.startScene();
         let center = this.viewport.getView().center;
+        this.initObjectPools();
+        this.subscribeToEvents();
 
         // Initialize demo_level enemies
         let enemies = this.load.getObject(DemoLevel.ENEMY_POSITIONS_KEY);
@@ -299,5 +342,106 @@ export default class DemoLevel extends Level {
             default:
                 throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
+    }
+
+    // public updateScene(deltaT: number) {
+    //     // Handle all game events
+    //     while (this.receiver.hasNextEvent()) {
+    //         this.handleEvent(this.receiver.getNextEvent());
+    //     }
+    //     // for (let bubble of this.bubbles) if (bubble.visible) this.handleScreenDespawn(bubble);
+    // }
+
+    /**
+	 * This method helps with handling events. 
+	 * 
+	 * @param event the event to be handled
+	 * @see GameEvent
+	 */
+	protected handleEvent(event: GameEvent){
+		switch(event.type) {
+			case GameEvents.SKILL_1_FIRED: {
+                console.log(event.data.get("direction"));
+				this.spawnBubble(event.data.get("direction"));
+                break;
+			}
+			default: {
+				throw new Error(`Unhandled event with type ${event.type} caught in ${this.constructor.name}`);
+			}
+		}
+
+	}
+
+    /**
+	 * This method initializes each of the object pools for this scene.
+	 * 
+	 * @remarks
+	 * 
+	 * There are three object pools that need to be initialized before the scene 
+	 * can start running. They are as follows:
+	 * 
+	 * 1. The bubble object-pool
+	 * 2. The mine object-pool
+	 * 3. The laseer object-pool
+	 * 
+	 * For each object-pool, if an object is not currently in use, it's visible
+	 * flag will be set to false. If an object is in use, then it's visible flag
+	 * will be set to true. This makes returning objects to their respective pools
+	 * as simple as just setting a flag.
+	 * 
+	 * @see {@link https://gameprogrammingpatterns.com/object-pool.html Object-Pools} 
+	 */
+	protected initObjectPools(): void {
+		
+		// Init bubble object pool
+		this.bubbles = new Array(10);
+		for (let i = 0; i < this.bubbles.length; i++) {
+			this.bubbles[i] = this.add.graphic(GraphicType.RECT, HW2Layers.PRIMARY, {position: new Vec2(0, 0), size: new Vec2(50, 50)});
+            
+            // Give the bubbles a custom shader
+			this.bubbles[i].useCustomShader(BubbleShaderType.KEY);
+			this.bubbles[i].visible = false;
+			this.bubbles[i].color = Color.BLUE;
+
+            // Give the bubbles AI
+			this.bubbles[i].addAI(BubbleAI);
+
+            // Give the bubbles a collider
+			let collider = new Circle(Vec2.ZERO, 25);
+			this.bubbles[i].setCollisionShape(collider);
+		}
+    }
+
+    protected spawnBubble(direction: string): void {
+		// Find the first visible bubble
+		let bubble: Graphic = this.bubbles.find((bubble: Graphic) => { return !bubble.visible });
+
+		if (bubble){
+			// Bring this bubble to life
+			bubble.visible = true;
+
+            bubble.position.copy(this.player.position);
+
+            // bubble.addAI(BubbleAI);
+			bubble.setAIActive(true, {direction: direction});
+		}
+	}
+
+    public handleScreenDespawn(node: CanvasNode): void {
+        // Extract the size of the viewport
+		let paddedViewportSize = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
+		let viewportSize = this.viewport.getHalfSize().scaled(2);
+		
+		let leftBound = (paddedViewportSize.x - viewportSize.x) - (2 * this.worldPadding.x); 
+		let topBound = (paddedViewportSize.y - viewportSize.y) - (2 * this.worldPadding.y);
+
+		if(node.position.x < leftBound || node.position.y < topBound ) {
+			node.position.copy(Vec2.ZERO);
+			node.visible = false;
+		}
+	}
+
+    protected subscribeToEvents(): void {
+        this.receiver.subscribe(GameEvents.SKILL_1_FIRED);
     }
 }

@@ -1,3 +1,4 @@
+import { GameEvents } from "../../GameEvents";
 import State from "../../Wolfie2D/DataTypes/State/State";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
@@ -48,14 +49,30 @@ export abstract class PlayerState extends State {
 
 export class Attack extends PlayerState {
     public onEnter(options: Record<string, any>): void {
-        options.key
+
+        let dir = this.parent.moveDir;
+        this.owner.animation.play(dir.x < 0 ? PlayerAnimations.ATTACKING_LEFT : PlayerAnimations.ATTACKING_RIGHT);
+        this.emitter.fireEvent(GameEvents.SKILL_1_FIRED, {direction: dir.x < 0 ? "left" : "right"});
     }
 
     public handleInput(event: GameEvent): void { }
 
-    public update(deltaT: number): void { }
-
-    public onExit(): Record<string, any> { return {}; }
+    public update(deltaT: number): void {
+        let dir = this.parent.moveDir;
+        if (!dir.isZero() && dir.y === 0)
+            this.finished(PlayerStates.WALK);
+        else if (Input.isJustPressed(PlayerControls.MOVE_UP))
+            this.finished(PlayerStates.JUMP);
+        else if (Input.isJustPressed(PlayerControls.DASH))
+            this.finished(PlayerStates.DASH);
+        else if (Input.isJustPressed(PlayerControls.SKILL_ONE))
+            this.finished(PlayerStates.ATTACKING);
+    }
+    
+    public onExit(): Record<string, any> { 
+        this.owner.animation.stop();
+        return {};
+     }
 }
 
 export class Dash extends PlayerState {
@@ -162,6 +179,8 @@ export class Idle extends PlayerState {
             this.finished(PlayerStates.JUMP);
         else if (Input.isJustPressed(PlayerControls.DASH))
             this.finished(PlayerStates.DASH);
+        else if (Input.isJustPressed(PlayerControls.SKILL_ONE))
+            this.finished(PlayerStates.ATTACKING);
         else if (!this.owner.onGround && this.parent.velocity.y > 0)
             this.finished(PlayerStates.FALL);
         else {
@@ -221,6 +240,8 @@ export class Walk extends PlayerState {
             this.finished(PlayerStates.JUMP)
         else if (Input.isJustPressed(PlayerControls.DASH))
             this.finished(PlayerStates.DASH);
+        else if (Input.isJustPressed(PlayerControls.SKILL_ONE))
+            this.finished(PlayerStates.ATTACKING);
         else if (!this.owner.onGround && this.parent.velocity.y !== 0) {
             this.finished(PlayerStates.FALL);
         } else {
