@@ -74,19 +74,19 @@ export default abstract class Level extends Scene {
 		// this.healthLabel.fontSize = 24;
 		// this.healthLabel.font = "Courier";
 
-        this.healthBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 20), "");
+        this.healthBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 60), "");
         this.healthBar.size = new Vec2(200, 25);
 		this.healthBar.backgroundColor = Color.GREEN;
         this.healthBar.borderColor = Color.BLACK;
 
         // Resource Bar
-        this.resourceBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 65), "");
+        this.resourceBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 105), "");
         this.resourceBar.size = new Vec2(200, 25);
 		this.resourceBar.backgroundColor = Color.BLACK;
         this.resourceBar.borderColor = Color.MAGENTA;
 
         // Ability Bar
-        const abilityBarCenter = new Vec2(150, 480);
+        const abilityBarCenter = new Vec2(150, 483);
         const abilityBarSize = new Vec2(300, 50);
         this.abilityBar = this.factory.addLabel(LevelLayers.UI, abilityBarCenter, "");
         this.abilityBar.size = abilityBarSize;
