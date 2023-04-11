@@ -1,7 +1,9 @@
+import { PhysicsGroups } from "../../../Physics";
 import Updateable from "../../DataTypes/Interfaces/Updateable";
 import Vec2 from "../../DataTypes/Vec2";
 import { GraphicType } from "../../Nodes/Graphics/GraphicTypes";
 import Particle from "../../Nodes/Graphics/Particle";
+import PhysicsManager from "../../Physics/PhysicsManager";
 import Scene from "../../Scene/Scene";
 import Timer from "../../Timing/Timer";
 import Color from "../../Utils/Color";

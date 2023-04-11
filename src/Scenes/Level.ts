@@ -129,7 +129,7 @@ export default abstract class Level extends Scene {
             throw new Error("Player must be initialized before setting the viewport to folow the player");
         }
         this.viewport.follow(this.player);
-        this.viewport.setZoomLevel(1.5);
+        this.viewport.setZoomLevel(1);
         this.viewport.setBounds(0, 0, 1366, 768);
 
         // this.subscribeEvents();

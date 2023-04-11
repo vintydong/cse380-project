@@ -134,7 +134,10 @@ export default class DemoLevel extends Level {
         for(let i = 0; i < enemies.positions.length; i++){
             let enemy = this.factory.addAnimatedSprite(demoEnemyActor, DemoLevel.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as demoEnemyActor
             enemy.position.set(enemies.positions[i].x * 6, enemies.positions[i].y * 6);
-            enemy.addPhysics(new AABB(enemy.position.clone(), enemy.boundary.getHalfSize().clone()), null, true);
+            enemy.addPhysics();
+            enemy.setGroup(PhysicsGroups.NPC);
+            console.log(enemy);
+            enemy.setTrigger(PhysicsGroups.WEAPON, 'ENEMY_HIT', null);
             enemy.navkey = "navmesh";
             
             console.log("Enemy", enemy);
@@ -142,20 +145,21 @@ export default class DemoLevel extends Level {
             // this.healthbars.set(npc.id, healthbar);
 
             enemy.addAI(demoEnemyController, {tilemap: this.tilemapKey});
-            enemy.setGroup(PhysicsGroups.NPC);
             enemy.animation.play("IDLE");
         }
         // Set the next level to be Level2
         // this.nextLevel = null;
     }
 
-    // public updateScene(deltaT: number) {
-    //     // Handle all game events
-    //     while (this.receiver.hasNextEvent()) {
-    //         this.handleEvent(this.receiver.getNextEvent());
-    //     }
-    //     // for (let bubble of this.bubbles) if (bubble.visible) this.handleScreenDespawn(bubble);
-    // }
+    public updateScene(deltaT: number) {
+        // Handle all game events
+        while (this.receiver.hasNextEvent()) {
+            this.handleEvent(this.receiver.getNextEvent());
+        }
+
+        
+        // for (let bubble of this.bubbles) if (bubble.visible) this.handleScreenDespawn(bubble);
+    }
 
     /**
 	 * This method helps with handling events. 
@@ -214,18 +218,21 @@ export default class DemoLevel extends Level {
             // Give the bubbles a collider
 			let collider = new Circle(Vec2.ZERO, 25);
 			this.bubbles[i].setCollisionShape(collider);
+            this.bubbles[i].addPhysics();
+            this.bubbles[i].setGroup(PhysicsGroups.WEAPON);
+            this.bubbles[i].setTrigger(PhysicsGroups.NPC, 'ENEMY_HIT', null);
 		}
     }
 
     protected spawnBubble(direction: string): void {
 		// Find the first visible bubble
 		let bubble: Graphic = this.bubbles.find((bubble: Graphic) => { return !bubble.visible });
-
+        console.log("BUBBLE:", bubble);
 		if (bubble){
 			// Bring this bubble to life
 			bubble.visible = true;
 
-            bubble.position.copy(this.player.position);
+            bubble.position = this.player.position.clone();
 
             // bubble.addAI(BubbleAI);
 			bubble.setAIActive(true, {direction: direction});
