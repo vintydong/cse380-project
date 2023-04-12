@@ -3,14 +3,14 @@ import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import Rect from "../Wolfie2D/Nodes/Graphics/Rect";
 import RectShaderType from "../Wolfie2D/Rendering/WebGLRendering/ShaderTypes/RectShaderType";
 
-export default class BubbleShaderType extends RectShaderType {
+export default class ParticleShaderType extends RectShaderType {
 
-	public static KEY: string = "BUBBLE_SHADER_TYPE_KEY";
-	public static VSHADER: string = "assets/shaders/bubble.vshader";
-	public static FSHADER: string = "assets/shaders/bubble.fshader";
+	public static KEY: string = "PARTICLE_SHADER_TYPE_KEY";
+	public static VSHADER: string = "assets/shaders/particle.vshader";
+	public static FSHADER: string = "assets/shaders/particle.fshader";
 
 	initBufferObject(): void {
-		this.bufferObjectKey = BubbleShaderType.KEY;
+		this.bufferObjectKey = ParticleShaderType.KEY;
 		this.resourceManager.createBuffer(this.bufferObjectKey);
 	}
 
