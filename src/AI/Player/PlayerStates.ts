@@ -1,4 +1,4 @@
-import { GameEvents } from "../../GameEvents";
+import { CustomGameEvents, MenuEvents } from "../../CustomGameEvents";
 import State from "../../Wolfie2D/DataTypes/State/State";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
@@ -52,7 +52,7 @@ export class Attack extends PlayerState {
 
         let dir = this.parent.moveDir;
         this.owner.animation.play(dir.x < 0 ? PlayerAnimations.ATTACKING_LEFT : PlayerAnimations.ATTACKING_RIGHT);
-        this.emitter.fireEvent(GameEvents.SKILL_1_FIRED, {direction: dir.x < 0 ? "left" : "right"});
+        this.emitter.fireEvent(CustomGameEvents.SKILL_1_FIRED, {direction: dir.x < 0 ? "left" : "right"});
     }
 
     public handleInput(event: GameEvent): void { }

@@ -31,7 +31,7 @@ export abstract class EnemyState extends State {
         switch (event.type) {
             // Default - throw an error
             default: {
-                throw new Error(`Unhandled event in PlayerState of type ${event.type}`);
+                throw new Error(`Unhandled event in EnemeyState of type ${event.type}`);
             }
         }
     }

@@ -1,4 +1,3 @@
-import CustomFactoryManager from "../Factory/CustomFactoryManager";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import { TweenableProperties } from "../Wolfie2D/Nodes/GameNode";
@@ -52,7 +51,8 @@ export default class SplashScreen extends Scene{
         splashButton.size.set(1366, 768);
         splashButton.backgroundColor = Color.TRANSPARENT;
         splashButton.onClickEventId = "click";
-
+        // For WebGL temporarily disabled
+        // splashButton.calculateBackgroundColor = () => splashButton.backgroundColor;
         this.receiver.subscribe("click");
     }
 
