@@ -8,7 +8,7 @@
 	"topBuffer": 0,
 	"bottomBuffer": 0,
 	"columns": 6,
-	"rows": 7,
+	"rows": 8,
 	"animations": [
 		{
 			"name": "IDLE",
@@ -16,32 +16,32 @@
 			"frames": [
 				{
 					"index": 0,
-					"duration": 20
+					"duration": 15
 				},
 				{
 					"index": 1,
-					"duration": 20
+					"duration": 15
 				},
 				{
 					"index": 2,
-					"duration": 20
+					"duration": 15
 				},
 				{
 					"index": 3,
-					"duration": 20
+					"duration": 15
 				},
 				{
 					"index": 4,
-					"duration": 20
+					"duration": 15
 				},
 				{
 					"index": 5,
-					"duration": 20
+					"duration": 15
 				}
 			]
 		},
 		{
-			"name": "RUNNING_LEFT",
+			"name": "RUNNING",
 			"repeat": true,
 			"frames": [
 				{
@@ -71,84 +71,94 @@
 			]
 		},
 		{
-			"name": "RUNNING_RIGHT",
-			"repeat": true,
+			"name": "JUMPING",
+			"repeat": false,
 			"frames": [
 				{
 					"index": 12,
-					"duration": 10
+					"duration": 3
 				},
 				{
 					"index": 13,
-					"duration": 10
+					"duration": 3
 				},
 				{
 					"index": 14,
-					"duration": 10
+					"duration": 5
 				},
 				{
 					"index": 15,
-					"duration": 10
+					"duration": 5
 				},
 				{
 					"index": 16,
-					"duration": 10
-				},
-				{
-					"index": 17,
-					"duration": 10
+					"duration": 5
 				}
 			]
 		},
 		{
-			"name": "ATTACKING_LEFT",
+			"name": "FALLING",
 			"repeat": false,
 			"frames": [
 				{
 					"index": 18,
-					"duration": 20
+					"duration": 5
 				},
 				{
 					"index": 19,
-					"duration": 20
+					"duration": 2
 				},
 				{
 					"index": 20,
-					"duration": 20
+					"duration": 2
 				},
 				{
 					"index": 21,
-					"duration": 20
+					"duration": 2
 				},
 				{
 					"index": 22,
-					"duration": 20
+					"duration": 2
+				},
+				{
+					"index": 23,
+					"duration": 2
 				}
 			]
 		},
 		{
-			"name": "ATTACKING_RIGHT",
-			"repeat": false,
+			"name": "DASH",
+			"repeat": true,
 			"frames": [
 				{
 					"index": 24,
-					"duration": 20
+					"duration": 10
+				}
+			]
+		},
+		{
+			"name": "ATTACKING",
+			"repeat": false,
+			"frames": [
+				{
+					"index": 30,
+					"duration": 5
 				},
 				{
-					"index": 25,
-					"duration": 20
+					"index": 31,
+					"duration": 5
 				},
 				{
-					"index": 26,
-					"duration": 20
+					"index": 32,
+					"duration": 10
 				},
 				{
-					"index": 27,
-					"duration": 20
+					"index": 33,
+					"duration": 5
 				},
 				{
-					"index": 28,
-					"duration": 20
+					"index": 34,
+					"duration": 5
 				}
 			]
 		},
@@ -157,20 +167,20 @@
 			"repeat": false,
 			"frames": [
 				{
-					"index": 30,
-					"duration": 200
+					"index": 36,
+					"duration": 20
 				},
 				{
-					"index": 31,
-					"duration": 200
+					"index": 37,
+					"duration": 20
 				},
 				{
-					"index": 32,
-					"duration": 200
+					"index": 38,
+					"duration": 20
 				},
 				{
-					"index": 33,
-					"duration": 200
+					"index": 39,
+					"duration": 20
 				}
 			]
 		},
@@ -179,8 +189,8 @@
 			"repeat": true,
 			"frames": [
 				{
-					"index": 36,
-					"duration": 200
+					"index": 42,
+					"duration": 20
 				}
 			]
 		}

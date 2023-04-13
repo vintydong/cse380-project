@@ -3,6 +3,7 @@ import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Input from "../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
+import Timer from "../../Wolfie2D/Timing/Timer";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 import { Attack, Dash, Dead, Fall, Idle, Jump, Walk } from './PlayerStates';
 
@@ -37,17 +38,18 @@ export enum PlayerStates {
 
 export enum PlayerAnimations {
     IDLE = "IDLE",
-    RUNNING_LEFT = "RUNNING_LEFT",
-    RUNNING_RIGHT = "RUNNING_RIGHT",
-    ATTACKING_LEFT = "ATTACKING_LEFT",
-    ATTACKING_RIGHT = "ATTACKING_RIGHT",
+    RUNNING = "RUNNING",
+    JUMPING = "JUMPING",
+    FALLING = "FALLING",
+    DASH = "DASH",
+    ATTACKING = "ATTACKING",
     TAKING_DAMAGE = "TAKING_DAMAGE",
     DEAD = "DEAD",    
 }
 
 export default class PlayerController extends StateMachineAI {
     public readonly MAX_SPEED: number = 200;
-    public readonly MIN_SPEED: number = 100;
+    public readonly MIN_SPEED: number = 175;
 
     protected owner: AnimatedSprite;
 
@@ -56,6 +58,10 @@ export default class PlayerController extends StateMachineAI {
 
     protected _velocity: Vec2;
     protected _speed: number;
+
+    protected _facing: string;
+    protected _dashTimer: Timer;
+    protected _airDash: boolean;
 
     // protected weapon: PlayerWeapon;
     protected tilemap: OrthogonalTilemap;
@@ -71,6 +77,9 @@ export default class PlayerController extends StateMachineAI {
 
         this.health = 100;
         this.maxHealth = 100;
+
+        this.dashTimer = new Timer(600);
+        this._airDash = true;
 
         // Add the different states the player can be in to the PlayerController 
         this.addState(PlayerStates.ATTACKING, new Attack(this, this.owner));
@@ -131,4 +140,13 @@ export default class PlayerController extends StateMachineAI {
         // If the health hit 0, change the state of the player
         if (this.health === 0) { this.changeState(PlayerStates.DEAD); }
     }
+
+    public get facing(): string { return this._facing; }
+    public set facing(facing: string) { this._facing = facing; }
+
+    public get dashTimer(): Timer { return this._dashTimer; }
+    public set dashTimer(Timer: Timer) { this._dashTimer = Timer; }
+
+    public get airDash(): boolean { return this._airDash; }
+    public set airDash(airDash: boolean) { this._airDash = airDash; }
 }
