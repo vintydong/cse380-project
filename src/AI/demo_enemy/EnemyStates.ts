@@ -5,7 +5,7 @@ import Input from "../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 import PlayerController, { PlayerAnimations, PlayerControls, PlayerStates } from "../Player/PlayerController";
-import demoEnemyController from "./demoEnemyController";
+import demoEnemyController, { EnemyAnimations } from "./demoEnemyController";
 
 /**
  * An abstract state for the PlayerController 
@@ -78,7 +78,7 @@ export class Dash extends EnemyState {
         let dx = moveDir.isZero() ? faceDir.x : moveDir.x;
         dx = dx > 0 ? 1 : -1
 
-        this.owner.animation.playIfNotAlready(dx < 0 ? PlayerAnimations.RUNNING_LEFT : PlayerAnimations.RUNNING_RIGHT);
+        this.owner.animation.playIfNotAlready(dx < 0 ? EnemyAnimations.RUNNING_LEFT : EnemyAnimations.RUNNING_RIGHT);
         
         this.parent.velocity.y += this.gravity * deltaT;
         this.parent.velocity.x = dx * 2 * this.parent.speed
@@ -150,7 +150,7 @@ export class Idle extends EnemyState {
     private time: number = 100;
 
     public onEnter(options: Record<string, any>): void {
-        this.owner.animation.play(PlayerAnimations.IDLE);
+        this.owner.animation.play(EnemyAnimations.IDLE);
         this.parent.speed = this.parent.MIN_SPEED;
         // this.parent.velocity.x = 0;
         // this.parent.velocity.y = 0;
@@ -222,7 +222,7 @@ export class Walk extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         this.parent.speed = this.parent.MIN_SPEED;
         let dir = this.parent.moveDir;
-        this.owner.animation.playIfNotAlready(dir.x < 0 ? PlayerAnimations.RUNNING_LEFT : PlayerAnimations.RUNNING_RIGHT);
+        this.owner.animation.playIfNotAlready(dir.x < 0 ? EnemyAnimations.RUNNING_LEFT : EnemyAnimations.RUNNING_RIGHT);
     }
 
     public handleInput(event: GameEvent): void { }
