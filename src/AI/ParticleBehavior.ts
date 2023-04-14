@@ -43,7 +43,7 @@ export default class ParticleBehavior implements AI {
     }
 
     public activate(options: Record<string, any>): void {
-        console.log(options);
+        // console.log(options);
         if (options) {
             this.direction = options.direction;
         }
@@ -52,7 +52,6 @@ export default class ParticleBehavior implements AI {
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
             case 'ENEMY_HIT':
-                // console.log(event.data);
                 let id = event.data.get('other');
                 if(id === this.owner.id){
                     this.owner.position.copy(Vec2.ZERO);
@@ -84,7 +83,6 @@ export default class ParticleBehavior implements AI {
 
             // Update position of the bubble - Scale up and move left
             let value = (this.direction == "left") ? Vec2.LEFT.scale(this.currentXSpeed* deltaT) : Vec2.RIGHT.scale(this.currentXSpeed* deltaT);
-            // console.log(value);
             this.owner.position.add(value);
         }
     }    

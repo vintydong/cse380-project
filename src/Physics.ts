@@ -18,10 +18,10 @@ export type PhysicOptions = {
  * Collision map between Physics groups
  *              Ground  Player  Weapon  Destructible    NPC NPC_Walls
  * Ground       0       1       1       0               1   0
- * Player       1       0       0       1               0   0
+ * Player       1       0       0       1               1   0
  * Weapon       1       0       0       1               1   0
  * Destructible 0       1       1       0               0   0
- * NPC          1       0       1       0               1   1
+ * NPC          1       1       1       0               1   1
  * NPC_Walls    0       0       0       0               1   1
  */
 export const PhysicsCollisionMap: PhysicOptions = {
@@ -36,10 +36,10 @@ export const PhysicsCollisionMap: PhysicOptions = {
         collisions:
         [
             [0, 1, 1, 0, 1, 0],
-            [1, 0, 0, 1, 0, 0],
+            [1, 0, 0, 1, 1, 0],
             [1, 0, 0, 1, 1, 0],
             [0, 1, 1, 0, 0, 0],
-            [1, 0, 1, 0, 1, 1],
+            [1, 1, 1, 0, 1, 1],
             [0, 0, 0, 0, 1, 1],
         ]
 }

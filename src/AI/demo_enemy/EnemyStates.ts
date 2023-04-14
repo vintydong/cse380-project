@@ -129,7 +129,6 @@ export class Fall extends EnemyState {
         if (this.owner.onGround) {
             // TODO: If we want fall damage or not
             // this.parent.health -= Math.floor(this.parent.velocity.y / 200);
-            console.log("On Ground")
             this.finished(PlayerStates.IDLE);
         } 
         else if (Input.isPressed(PlayerControls.DASH))
@@ -152,16 +151,12 @@ export class Idle extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         this.owner.animation.play(PlayerAnimations.IDLE);
         this.parent.speed = this.parent.MIN_SPEED;
-        // this.parent.velocity.x = 0;
-        // this.parent.velocity.y = 0;
-        console.log("Enter IDLE");
     }
 
     public handleInput(event: GameEvent): void { }
 
     public update(deltaT: number): void {
         super.update(deltaT);
-        // console.log(this.owner.onGround, this.parent.velocity);
         // if (!this.owner.onGround && this.owner.position.y > 0)
         if(this.dir && this.time > 0){
             this.owner.move(this.parent.velocity.scaled(deltaT));
