@@ -1,4 +1,5 @@
-import { GameEvents } from "../../GameEvents";
+import { CustomGameEvents } from "../../CustomGameEvents";
+import { PhysicsGroups } from "../../Physics";
 import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
@@ -179,7 +180,7 @@ export default class PlayerController extends StateMachineAI {
         if (this._iFrameTimer.isStopped){
 			this.health -= 10;
 			this.owner.animation.playIfNotAlready(PlayerAnimations.TAKING_DAMAGE, false);
-            this.emitter.fireEvent(GameEvents.UPDATE_HEALTH, {
+            this.emitter.fireEvent(CustomGameEvents.UPDATE_HEALTH, {
 				currentHealth: this.health,
 				maxHealth: this.maxHealth
 			});
@@ -189,7 +190,7 @@ export default class PlayerController extends StateMachineAI {
     }
 
     protected handleIFrameTimerEnd = () => {
-		this.owner.animation.playIfNotAlready(PlayerAnimations.IDLE, false);
+		// this.owner.animation.playIfNotAlready(PlayerAnimations.IDLE, false);
 		this.hit = false;
 	}
 }
