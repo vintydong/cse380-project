@@ -29,6 +29,12 @@ export class LayerManager {
 
     public static readonly PAUSE_SPRITE_KEY = "PAUSE_MENU";
     public static readonly PAUSE_SPRITE_PATH = "assets/sprites/menus/escMenu.png/";
+    
+    public static readonly CONTROL_SPRITE_KEY = "CONTROL_MENU";
+    public static readonly CONTROL_SPRITE_PATH = "assets/sprites/menus/controls.png/";
+
+    public static readonly HELP_SPRITE_KEY = "HELP_MENU";
+    public static readonly HELP_SPRITE_PATH = "assets/sprites/menus/help.png/";
 
     private pauseLayer: UILayer;
     private controlLayer: UILayer;
@@ -44,45 +50,46 @@ export class LayerManager {
         this.transitionLayer = scene.addUILayer(LevelUILayers.TRANSITION);
 
         this.initPauseLayer();
+        this.initControlLayer();
+        this.initHelplayer();
 
-        this.disablePauseLayer();
-        this.disableControlLayer();
-        this.disableHelpLayer();
-        // this.initControlLayer();
-        // this.initHelplayer();
+        this.pauseLayer.disable();
+        this.controlLayer.disable();
+        this.helpLayer.disable();
+        
         // this.initTransitionLayer();
     }
 
     public isPaused(): boolean {
-        return true;
+        return !this.pauseLayer.isHidden();
+    }
+
+    public hidePauseMenu(){
+        this.pauseLayer.disable();
+        this.controlLayer.disable();
+        this.helpLayer.disable();
+    }
+
+    public showPauseMenu(){
+        this.pauseLayer.enable();
+        this.controlLayer.disable();
+        this.helpLayer.disable();
+    }
+
+    public showControlLayer(){
+        this.pauseLayer.disable();
+        this.controlLayer.enable();
+        this.helpLayer.disable();
+    }
+
+    public showHelpLayer(){
+        this.pauseLayer.disable();
+        this.controlLayer.disable();
+        this.helpLayer.enable();
     }
 
     public togglePauseLayer(){
         // this.pauseLayer.enable();
-    }
-
-    public enablePauseLayer(){
-        this.pauseLayer.enable();
-    }
-
-    public enableControlLayer(){
-        this.pauseLayer.enable();
-    }
-
-    public enableHelpLayer(){
-        this.pauseLayer.enable();
-    }
-
-    public disablePauseLayer(){
-        this.pauseLayer.disable();
-    }
-
-    public disableControlLayer(){
-        this.pauseLayer.disable();
-    }
-
-    public disableHelpLayer(){
-        this.pauseLayer.disable();
     }
 
     private initPauseLayer() {
@@ -106,8 +113,6 @@ export class LayerManager {
             ]
         });
 
-        this.pauseLayer.disable();
-
         const escMenuButtonProps = {
             size: new Vec2(150, 50),
             borderWidth: 2,
@@ -117,18 +122,74 @@ export class LayerManager {
             fontSize: 14,
         };
 
-        const resume = this.scene.factory.addButton(LevelUILayers.PAUSE, new Vec2(center.x, center.y), "Resume", {...escMenuButtonProps, onClickEventId: MenuEvents.RESUME});
-        const newGame = this.scene.factory.addButton(LevelUILayers.PAUSE, new Vec2(center.x, center.y), "Restart", {...escMenuButtonProps, onClickEventId: MenuEvents.RESTART});
+        const resume = this.scene.factory.addButton(LevelUILayers.PAUSE, new Vec2(center.x, center.y - 120), "Resume", {...escMenuButtonProps, onClickEventId: MenuEvents.RESUME});
+        const newGame = this.scene.factory.addButton(LevelUILayers.PAUSE, new Vec2(center.x, center.y - 60), "Restart", {...escMenuButtonProps, onClickEventId: MenuEvents.RESTART});
         const controls = this.scene.factory.addButton(LevelUILayers.PAUSE, new Vec2(center.x, center.y), "Controls", {...escMenuButtonProps, onClickEventId: MenuEvents.CONTROLS});
-        const help = this.scene.factory.addButton(LevelUILayers.PAUSE, new Vec2(center.x, center.y), "Help", {...escMenuButtonProps, onClickEventId: MenuEvents.HELP});
-        const exit = this.scene.factory.addButton(LevelUILayers.PAUSE, new Vec2(center.x, center.y), "Exit Game", {...escMenuButtonProps, onClickEventId: MenuEvents.EXIT});
+        const help = this.scene.factory.addButton(LevelUILayers.PAUSE, new Vec2(center.x, center.y + 60), "Help", {...escMenuButtonProps, onClickEventId: MenuEvents.HELP});
+        const exit = this.scene.factory.addButton(LevelUILayers.PAUSE, new Vec2(center.x, center.y + 120), "Exit Game", {...escMenuButtonProps, onClickEventId: MenuEvents.EXIT});
     }
     
     private initControlLayer() {
-        throw new Error("Method not implemented.");
+        let controls = this.scene.add.sprite(LayerManager.CONTROL_SPRITE_KEY, LevelUILayers.CONTROLS);
+
+        let center = this.scene.getViewport().getCenter();
+        let bottomY = this.scene.getViewport().getHalfSize().clone().y + center.y;
+
+        controls.position.set(center.x, center.y);
+        controls.scale = new Vec2(0.71, 0.71);
+        controls.tweens.add('fadeOut', {
+            startDelay: 0,
+            duration: 750,
+            effects: [
+                {
+                    property: TweenableProperties.alpha,
+                    start: 1,
+                    end: 0,
+                    ease: EaseFunctionType.OUT_IN_SINE
+                }
+            ]
+        });
+
+        let goBackButton = this.scene.factory.addButton(LevelUILayers.CONTROLS, new Vec2(center.x, bottomY - 50), "Back", {
+            size: new Vec2(150, 50),
+            borderWidth: 2,
+            borderColor: Color.WHITE,
+            backgroundColor: Color.WHITE,
+            textColor: Color.BLACK,
+            fontSize: 14,
+            onClickEventId: MenuEvents.PAUSE
+        })
     }
     private initHelplayer() {
-        throw new Error("Method not implemented.");
+        let help = this.scene.add.sprite(LayerManager.HELP_SPRITE_KEY, LevelUILayers.HELP);
+
+        let center = this.scene.getViewport().getCenter();
+        let bottomY = this.scene.getViewport().getHalfSize().clone().y + center.y;
+
+        help.position.set(center.x, center.y);
+        help.scale = new Vec2(0.71, 0.71);
+        help.tweens.add('fadeOut', {
+            startDelay: 0,
+            duration: 750,
+            effects: [
+                {
+                    property: TweenableProperties.alpha,
+                    start: 1,
+                    end: 0,
+                    ease: EaseFunctionType.OUT_IN_SINE
+                }
+            ]
+        });
+
+        let goBackButton = this.scene.factory.addButton(LevelUILayers.HELP, new Vec2(center.x, bottomY - 50), "Back", {
+            size: new Vec2(150, 50),
+            borderWidth: 2,
+            borderColor: Color.WHITE,
+            backgroundColor: Color.WHITE,
+            textColor: Color.BLACK,
+            fontSize: 14,
+            onClickEventId: MenuEvents.PAUSE
+        })
     }
     private initTransitionLayer() {
         throw new Error("Method not implemented.");

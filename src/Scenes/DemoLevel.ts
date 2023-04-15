@@ -9,6 +9,7 @@ import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Level, { LevelLayers } from "./Level";
 import ParticleShaderType from "../Shaders/ParticleShaderType";
 import { LayerManager } from "./LayerManager";
+import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 
 export default class DemoLevel extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "DEMO_ENEMY_KEY";
@@ -19,12 +20,6 @@ export default class DemoLevel extends Level {
     public static readonly TILEMAP_KEY = "DemoLevel";
     public static readonly TILEMAP_PATH = "assets/tilemaps/demo_tilemap.json";
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
-
-    public static readonly PLAYER_SPRITE_KEY = "PLAYER_SPRITE_KEY";
-    public static readonly PLAYER_SPRITE_PATH = "assets/sprites/Shadow_Knight.json";
-
-    public static readonly ABILITY_ICONS_KEY = "ABILITY_ICONS_KEY";
-    public static readonly ABILITY_ICONS_PATH = "assets/sprites/ability_icons.png";
 
     // public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
     // public static readonly LEVEL_MUSIC_PATH = "hw4_assets/music/hw5_level_music.wav";
@@ -42,13 +37,8 @@ export default class DemoLevel extends Level {
         this.tilemapKey = DemoLevel.TILEMAP_KEY;
         this.tilemapScale = DemoLevel.TILEMAP_SCALE;
 
-        this.playerSpriteKey = DemoLevel.PLAYER_SPRITE_KEY;
         this.playerSpawn = new Vec2(128, 256);
         // Set the player's spawn
-
-        this.abilityIconsKey = DemoLevel.ABILITY_ICONS_KEY;
-
-
         // Music and sound
     }
 
@@ -57,19 +47,15 @@ export default class DemoLevel extends Level {
      * These things should be laoded in Level 1 and then kept in the resource manager
      */
     public loadScene(): void {
-        // super.loadScene();
+        super.loadScene();
 
         // Load in the tilemap
         this.load.tilemap(DemoLevel.TILEMAP_KEY, DemoLevel.TILEMAP_PATH);
-        // Load in the player's sprite
-        this.load.spritesheet(DemoLevel.PLAYER_SPRITE_KEY, DemoLevel.PLAYER_SPRITE_PATH);
+
+        // Load in demo level enemies
         this.load.spritesheet(DemoLevel.ENEMY_SPRITE_KEY, DemoLevel.ENEMY_SPRITE_PATH);
-
-        this.load.image(LayerManager.PAUSE_SPRITE_KEY, LayerManager.PAUSE_SPRITE_PATH);
-
-
-        // Load in ability icons
-        this.load.image(DemoLevel.ABILITY_ICONS_KEY, DemoLevel.ABILITY_ICONS_PATH);
+        this.load.object(DemoLevel.ENEMY_POSITIONS_KEY, DemoLevel.ENEMY_POSIITIONS_PATH);
+        
         // Load in the shader for bubble.
         this.load.shader(
             ParticleShaderType.KEY,
@@ -77,10 +63,6 @@ export default class DemoLevel extends Level {
             ParticleShaderType.FSHADER
         );
 
-        // Load in demo level enemies
-        this.load.spritesheet(DemoLevel.ENEMY_SPRITE_KEY, DemoLevel.ENEMY_SPRITE_PATH);
-        this.load.object(DemoLevel.ENEMY_POSITIONS_KEY, DemoLevel.ENEMY_POSIITIONS_PATH);
-        
         // Load UI layer sprites
         // Audio and music
     }
@@ -88,9 +70,9 @@ export default class DemoLevel extends Level {
     /**
      * Unload resources for level 1
      */
-    public unloadScene(): void {
-        // TODO decide which resources to keep/cull 
-    }
+    // public unloadScene(): void {
+    //     // TODO decide which resources to keep/cull 
+    // }
 
     public startScene(): void {
         super.startScene();
@@ -100,9 +82,8 @@ export default class DemoLevel extends Level {
         for (let i = 0; i < enemies.positions.length; i++) {
             let enemy = this.factory.addAnimatedSprite(demoEnemyActor, DemoLevel.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as demoEnemyActor
             enemy.position.set(enemies.positions[i].x * 6, enemies.positions[i].y * 6);
-            enemy.addPhysics();
+            enemy.addPhysics(new Circle(enemy.position, 16));
             enemy.setGroup(PhysicsGroups.NPC);
-            console.log(enemy);
             enemy.setTrigger(PhysicsGroups.WEAPON, 'ENEMY_HIT', null);
             enemy.navkey = "navmesh";
 

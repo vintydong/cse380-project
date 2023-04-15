@@ -15,7 +15,7 @@ import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
 import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import Color from "../Wolfie2D/Utils/Color";
 import Layer from "../Wolfie2D/Scene/Layer";
-import PlayerWeapon from "../AI/Player/PlayerWeapon";
+import PlayerParticleSystem from "../AI/Player/PlayerParticleSystem";
 import ParticleShaderType from "../Shaders/ParticleShaderType";
 import ParticleBehavior from "../AI/ParticleBehavior";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
@@ -46,9 +46,13 @@ export default abstract class Level extends Scene {
     // protected jumpAudioKey: string;
 
     /** Attributes for the player */
-    // public static readonly PLAYER_SPRITE_KEY = "PLAYER_SPRITE_KEY";
-    // public static readonly PLAYER_SPRITE_PATH = "assets/sprites/Shadow_Knight.json";
-    // public static readonly PLAYER_SPAWN = new Vec2(128, 256);
+    public static readonly PLAYER_SPRITE_KEY = "PLAYER_SPRITE_KEY";
+    public static readonly PLAYER_SPRITE_PATH = "assets/sprites/Shadow_Knight.json";
+    public static readonly PLAYER_SPAWN = new Vec2(128, 256);
+
+    protected abilityIconsKey: string;
+    public static readonly ABILITY_ICONS_KEY = "ABILITY_ICONS_KEY";
+    public static readonly ABILITY_ICONS_PATH = "assets/sprites/ability_icons.png";
 
     protected playerSpriteKey: string;
     protected player: AnimatedSprite;
@@ -59,11 +63,7 @@ export default abstract class Level extends Scene {
     /** Attributes for the UI */
     protected healthBar: Label;
     protected resourceBar: Label;
-    protected abilityBar: Label;
-
-    protected abilityIconsKey: string;
-    // public static readonly ABILITY_ICONS_KEY = "ABILITY_ICONS_KEY";
-    // public static readonly ABILITY_ICONS_PATH = "assets/sprites/ability_icons.png";
+    protected abilityBar: Label;    
 
     // Layers in each Level
     protected primary: Layer;
@@ -74,15 +74,22 @@ export default abstract class Level extends Scene {
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, { ...options, physics: PhysicsCollisionMap });
 
-        // this.playerSpriteKey = Level.PLAYER_SPRITE_KEY;
-        // this.abilityIconsKey = Level.ABILITY_ICONS_KEY;
+        this.playerSpriteKey = Level.PLAYER_SPRITE_KEY;
+        this.abilityIconsKey = Level.ABILITY_ICONS_KEY;
         this.factory = new CustomFactoryManager(this, this.tilemaps);
         this.enemies = [];
     }
 
     // /** Load common things for all levels */
-    // public loadScene(): void {
-    // }
+    public loadScene(): void {
+        this.load.spritesheet(Level.PLAYER_SPRITE_KEY, Level.PLAYER_SPRITE_PATH);
+
+        this.load.image(LayerManager.PAUSE_SPRITE_KEY, LayerManager.PAUSE_SPRITE_PATH);
+        this.load.image(LayerManager.CONTROL_SPRITE_KEY, LayerManager.CONTROL_SPRITE_PATH);
+        this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
+        
+        this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
+    }
 
     /** Common initializations between all levels */
     public startScene(): void {
@@ -90,8 +97,8 @@ export default abstract class Level extends Scene {
         this.layer_manager = new LayerManager(this);
         this.primary = this.addLayer(LevelLayers.PRIMARY);
         this.ui = this.addLayer(LevelLayers.UI);
-        // this.layers.add(LevelLayers.PRIMARY, this.primary);
-        // this.layers.add(LevelLayers.UI, this.ui);
+        this.layers.add(LevelLayers.PRIMARY, this.primary);
+        this.layers.add(LevelLayers.UI, this.ui);
 
         // Initialize Tilemaps
         if (this.tilemapKey === undefined || this.tilemapScale === undefined)
@@ -149,8 +156,7 @@ export default abstract class Level extends Scene {
 
     public updateScene(deltaT: number) {
         let escButton = Input.isKeyJustPressed("escape");
-        // let paused = this.layer_manager.isPaused();
-        let paused = false;
+        let paused = this.layer_manager.isPaused();
         if(escButton)
             paused 
                 ? this.emitter.fireEvent(MenuEvents.RESUME)
@@ -170,31 +176,30 @@ export default abstract class Level extends Scene {
         let type = event.type as MenuEvent | CustomGameEvent;
         switch (type) {
             case CustomGameEvents.SKILL_1_FIRED: {
-                console.log(event.data.get("direction"));
                 this.spawnBubble(event.data.get("direction"));
                 break;
             }
             //Main menu options
             case MenuEvents.PAUSE:
-                this.layer_manager.enablePauseLayer();
+                this.layer_manager.showPauseMenu();
                 for (let enemy of this.enemies) {
-                    enemy.animation.play("IDLE");
+                    enemy.animation.pause();
                     enemy.freeze();
                 }
                 this.player.freeze();
                 break;
 
             case MenuEvents.RESUME:
-                this.layer_manager.disablePauseLayer();
+                this.layer_manager.hidePauseMenu();
                 for (let enemy of this.enemies) {
-                    enemy.animation.play("IDLE");
+                    enemy.animation.resume();
                     enemy.unfreeze();
                 }
                 this.player.unfreeze();
                 break;
 
             case MenuEvents.RESTART:
-                this.layer_manager.disablePauseLayer();
+                this.layer_manager.hidePauseMenu();
                 for (let enemy of this.enemies) {
                     enemy.animation.play("IDLE");
                     enemy.unfreeze();
@@ -204,11 +209,11 @@ export default abstract class Level extends Scene {
                 break;
 
             case MenuEvents.CONTROLS:
-                this.layer_manager.enableControlLayer();
+                this.layer_manager.showControlLayer();
                 break;
 
             case MenuEvents.HELP:
-                this.layer_manager.enableHelpLayer();
+                this.layer_manager.showHelpLayer();
                 break;
 
             case MenuEvents.EXIT:
@@ -264,7 +269,7 @@ export default abstract class Level extends Scene {
             let ability = this.factory.addSprite(this.abilityIconsKey, LevelLayers.UI, offset);
             ability.position = squarePos;
             ability.size = new Vec2(16, 16);
-            ability.scale = new Vec2(2, 2);
+            ability.scale = new Vec2(2.5, 2.5);
         }
     }
 
@@ -294,16 +299,16 @@ export default abstract class Level extends Scene {
     }
 
     protected spawnBubble(direction: string): void {
-        // Find the first visible bubble
-        // let particle: Particle = this.weaponParticles.getPool().find((bubble: Particle) => { return !bubble.visible });
-        // if (bubble) {
-        //     // Bring this bubble to life
-        //     bubble.visible = true;
+        // Find the first visible particle
+        let particle: Particle = this.weaponParticles.getPool().find((bubble: Particle) => { return !bubble.visible });
+        if (particle) {
+            // Bring this bubble to life
+            particle.visible = true;
 
-        //     bubble.position = this.player.position.clone();
+            particle.position = this.player.position.clone();
 
-        //     bubble.setAIActive(true, { direction: direction });
-        // }
+            particle.setAIActive(true, { direction: direction });
+        }
     }
 
     // public handleScreenDespawn(node: CanvasNode): void {
