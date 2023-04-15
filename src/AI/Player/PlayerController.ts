@@ -104,11 +104,15 @@ export default class PlayerController extends StateMachineAI {
 
     public handleEvent(event: GameEvent): void{
         switch (event.type){
-            case 'ENEMY_COLLISION':
+            case 'ENEMY_COLLISION': {
                 if (!this.hit){
                     this.handlePlayerCollision(event);
+                    if (this.health <= 0){
+                        this.changeState(PlayerStates.DEAD);
+                    }
                 }
                 break;
+            }
             default:
                 throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
@@ -159,7 +163,6 @@ export default class PlayerController extends StateMachineAI {
         // When the health changes, fire an event up to the scene.
         // this.emitter.fireEvent(HW3Events.HEALTH_CHANGE, {curhp: this.health, maxhp: this.maxHealth});
         // If the health hit 0, change the state of the player
-        if (this.health === 0) { this.changeState(PlayerStates.DEAD); }
     }
 
     public get facing(): string { return this._facing; }
