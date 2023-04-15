@@ -15,6 +15,7 @@ import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
 import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import Color from "../Wolfie2D/Utils/Color";
 import Layer from "../Wolfie2D/Scene/Layer";
+import { GameEvents } from "../GameEvents";
 
 export const LevelLayers = {
     PRIMARY: "PRIMARY",
@@ -42,6 +43,7 @@ export default abstract class Level extends Scene {
     /** Attributes for the UI */
     // private healthLabel: Label;
     private healthBar: Label;
+    private healthBarBg: Label;
     // private resourceLabel: Label;
     private resourceBar: Label;
     private abilityBar: Label;
@@ -67,7 +69,7 @@ export default abstract class Level extends Scene {
             throw new Error("Missing tilemap key or scale");
         
         this.factory.tilemap(this.tilemapKey, this.tilemapScale);
-
+        
         // this.initWeapon();
 
         // TODO: this.initUI();
@@ -80,7 +82,11 @@ export default abstract class Level extends Scene {
         this.healthBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 60), "");
         this.healthBar.size = new Vec2(200, 25);
 		this.healthBar.backgroundColor = Color.GREEN;
-        this.healthBar.borderColor = Color.BLACK;
+
+        // HealthBar Border
+		this.healthBarBg = <Label>this.add.uiElement(UIElementType.LABEL, LevelLayers.UI, {position: new Vec2(125, 60), text: ""});
+		this.healthBarBg.size = new Vec2(200, 25);
+		this.healthBarBg.borderColor = Color.BLACK;
 
         // Resource Bar
         this.resourceBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 105), "");
@@ -143,6 +149,8 @@ export default abstract class Level extends Scene {
         // Fire events to start game (e.g. music)
 
         // Input.disableInput();
+
+        this.receiver.subscribe(GameEvents.UPDATE_HEALTH);
     }
 
     public updateScene(deltaT: number) {
@@ -164,4 +172,13 @@ export default abstract class Level extends Scene {
             }
         }
     }
+
+    protected handleHealthChange(currentHealth: number, maxHealth: number): void {
+		let unit = this.healthBarBg.size.x / maxHealth;
+
+		this.healthBar.size.set(this.healthBarBg.size.x - unit * (maxHealth - currentHealth), this.healthBarBg.size.y);
+		this.healthBar.position.set(this.healthBarBg.position.x - (unit / 2) * (maxHealth - currentHealth), this.healthBarBg.position.y);
+
+		this.healthBar.backgroundColor = currentHealth < maxHealth * 1/4 ? Color.RED: currentHealth < maxHealth * 3/4 ? Color.YELLOW : Color.GREEN;
+	}
 }

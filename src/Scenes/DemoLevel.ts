@@ -156,6 +156,7 @@ export default class DemoLevel extends Level {
             enemy.setGroup(PhysicsGroups.NPC);
             console.log(enemy);
             enemy.setTrigger(PhysicsGroups.WEAPON, 'ENEMY_HIT', null);
+            enemy.setTrigger(PhysicsGroups.PLAYER, 'ENEMY_COLLISION', null);
             enemy.navkey = "navmesh";
         
             // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
@@ -280,7 +281,9 @@ export default class DemoLevel extends Level {
         }
 
         for(let i = 0; i < this.allEnemies.length; i++){
-            if(this.allEnemies[i].visible) return
+            if(this.allEnemies[i].visible){
+                return;
+            }
         }
 
         this.sceneManager.changeToScene(MainMenu);
@@ -354,6 +357,13 @@ export default class DemoLevel extends Level {
                 console.log(event.data.get("direction"));
                 this.spawnBubble(event.data.get("direction"));
                 break;
+            }
+
+            case GameEvents.UPDATE_HEALTH: {
+                let currentHealth = event.data.get('currentHealth');
+				let maxHealth = event.data.get('maxHealth');
+				this.handleHealthChange(currentHealth, maxHealth);
+				break;
             }
 
             default:
@@ -435,5 +445,6 @@ export default class DemoLevel extends Level {
 
     protected subscribeToEvents(): void {
         this.receiver.subscribe(GameEvents.SKILL_1_FIRED);
+        this.receiver.subscribe(GameEvents.UPDATE_HEALTH);
     }
 }
