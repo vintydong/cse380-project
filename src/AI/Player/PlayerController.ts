@@ -57,7 +57,7 @@ export default class PlayerController extends StateMachineAI {
     protected _velocity: Vec2;
     protected _speed: number;
 
-    // protected weapon: PlayerWeapon;
+    // protected weapon: PlayerParticleSystem;
     protected tilemap: OrthogonalTilemap;
 
     public initializeAI(owner: AnimatedSprite, options: Record<string, any>) {

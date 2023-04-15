@@ -54,7 +54,7 @@ export default abstract class Level extends Scene {
     protected player: AnimatedSprite;
     protected playerSpawn: Vec2;
 
-    protected weaponParticles: PlayerWeapon;
+    protected weaponParticles: PlayerParticleSystem;
 
     /** Attributes for the UI */
     protected healthBar: Label;
@@ -271,7 +271,7 @@ export default abstract class Level extends Scene {
     protected initWeaponParticles(): void {
         // Init particle system of 50 particles
         const particle_size = 3;
-        this.weaponParticles = new PlayerWeapon(50, Vec2.ZERO, 3000, particle_size, 0, 50);
+        this.weaponParticles = new PlayerParticleSystem(50, Vec2.ZERO, 3000, particle_size, 0, 50);
         this.weaponParticles.initializePool(this, LevelLayers.PRIMARY);
 
         let pool = this.weaponParticles.getPool();
