@@ -75,3 +75,6 @@ dist/*
 !dist/builtin
 
 !dist/assets
+
+public/benchmark2
+public/benchmark3

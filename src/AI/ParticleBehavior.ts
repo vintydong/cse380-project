@@ -5,11 +5,7 @@ import Receiver from "../Wolfie2D/Events/Receiver";
 import Graphic from "../Wolfie2D/Nodes/Graphic";
 import MathUtils from "../Wolfie2D/Utils/MathUtils";
 
-/**
- * A class that represents the behavior of the bubbles in the HW2Scene
- * @author PeteyLumpkins
- */
-export default class BubbleBehavior implements AI {
+export default class ParticleBehavior implements AI {
     // The GameNode that owns this behavior
     private owner: Graphic;
     private receiver: Receiver;
@@ -32,7 +28,6 @@ export default class BubbleBehavior implements AI {
         this.owner = owner;
 
         this.receiver = new Receiver();
-        // this.receiver.subscribe(HW2Events.PLAYER_BUBBLE_COLLISION);
         this.receiver.subscribe('ENEMY_HIT');
 
         this.currentXSpeed = 50;
@@ -48,7 +43,7 @@ export default class BubbleBehavior implements AI {
     }
 
     public activate(options: Record<string, any>): void {
-        console.log(options);
+        // console.log(options);
         if (options) {
             this.direction = options.direction;
         }
@@ -57,7 +52,6 @@ export default class BubbleBehavior implements AI {
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
             case 'ENEMY_HIT':
-                // console.log(event.data);
                 let id = event.data.get('other');
                 if(id === this.owner.id){
                     this.owner.position.copy(Vec2.ZERO);
@@ -89,18 +83,9 @@ export default class BubbleBehavior implements AI {
 
             // Update position of the bubble - Scale up and move left
             let value = (this.direction == "left") ? Vec2.LEFT.scale(this.currentXSpeed* deltaT) : Vec2.RIGHT.scale(this.currentXSpeed* deltaT);
-            // console.log(value);
             this.owner.position.add(value);
         }
-    }
-
-    protected handlePlayerBubbleCollision(event: GameEvent): void {
-        let id = event.data.get("bubbleId");
-        if (id === this.owner.id) {
-            this.owner.position.copy(Vec2.ZERO);
-        }
-    }
-    
+    }    
 }
 
 

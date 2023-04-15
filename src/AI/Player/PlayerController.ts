@@ -61,6 +61,7 @@ export default class PlayerController extends StateMachineAI {
     protected _velocity: Vec2;
     protected _speed: number;
 
+    // protected weapon: PlayerParticleSystem;
     protected _facing: string;
     protected _dashTimer: Timer;
     protected _airDash: boolean;

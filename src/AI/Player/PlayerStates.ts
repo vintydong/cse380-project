@@ -1,4 +1,4 @@
-import { GameEvents } from "../../GameEvents";
+import { CustomGameEvents, MenuEvents } from "../../CustomGameEvents";
 import State from "../../Wolfie2D/DataTypes/State/State";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
@@ -56,7 +56,7 @@ export abstract class PlayerState extends State {
 
 export class Attack extends PlayerState {
     public onEnter(options: Record<string, any>): void {
-        this.emitter.fireEvent(GameEvents.SKILL_1_FIRED, {direction: this.parent.facing});
+        this.emitter.fireEvent(CustomGameEvents.SKILL_1_FIRED, {direction: this.parent.facing});
         this.owner.animation.play(PlayerAnimations.ATTACKING);
     }
 
