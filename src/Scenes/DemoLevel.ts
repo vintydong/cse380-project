@@ -23,8 +23,10 @@ import Help from "./Help";
 import MainMenu from "./MainMenu";
 import Graphic from "../Wolfie2D/Nodes/Graphic";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
+import BasicAttackShaderType from"../Shaders/BasicAttackShaderType";
 import BubbleShaderType from "../Shaders/BubbleShaderType";
 
+import BasicAttackAI from "../AI/BasicAttackBehavior";
 import BubbleAI from "../AI/BubbleBehavior";
 
 import { GameEvents } from "../GameEvents";
@@ -82,7 +84,8 @@ export default class DemoLevel extends Level {
     // public static readonly TILE_DESTROYED_KEY = "TILE_DESTROYED";
     // public static readonly TILE_DESTROYED_PATH = "hw4_assets/sounds/switch.wav";
 
-    // Object pool for bubbles
+    // Object pool for basic attacks and bubbles
+    private basicAttacks: Array<Graphic>;
 	private bubbles: Array<Graphic>;
     
     // The padding of the world
@@ -116,12 +119,19 @@ export default class DemoLevel extends Level {
         // Load in ability icons
         this.load.image(this.abilityIconsKey, DemoLevel.ABILITY_ICONS_PATH);
         
+        // Load in the shader for basic attack.
+        this.load.shader(
+            BasicAttackShaderType.KEY,
+            BasicAttackShaderType.VSHADER,
+            BasicAttackShaderType.FSHADER
+        );
+
         // Load in the shader for bubble.
-      this.load.shader(
-        BubbleShaderType.KEY,
-        BubbleShaderType.VSHADER,
-        BubbleShaderType.FSHADER
-      );
+        this.load.shader(
+            BubbleShaderType.KEY,
+            BubbleShaderType.VSHADER,
+            BubbleShaderType.FSHADER
+        );
 
         // Load in demo level enemies
         this.load.spritesheet(DemoLevel.ENEMY_SPRITE_KEY, DemoLevel.ENEMY_SPRITE_PATH);
@@ -279,6 +289,10 @@ export default class DemoLevel extends Level {
             this.handleEvent(this.receiver.getNextEvent());
         }
 
+        // Handle despawning of attacks
+        for (let basicAttack of this.basicAttacks) if (basicAttack.visible) this.handleScreenDespawn(basicAttack);
+        for (let bubble of this.bubbles) if (bubble.visible) this.handleScreenDespawn(bubble);
+
         for(let i = 0; i < this.allEnemies.length; i++){
             if(this.allEnemies[i].visible) return
         }
@@ -351,6 +365,11 @@ export default class DemoLevel extends Level {
                 break;
 
             case GameEvents.SKILL_1_FIRED: {
+                this.spawnBasicAttack(event.data.get("direction"));
+                break;
+            }
+
+            case GameEvents.SKILL_2_FIRED: {
                 console.log(event.data.get("direction"));
                 this.spawnBubble(event.data.get("direction"));
                 break;
@@ -380,12 +399,46 @@ export default class DemoLevel extends Level {
 	 * 
 	 * @see {@link https://gameprogrammingpatterns.com/object-pool.html Object-Pools} 
 	 */
-	protected initObjectPools(): void {
+    protected initObjectPools(): void {
+        // Init basic attack object pool
+        this.basicAttacks = new Array(10);
+        for (let i = 0; i < this.basicAttacks.length; i++) {
+            this.basicAttacks[i] = this.add.graphic(GraphicType.RECT, HW2Layers.PRIMARY, {position: new Vec2(0, 0), size: new Vec2(50, 100)});
+            
+            // Give the basic attacks a custom shader
+            this.basicAttacks[i].useCustomShader(BasicAttackShaderType.KEY);
+            this.basicAttacks[i].visible = false;
+            this.basicAttacks[i].color = Color.BLUE;
+
+            // Give the basic attacks AI
+            this.basicAttacks[i].addAI(BasicAttackAI);
+
+            // Give the basic attacks a collider
+            let collider = new Circle(Vec2.ZERO, 25);
+            this.basicAttacks[i].setCollisionShape(collider);
+            this.basicAttacks[i].addPhysics();
+            this.basicAttacks[i].setGroup(PhysicsGroups.WEAPON);
+            this.basicAttacks[i].setTrigger(PhysicsGroups.NPC, 'ENEMY_HIT', null);
+
+            // Add tween to particle
+            this.basicAttacks[i].tweens.add("fadeout", {
+                startDelay: 0,
+                duration: 200,
+                effects: [
+                    {
+                        property: "alpha",
+                        start: 1,
+                        end: 0,
+                        ease: EaseFunctionType.IN_OUT_SINE
+                    }
+                ]
+            });
+        }
 		
 		// Init bubble object pool
 		this.bubbles = new Array(10);
 		for (let i = 0; i < this.bubbles.length; i++) {
-			this.bubbles[i] = this.add.graphic(GraphicType.RECT, HW2Layers.PRIMARY, {position: new Vec2(0, 0), size: new Vec2(50, 50)});
+			this.bubbles[i] = this.add.graphic(GraphicType.RECT, HW2Layers.PRIMARY, {position: new Vec2(0, 0), size: new Vec2(100, 50)});
             
             // Give the bubbles a custom shader
 			this.bubbles[i].useCustomShader(BubbleShaderType.KEY);
@@ -404,6 +457,29 @@ export default class DemoLevel extends Level {
 		}
     }
 
+    protected spawnBasicAttack(direction: string): void {
+		// Find the first visible bubble
+		let basicAttack: Graphic = this.basicAttacks.find((basicAttack: Graphic) => { return !basicAttack.visible });
+        console.log("basicAttack:", basicAttack);
+		if (basicAttack){
+			// Bring this bubble to life
+			basicAttack.visible = true;
+            basicAttack.alpha = 1;
+
+            // Calculate bubble offset from player center
+            let newPosition = this.player.position.clone();
+            let xOffset = basicAttack.boundary.getHalfSize().x
+            newPosition.x += (direction == "left")? -1 * xOffset : xOffset;
+            basicAttack.position = newPosition;
+            // console.log("basicAttack",basicAttack.position.x);
+            // console.log("PLAYER",this.player.position.x);
+
+            // bubble.addAI(BubbleAI);
+			basicAttack.setAIActive(true, {direction: direction});
+            basicAttack.tweens.play("fadeout");
+		}
+	}
+
     protected spawnBubble(direction: string): void {
 		// Find the first visible bubble
 		let bubble: Graphic = this.bubbles.find((bubble: Graphic) => { return !bubble.visible });
@@ -412,7 +488,13 @@ export default class DemoLevel extends Level {
 			// Bring this bubble to life
 			bubble.visible = true;
 
-            bubble.position = this.player.position.clone();
+            // Calculate bubble offset from player center
+            let newPosition = this.player.position.clone();
+            let xOffset = bubble.boundary.getHalfSize().x
+            newPosition.x += (direction == "left")? -1 * xOffset : xOffset;
+            bubble.position = newPosition;
+            console.log("BUBBLE",bubble.position.x);
+            console.log("PLAYER",this.player.position.x);
 
             // bubble.addAI(BubbleAI);
 			bubble.setAIActive(true, {direction: direction});
@@ -421,13 +503,18 @@ export default class DemoLevel extends Level {
 
     public handleScreenDespawn(node: CanvasNode): void {
         // Extract the size of the viewport
-		let paddedViewportSize = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
+		// let paddedViewportSize = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
 		let viewportSize = this.viewport.getHalfSize().scaled(2);
-		
-		let leftBound = (paddedViewportSize.x - viewportSize.x) - (2 * this.worldPadding.x); 
-		let topBound = (paddedViewportSize.y - viewportSize.y) - (2 * this.worldPadding.y);
 
-		if(node.position.x < leftBound || node.position.y < topBound ) {
+        // Check if node is outside viewport
+        let padding = 100
+        let leftBound = 0 - padding
+        let topBound = 0 - padding
+        let rightBound = viewportSize.x + padding
+        let botBound = viewportSize.y + padding
+        let outOfBounds = node.position.x < leftBound || node.position.y < topBound || node.position.x > rightBound || node.position.y > botBound
+
+		if(outOfBounds || node.alpha == 0) {
 			node.position.copy(Vec2.ZERO);
 			node.visible = false;
 		}
@@ -435,5 +522,6 @@ export default class DemoLevel extends Level {
 
     protected subscribeToEvents(): void {
         this.receiver.subscribe(GameEvents.SKILL_1_FIRED);
+        this.receiver.subscribe(GameEvents.SKILL_2_FIRED);
     }
 }
