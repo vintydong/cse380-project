@@ -7,6 +7,13 @@ import { PlayerControls, PlayerStates } from "../Player/PlayerController";
 import { Attack, Dash, Dead, Fall, Idle, Jump, Walk } from "./EnemyStates";
 import demoEnemyActor from "./demoEnemyActor";
 
+export enum EnemyAnimations {
+    IDLE = "IDLE",
+    RUNNING_LEFT = "RUNNING_LEFT",
+    RUNNING_RIGHT = "RUNNING_RIGHT",
+    TAKING_DAMAGE = "TAKING_DAMAGE",
+    DEAD = "DEAD",    
+}
 
 export default class demoEnemyController extends StateMachineAI  {
 

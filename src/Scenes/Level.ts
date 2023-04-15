@@ -1,29 +1,27 @@
+import ParticleBehavior from "../AI/ParticleBehavior";
+import PlayerController from "../AI/Player/PlayerController";
+import PlayerParticleSystem from "../AI/Player/PlayerParticleSystem";
+import { CustomGameEvent, CustomGameEvents, MenuEvent, MenuEvents } from "../CustomGameEvents";
 import CustomFactoryManager from "../Factory/CustomFactoryManager";
+import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
+import ParticleShaderType from "../Shaders/ParticleShaderType";
+import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
+import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import Input from "../Wolfie2D/Input/Input";
+import Particle from "../Wolfie2D/Nodes/Graphics/Particle";
 import AnimatedSprite from "../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Label from "../Wolfie2D/Nodes/UIElements/Label";
+import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
-import FactoryManager from "../Wolfie2D/Scene/Factories/FactoryManager";
+import Layer from "../Wolfie2D/Scene/Layer";
 import Scene from "../Wolfie2D/Scene/Scene";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
-import PlayerController from "../AI/Player/PlayerController";
-import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
-import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
-import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import Color from "../Wolfie2D/Utils/Color";
-import Layer from "../Wolfie2D/Scene/Layer";
-import PlayerParticleSystem from "../AI/Player/PlayerParticleSystem";
-import ParticleShaderType from "../Shaders/ParticleShaderType";
-import ParticleBehavior from "../AI/ParticleBehavior";
-import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
-import Particle from "../Wolfie2D/Nodes/Graphics/Particle";
-import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
-import { LayerManager } from "./LayerManager";
-import { CustomGameEvent, CustomGameEvents, MenuEvent, MenuEvents } from "../CustomGameEvents";
 import DemoLevel from "./DemoLevel";
+import { LayerManager } from "./LayerManager";
 import MainMenu from "./MainMenu";
 
 export const LevelLayers = {
@@ -62,6 +60,8 @@ export default abstract class Level extends Scene {
 
     /** Attributes for the UI */
     protected healthBar: Label;
+    protected healthBarBg: Label;
+
     protected resourceBar: Label;
     protected abilityBar: Label;    
 
@@ -145,6 +145,7 @@ export default abstract class Level extends Scene {
         this.receiver.subscribe(CustomGameEvents.SKILL_2_FIRED);
         this.receiver.subscribe(CustomGameEvents.SKILL_3_FIRED);
         this.receiver.subscribe(CustomGameEvents.SKILL_4_FIRED);
+        this.receiver.subscribe(CustomGameEvents.UPDATE_HEALTH);
 
         this.receiver.subscribe(MenuEvents.RESUME);
         this.receiver.subscribe(MenuEvents.PAUSE);
@@ -236,8 +237,12 @@ export default abstract class Level extends Scene {
 
         this.healthBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 60), "");
         this.healthBar.size = new Vec2(200, 25);
-        this.healthBar.backgroundColor = Color.GREEN;
-        this.healthBar.borderColor = Color.BLACK;
+		this.healthBar.backgroundColor = Color.GREEN;
+
+        // HealthBar Border
+		this.healthBarBg = <Label>this.add.uiElement(UIElementType.LABEL, LevelLayers.UI, {position: new Vec2(125, 60), text: ""});
+		this.healthBarBg.size = new Vec2(200, 25);
+		this.healthBarBg.borderColor = Color.BLACK;
 
         // Resource Bar
         this.resourceBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 105), "");
@@ -324,4 +329,13 @@ export default abstract class Level extends Scene {
     //         node.visible = false;
     //     }
     // }
+
+    protected handleHealthChange(currentHealth: number, maxHealth: number): void {
+		let unit = this.healthBarBg.size.x / maxHealth;
+
+		this.healthBar.size.set(this.healthBarBg.size.x - unit * (maxHealth - currentHealth), this.healthBarBg.size.y);
+		this.healthBar.position.set(this.healthBarBg.position.x - (unit / 2) * (maxHealth - currentHealth), this.healthBarBg.position.y);
+
+		this.healthBar.backgroundColor = currentHealth < maxHealth * 1/4 ? Color.RED: currentHealth < maxHealth * 3/4 ? Color.YELLOW : Color.GREEN;
+	}
 }

@@ -10,6 +10,7 @@ import Level, { LevelLayers } from "./Level";
 import ParticleShaderType from "../Shaders/ParticleShaderType";
 import { LayerManager } from "./LayerManager";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
+import { CustomGameEvents } from "../CustomGameEvents";
 
 export default class DemoLevel extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "DEMO_ENEMY_KEY";
@@ -85,6 +86,7 @@ export default class DemoLevel extends Level {
             enemy.addPhysics(new Circle(enemy.position, 16));
             enemy.setGroup(PhysicsGroups.NPC);
             enemy.setTrigger(PhysicsGroups.WEAPON, 'ENEMY_HIT', null);
+            enemy.setTrigger(PhysicsGroups.PLAYER, 'ENEMY_COLLISION', null);
             enemy.navkey = "navmesh";
 
             // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
@@ -112,6 +114,20 @@ export default class DemoLevel extends Level {
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
             // Let Level.ts handle it by default
+
+            case CustomGameEvents.SKILL_1_FIRED: {
+                console.log(event.data.get("direction"));
+                this.spawnBubble(event.data.get("direction"));
+                break;
+            }
+
+            case CustomGameEvents.UPDATE_HEALTH: {
+                let currentHealth = event.data.get('currentHealth');
+				let maxHealth = event.data.get('maxHealth');
+				this.handleHealthChange(currentHealth, maxHealth);
+				break;
+            }
+
             default:
                 super.handleEvent(event);
                 break;

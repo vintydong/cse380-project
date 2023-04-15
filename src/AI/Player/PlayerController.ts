@@ -1,8 +1,11 @@
+import { GameEvents } from "../../GameEvents";
 import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
+import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Input from "../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
+import Timer from "../../Wolfie2D/Timing/Timer";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 import { Attack, Dash, Dead, Fall, Idle, Jump, Walk } from './PlayerStates';
 
@@ -37,17 +40,18 @@ export enum PlayerStates {
 
 export enum PlayerAnimations {
     IDLE = "IDLE",
-    RUNNING_LEFT = "RUNNING_LEFT",
-    RUNNING_RIGHT = "RUNNING_RIGHT",
-    ATTACKING_LEFT = "ATTACKING_LEFT",
-    ATTACKING_RIGHT = "ATTACKING_RIGHT",
+    RUNNING = "RUNNING",
+    JUMPING = "JUMPING",
+    FALLING = "FALLING",
+    DASH = "DASH",
+    ATTACKING = "ATTACKING",
     TAKING_DAMAGE = "TAKING_DAMAGE",
     DEAD = "DEAD",    
 }
 
 export default class PlayerController extends StateMachineAI {
     public readonly MAX_SPEED: number = 200;
-    public readonly MIN_SPEED: number = 100;
+    public readonly MIN_SPEED: number = 175;
 
     protected owner: AnimatedSprite;
 
@@ -58,6 +62,14 @@ export default class PlayerController extends StateMachineAI {
     protected _speed: number;
 
     // protected weapon: PlayerParticleSystem;
+    protected _facing: string;
+    protected _dashTimer: Timer;
+    protected _airDash: boolean;
+
+    protected _iFrameTimer: Timer;
+    protected hit: boolean;
+
+    // protected weapon: PlayerWeapon;
     protected tilemap: OrthogonalTilemap;
 
     public initializeAI(owner: AnimatedSprite, options: Record<string, any>) {
@@ -72,6 +84,11 @@ export default class PlayerController extends StateMachineAI {
         this.health = 100;
         this.maxHealth = 100;
 
+        this.dashTimer = new Timer(600);
+        this._airDash = true;
+
+        this._iFrameTimer = new Timer(1000, this.handleIFrameTimerEnd, false);
+
         // Add the different states the player can be in to the PlayerController 
         this.addState(PlayerStates.ATTACKING, new Attack(this, this.owner));
         this.addState(PlayerStates.DASH, new Dash(this, this.owner));
@@ -81,7 +98,25 @@ export default class PlayerController extends StateMachineAI {
         this.addState(PlayerStates.JUMP, new Jump(this, this.owner));
 		this.addState(PlayerStates.WALK, new Walk(this, this.owner));
 
+        this.receiver.subscribe('ENEMY_COLLISION');
+
         this.initialize(PlayerStates.IDLE);
+    }
+
+    public handleEvent(event: GameEvent): void{
+        switch (event.type){
+            case 'ENEMY_COLLISION': {
+                if (!this.hit){
+                    this.handlePlayerCollision(event);
+                    if (this.health <= 0){
+                        this.changeState(PlayerStates.DEAD);
+                    }
+                }
+                break;
+            }
+            default:
+                throw new Error(`Event handler not implemented for event type ${event.type}`)
+        }
     }
 
     /**
@@ -129,6 +164,32 @@ export default class PlayerController extends StateMachineAI {
         // When the health changes, fire an event up to the scene.
         // this.emitter.fireEvent(HW3Events.HEALTH_CHANGE, {curhp: this.health, maxhp: this.maxHealth});
         // If the health hit 0, change the state of the player
-        if (this.health === 0) { this.changeState(PlayerStates.DEAD); }
     }
+
+    public get facing(): string { return this._facing; }
+    public set facing(facing: string) { this._facing = facing; }
+
+    public get dashTimer(): Timer { return this._dashTimer; }
+    public set dashTimer(Timer: Timer) { this._dashTimer = Timer; }
+
+    public get airDash(): boolean { return this._airDash; }
+    public set airDash(airDash: boolean) { this._airDash = airDash; }
+
+    public handlePlayerCollision(event): void{
+        if (this._iFrameTimer.isStopped){
+			this.health -= 10;
+			this.owner.animation.playIfNotAlready(PlayerAnimations.TAKING_DAMAGE, false);
+            this.emitter.fireEvent(GameEvents.UPDATE_HEALTH, {
+				currentHealth: this.health,
+				maxHealth: this.maxHealth
+			});
+			this._iFrameTimer.start();
+			this.hit = true;
+		}
+    }
+
+    protected handleIFrameTimerEnd = () => {
+		this.owner.animation.playIfNotAlready(PlayerAnimations.IDLE, false);
+		this.hit = false;
+	}
 }

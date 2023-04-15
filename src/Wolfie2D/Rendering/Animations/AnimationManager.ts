@@ -137,7 +137,9 @@ export default class AnimationManager {
 
     /** Ends the current animation and fires any necessary events, as well as starting any new animations */
     protected endCurrentAnimation(): void {
-        this.currentFrame = 0;
+        // Repeat last frame of currently finished animation instead of the first frame
+        let currentAnimation = this.animations.get(this.currentAnimation);
+        this.currentFrame = currentAnimation.frames.length - 1;
         this.animationState = AnimationState.STOPPED;
 
         if(this.onEndEvent !== null){
