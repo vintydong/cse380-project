@@ -1,15 +1,20 @@
+import BasicAttack from "../AI/BasicAttackBehavior";
 import ParticleBehavior from "../AI/ParticleBehavior";
 import PlayerController from "../AI/Player/PlayerController";
 import PlayerParticleSystem from "../AI/Player/PlayerParticleSystem";
 import { CustomGameEvent, CustomGameEvents, MenuEvent, MenuEvents } from "../CustomGameEvents";
 import CustomFactoryManager from "../Factory/CustomFactoryManager";
 import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
+import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
 import ParticleShaderType from "../Shaders/ParticleShaderType";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import Input from "../Wolfie2D/Input/Input";
+import CanvasNode from "../Wolfie2D/Nodes/CanvasNode";
+import Graphic from "../Wolfie2D/Nodes/Graphic";
+import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Particle from "../Wolfie2D/Nodes/Graphics/Particle";
 import AnimatedSprite from "../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Label from "../Wolfie2D/Nodes/UIElements/Label";
@@ -20,6 +25,7 @@ import Scene from "../Wolfie2D/Scene/Scene";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Color from "../Wolfie2D/Utils/Color";
+import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
 import DemoLevel from "./DemoLevel";
 import { LayerManager } from "./LayerManager";
 import MainMenu from "./MainMenu";
@@ -57,6 +63,9 @@ export default abstract class Level extends Scene {
     protected playerSpawn: Vec2;
 
     protected weaponParticles: PlayerParticleSystem;
+    // Object pool for basic attacks and bubbles
+    protected basicAttacks: Array<Graphic>;
+	protected bubbles: Array<Graphic>;
 
     /** Attributes for the UI */
     protected healthBar: Label;
@@ -107,6 +116,7 @@ export default abstract class Level extends Scene {
         this.factory.tilemap(this.tilemapKey, this.tilemapScale);
 
         this.initWeaponParticles();
+        this.initObjectPools();
 
         // Initialize UI layer components such as health bar, ability bar, etc.
         this.initUI();
@@ -303,6 +313,43 @@ export default abstract class Level extends Scene {
         }
     }
 
+    protected initObjectPools(): void {
+        // Init basic attack object pool
+        this.basicAttacks = new Array(10);
+        for (let i = 0; i < this.basicAttacks.length; i++) {
+            this.basicAttacks[i] = this.add.graphic(GraphicType.RECT, LevelLayers.PRIMARY, {position: new Vec2(0, 0), size: new Vec2(50, 100)});
+            
+            // Give the basic attacks a custom shader
+            this.basicAttacks[i].useCustomShader(BasicAttackShaderType.KEY);
+            this.basicAttacks[i].visible = false;
+            this.basicAttacks[i].color = Color.BLUE;
+
+            // Give the basic attacks AI
+            this.basicAttacks[i].addAI(BasicAttack);
+
+            // Give the basic attacks a collider
+            let collider = new Circle(Vec2.ZERO, 25);
+            this.basicAttacks[i].setCollisionShape(collider);
+            this.basicAttacks[i].addPhysics();
+            this.basicAttacks[i].setGroup(PhysicsGroups.WEAPON);
+            this.basicAttacks[i].setTrigger(PhysicsGroups.NPC, 'ENEMY_HIT', null);
+
+            // Add tween to particle
+            this.basicAttacks[i].tweens.add("fadeout", {
+                startDelay: 0,
+                duration: 200,
+                effects: [
+                    {
+                        property: "alpha",
+                        start: 1,
+                        end: 0,
+                        ease: EaseFunctionType.IN_OUT_SINE
+                    }
+                ]
+            });
+        }
+    }
+
     protected spawnBubble(direction: string): void {
         // Find the first visible particle
         let particle: Particle = this.weaponParticles.getPool().find((bubble: Particle) => { return !bubble.visible });
@@ -316,19 +363,47 @@ export default abstract class Level extends Scene {
         }
     }
 
-    // public handleScreenDespawn(node: CanvasNode): void {
-    //     // Extract the size of the viewport
-    //     let paddedViewportSize = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
-    //     let viewportSize = this.viewport.getHalfSize().scaled(2);
+    protected spawnBasicAttack(direction: string): void {
+		// Find the first visible bubble
+		let basicAttack: Graphic = this.basicAttacks.find((basicAttack: Graphic) => { return !basicAttack.visible });
+        console.log("basicAttack:", basicAttack);
+		if (basicAttack){
+			// Bring this bubble to life
+			basicAttack.visible = true;
+            basicAttack.alpha = 1;
 
-    //     let leftBound = (paddedViewportSize.x - viewportSize.x) - (2 * this.worldPadding.x);
-    //     let topBound = (paddedViewportSize.y - viewportSize.y) - (2 * this.worldPadding.y);
+            // Calculate bubble offset from player center
+            let newPosition = this.player.position.clone();
+            let xOffset = basicAttack.boundary.getHalfSize().x
+            newPosition.x += (direction == "left")? -1 * xOffset : xOffset;
+            basicAttack.position = newPosition;
+            // console.log("basicAttack",basicAttack.position.x);
+            // console.log("PLAYER",this.player.position.x);
 
-    //     if (node.position.x < leftBound || node.position.y < topBound) {
-    //         node.position.copy(Vec2.ZERO);
-    //         node.visible = false;
-    //     }
-    // }
+            // bubble.addAI(BubbleAI);
+			basicAttack.setAIActive(true, {direction: direction});
+            basicAttack.tweens.play("fadeout");
+		}
+	}
+
+    public handleScreenDespawn(node: CanvasNode): void {
+        // Extract the size of the viewport
+		// let paddedViewportSize = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
+		let viewportSize = this.viewport.getHalfSize().scaled(2);
+
+        // Check if node is outside viewport
+        let padding = 100
+        let leftBound = 0 - padding
+        let topBound = 0 - padding
+        let rightBound = viewportSize.x + padding
+        let botBound = viewportSize.y + padding
+        let outOfBounds = node.position.x < leftBound || node.position.y < topBound || node.position.x > rightBound || node.position.y > botBound
+
+		if(outOfBounds || node.alpha == 0) {
+			node.position.copy(Vec2.ZERO);
+			node.visible = false;
+		}
+	}
 
     protected handleHealthChange(currentHealth: number, maxHealth: number): void {
 		let unit = this.healthBarBg.size.x / maxHealth;

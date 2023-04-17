@@ -38,10 +38,6 @@ export default class DemoLevel extends Level {
 
     // public static readonly TILE_DESTROYED_KEY = "TILE_DESTROYED";
     // public static readonly TILE_DESTROYED_PATH = "hw4_assets/sounds/switch.wav";
-
-    // Object pool for basic attacks and bubbles
-    private basicAttacks: Array<Graphic>;
-	private bubbles: Array<Graphic>;
     
     // The padding of the world
 	private worldPadding: Vec2;
@@ -131,7 +127,7 @@ export default class DemoLevel extends Level {
 
         // Handle despawning of attacks
         for (let basicAttack of this.basicAttacks) if (basicAttack.visible) this.handleScreenDespawn(basicAttack);
-        for (let bubble of this.bubbles) if (bubble.visible) this.handleScreenDespawn(bubble);
+        // for (let bubble of this.bubbles) if (bubble.visible) this.handleScreenDespawn(bubble);
 
         let allEnemiesDefeated = true
         for(let i = 0; i < this.enemies.length; i++){
@@ -177,83 +173,4 @@ export default class DemoLevel extends Level {
                 // throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
     }
-
-    protected initObjectPools(): void {
-        // Init basic attack object pool
-        this.basicAttacks = new Array(10);
-        for (let i = 0; i < this.basicAttacks.length; i++) {
-            this.basicAttacks[i] = this.add.graphic(GraphicType.RECT, LevelLayers.PRIMARY, {position: new Vec2(0, 0), size: new Vec2(50, 100)});
-            
-            // Give the basic attacks a custom shader
-            this.basicAttacks[i].useCustomShader(BasicAttackShaderType.KEY);
-            this.basicAttacks[i].visible = false;
-            this.basicAttacks[i].color = Color.BLUE;
-
-            // Give the basic attacks AI
-            this.basicAttacks[i].addAI(BasicAttack);
-
-            // Give the basic attacks a collider
-            let collider = new Circle(Vec2.ZERO, 25);
-            this.basicAttacks[i].setCollisionShape(collider);
-            this.basicAttacks[i].addPhysics();
-            this.basicAttacks[i].setGroup(PhysicsGroups.WEAPON);
-            this.basicAttacks[i].setTrigger(PhysicsGroups.NPC, 'ENEMY_HIT', null);
-
-            // Add tween to particle
-            this.basicAttacks[i].tweens.add("fadeout", {
-                startDelay: 0,
-                duration: 200,
-                effects: [
-                    {
-                        property: "alpha",
-                        start: 1,
-                        end: 0,
-                        ease: EaseFunctionType.IN_OUT_SINE
-                    }
-                ]
-            });
-        }
-    }
-
-    protected spawnBasicAttack(direction: string): void {
-		// Find the first visible bubble
-		let basicAttack: Graphic = this.basicAttacks.find((basicAttack: Graphic) => { return !basicAttack.visible });
-        console.log("basicAttack:", basicAttack);
-		if (basicAttack){
-			// Bring this bubble to life
-			basicAttack.visible = true;
-            basicAttack.alpha = 1;
-
-            // Calculate bubble offset from player center
-            let newPosition = this.player.position.clone();
-            let xOffset = basicAttack.boundary.getHalfSize().x
-            newPosition.x += (direction == "left")? -1 * xOffset : xOffset;
-            basicAttack.position = newPosition;
-            // console.log("basicAttack",basicAttack.position.x);
-            // console.log("PLAYER",this.player.position.x);
-
-            // bubble.addAI(BubbleAI);
-			basicAttack.setAIActive(true, {direction: direction});
-            basicAttack.tweens.play("fadeout");
-		}
-	}
-
-    public handleScreenDespawn(node: CanvasNode): void {
-        // Extract the size of the viewport
-		// let paddedViewportSize = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
-		let viewportSize = this.viewport.getHalfSize().scaled(2);
-
-        // Check if node is outside viewport
-        let padding = 100
-        let leftBound = 0 - padding
-        let topBound = 0 - padding
-        let rightBound = viewportSize.x + padding
-        let botBound = viewportSize.y + padding
-        let outOfBounds = node.position.x < leftBound || node.position.y < topBound || node.position.x > rightBound || node.position.y > botBound
-
-		if(outOfBounds || node.alpha == 0) {
-			node.position.copy(Vec2.ZERO);
-			node.visible = false;
-		}
-	}
 }
