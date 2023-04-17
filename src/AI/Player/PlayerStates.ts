@@ -56,7 +56,7 @@ export abstract class PlayerState extends State {
 
 export class Attack extends PlayerState {
     public onEnter(options: Record<string, any>): void {
-        this.emitter.fireEvent(CustomGameEvents.SKILL_1_FIRED, {direction: this.parent.facing});
+        this.emitter.fireEvent(options.skillFired, {direction: this.parent.facing});
         this.owner.animation.play(PlayerAnimations.ATTACKING);
     }
 
@@ -70,8 +70,8 @@ export class Attack extends PlayerState {
             this.finished(PlayerStates.JUMP);
         else if (Input.isJustPressed(PlayerControls.DASH) && this.parent.dashTimer.isStopped())
             this.finished(PlayerStates.DASH);
-        else if (Input.isJustPressed(PlayerControls.SKILL_ONE))
-            this.finished(PlayerStates.ATTACKING);
+        // else if (Input.isJustPressed(PlayerControls.SKILL_ONE))
+        //     this.finished(PlayerStates.ATTACKING);
 
         // Go idle after animation finishes
         if (!this.owner.animation.isPlaying(PlayerAnimations.ATTACKING)) {
@@ -112,7 +112,7 @@ export class Dash extends PlayerState {
             return;
         }
 
-        if (Input.isJustPressed(PlayerControls.MOVE_UP))
+        if (Input.isPressed(PlayerControls.MOVE_UP))
             this.finished(PlayerStates.JUMP)
         else if (!this.owner.onGround && this.parent.velocity.y !== 0) {
             this.finished(PlayerStates.FALL);
@@ -178,6 +178,7 @@ export class Fall extends PlayerState {
 }
 
 export class Idle extends PlayerState {
+    skillFired = "";
     public onEnter(options: Record<string, any>): void {        
         this.parent.speed = this.parent.MIN_SPEED;
         this.parent.velocity.x = 0;
@@ -197,8 +198,15 @@ export class Idle extends PlayerState {
             this.finished(PlayerStates.JUMP);
         else if (Input.isJustPressed(PlayerControls.DASH) && this.parent.dashTimer.isStopped())
             this.finished(PlayerStates.DASH);
-        else if (Input.isJustPressed(PlayerControls.SKILL_ONE))
+        else if (Input.isJustPressed(PlayerControls.SKILL_ONE) || Input.isJustPressed(PlayerControls.SKILL_TWO)){
+            if (Input.isJustPressed(PlayerControls.SKILL_ONE)){
+                this.skillFired = CustomGameEvents.SKILL_1_FIRED
+            }
+            else if (Input.isJustPressed(PlayerControls.SKILL_TWO)){
+                this.skillFired = CustomGameEvents.SKILL_2_FIRED
+            }
             this.finished(PlayerStates.ATTACKING);
+        }
         else if (!this.owner.onGround && this.parent.velocity.y > 0)
             this.finished(PlayerStates.FALL);
         else {
@@ -209,7 +217,7 @@ export class Idle extends PlayerState {
 
     public onExit(): Record<string, any> {
         this.owner.animation.stop();
-        return {};
+        return {skillFired: this.skillFired};
     }
 }
 
@@ -256,6 +264,7 @@ export class Jump extends PlayerState {
 }
 
 export class Walk extends PlayerState {
+    skillFired = "";
     public onEnter(options: Record<string, any>): void {        
         this.parent.speed = this.parent.MIN_SPEED;
         this.owner.animation.play(PlayerAnimations.RUNNING);
@@ -273,8 +282,15 @@ export class Walk extends PlayerState {
             this.finished(PlayerStates.JUMP)
         else if (Input.isJustPressed(PlayerControls.DASH) && this.parent.dashTimer.isStopped())
             this.finished(PlayerStates.DASH);
-        else if (Input.isJustPressed(PlayerControls.SKILL_ONE))
+        else if (Input.isJustPressed(PlayerControls.SKILL_ONE) || Input.isJustPressed(PlayerControls.SKILL_TWO)){
+            if (Input.isJustPressed(PlayerControls.SKILL_ONE)){
+                this.skillFired = CustomGameEvents.SKILL_1_FIRED
+            }
+            else if (Input.isJustPressed(PlayerControls.SKILL_TWO)){
+                this.skillFired = CustomGameEvents.SKILL_2_FIRED
+            }
             this.finished(PlayerStates.ATTACKING);
+        }
         else if (!this.owner.onGround && this.parent.velocity.y !== 0) {
             this.finished(PlayerStates.FALL);
         } else {
@@ -287,6 +303,6 @@ export class Walk extends PlayerState {
 
     public onExit(): Record<string, any> {
         this.owner.animation.stop();
-        return {};
+        return {skillFired: this.skillFired};
     }
 }

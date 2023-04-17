@@ -5,6 +5,7 @@ import { PlayerControls } from "./AI/Player/PlayerController";
 import SplashScreen from "./Scenes/SplashScreen";
 
 import ParticleShaderType from "./Shaders/ParticleShaderType"
+import BasicAttackShaderType from "./Shaders/BasicAttackShaderType";
 
 // The main function is your entrypoint into Wolfie2D. Specify your first scene and any options here.
 (function main(){
@@ -34,6 +35,13 @@ import ParticleShaderType from "./Shaders/ParticleShaderType"
     // The registry essentially just ensures that we can locate items by name later, rather than needing
     // the class constructor. Here, we additionally make sure to preload the data so our
     // shader is available throughout the application
+    RegistryManager.shaders.registerAndPreloadItem(
+        BasicAttackShaderType.KEY,   // The key of the shader program
+        BasicAttackShaderType,           // The constructor of the shader program
+        BasicAttackShaderType.VSHADER,   // The path to the vertex shader
+        BasicAttackShaderType.FSHADER  // the path to the fragment shader*/
+    );
+
     RegistryManager.shaders.registerAndPreloadItem(
         ParticleShaderType.KEY,   // The key of the shader program
         ParticleShaderType,           // The constructor of the shader program
