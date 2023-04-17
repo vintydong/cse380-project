@@ -1,5 +1,8 @@
+import { CustomGameEvents } from "../../CustomGameEvents";
+import { PhysicsGroups } from "../../Physics";
 import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
+import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Input from "../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
@@ -59,9 +62,13 @@ export default class PlayerController extends StateMachineAI {
     protected _velocity: Vec2;
     protected _speed: number;
 
+    // protected weapon: PlayerParticleSystem;
     protected _facing: string;
     protected _dashTimer: Timer;
     protected _airDash: boolean;
+
+    protected _iFrameTimer: Timer;
+    protected hit: boolean;
 
     // protected weapon: PlayerWeapon;
     protected tilemap: OrthogonalTilemap;
@@ -81,6 +88,8 @@ export default class PlayerController extends StateMachineAI {
         this.dashTimer = new Timer(600);
         this._airDash = true;
 
+        this._iFrameTimer = new Timer(1000, this.handleIFrameTimerEnd, false);
+
         // Add the different states the player can be in to the PlayerController 
         this.addState(PlayerStates.ATTACKING, new Attack(this, this.owner));
         this.addState(PlayerStates.DASH, new Dash(this, this.owner));
@@ -90,7 +99,25 @@ export default class PlayerController extends StateMachineAI {
         this.addState(PlayerStates.JUMP, new Jump(this, this.owner));
 		this.addState(PlayerStates.WALK, new Walk(this, this.owner));
 
+        this.receiver.subscribe('ENEMY_COLLISION');
+
         this.initialize(PlayerStates.IDLE);
+    }
+
+    public handleEvent(event: GameEvent): void{
+        switch (event.type){
+            case 'ENEMY_COLLISION': {
+                if (!this.hit){
+                    this.handlePlayerCollision(event);
+                    if (this.health <= 0){
+                        this.changeState(PlayerStates.DEAD);
+                    }
+                }
+                break;
+            }
+            default:
+                throw new Error(`Event handler not implemented for event type ${event.type}`)
+        }
     }
 
     /**
@@ -138,7 +165,6 @@ export default class PlayerController extends StateMachineAI {
         // When the health changes, fire an event up to the scene.
         // this.emitter.fireEvent(HW3Events.HEALTH_CHANGE, {curhp: this.health, maxhp: this.maxHealth});
         // If the health hit 0, change the state of the player
-        if (this.health === 0) { this.changeState(PlayerStates.DEAD); }
     }
 
     public get facing(): string { return this._facing; }
@@ -149,4 +175,22 @@ export default class PlayerController extends StateMachineAI {
 
     public get airDash(): boolean { return this._airDash; }
     public set airDash(airDash: boolean) { this._airDash = airDash; }
+
+    public handlePlayerCollision(event): void{
+        if (this._iFrameTimer.isStopped){
+			this.health -= 10;
+			this.owner.animation.playIfNotAlready(PlayerAnimations.TAKING_DAMAGE, false);
+            this.emitter.fireEvent(CustomGameEvents.UPDATE_HEALTH, {
+				currentHealth: this.health,
+				maxHealth: this.maxHealth
+			});
+			this._iFrameTimer.start();
+			this.hit = true;
+		}
+    }
+
+    protected handleIFrameTimerEnd = () => {
+		// this.owner.animation.playIfNotAlready(PlayerAnimations.IDLE, false);
+		this.hit = false;
+	}
 }

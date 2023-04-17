@@ -1,4 +1,4 @@
-import { GameEvents } from "../../GameEvents";
+import { CustomGameEvents, MenuEvents } from "../../CustomGameEvents";
 import State from "../../Wolfie2D/DataTypes/State/State";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
@@ -200,10 +200,10 @@ export class Idle extends PlayerState {
             this.finished(PlayerStates.DASH);
         else if (Input.isJustPressed(PlayerControls.SKILL_ONE) || Input.isJustPressed(PlayerControls.SKILL_TWO)){
             if (Input.isJustPressed(PlayerControls.SKILL_ONE)){
-                this.skillFired = GameEvents.SKILL_1_FIRED
+                this.skillFired = CustomGameEvents.SKILL_1_FIRED
             }
             else if (Input.isJustPressed(PlayerControls.SKILL_TWO)){
-                this.skillFired = GameEvents.SKILL_2_FIRED
+                this.skillFired = CustomGameEvents.SKILL_2_FIRED
             }
             this.finished(PlayerStates.ATTACKING);
         }
@@ -284,10 +284,10 @@ export class Walk extends PlayerState {
             this.finished(PlayerStates.DASH);
         else if (Input.isJustPressed(PlayerControls.SKILL_ONE) || Input.isJustPressed(PlayerControls.SKILL_TWO)){
             if (Input.isJustPressed(PlayerControls.SKILL_ONE)){
-                this.skillFired = GameEvents.SKILL_1_FIRED
+                this.skillFired = CustomGameEvents.SKILL_1_FIRED
             }
             else if (Input.isJustPressed(PlayerControls.SKILL_TWO)){
-                this.skillFired = GameEvents.SKILL_2_FIRED
+                this.skillFired = CustomGameEvents.SKILL_2_FIRED
             }
             this.finished(PlayerStates.ATTACKING);
         }

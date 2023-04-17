@@ -35,7 +35,6 @@ export default class MainMenu extends Scene {
      */
     public startScene(): void {
         const center = this.viewport.getCenter();
-        console.log(center.x , center.y);
         const {x: halfX, y: halfY} = this.viewport.getHalfSize();
 
         /** Main Menu Layer */
