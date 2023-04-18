@@ -151,7 +151,7 @@ export default class DemoLevel extends Level {
             // Let Level.ts handle it by default
 
             case CustomGameEvents.SKILL_1_FIRED: {
-                this.spawnBasicAttack(event.data.get("direction"));
+                this.spawnBasicAttack(event.data.get("direction"), event.data.get("offset"));
                 break;
             }
 

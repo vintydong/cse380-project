@@ -317,7 +317,7 @@ export default abstract class Level extends Scene {
         // Init basic attack object pool
         this.basicAttacks = new Array(10);
         for (let i = 0; i < this.basicAttacks.length; i++) {
-            this.basicAttacks[i] = this.add.graphic(GraphicType.RECT, LevelLayers.PRIMARY, {position: new Vec2(0, 0), size: new Vec2(50, 100)});
+            this.basicAttacks[i] = this.add.graphic(GraphicType.RECT, LevelLayers.PRIMARY, {position: new Vec2(0, 0), size: new Vec2(75, 100)});
             
             // Give the basic attacks a custom shader
             this.basicAttacks[i].useCustomShader(BasicAttackShaderType.KEY);
@@ -363,24 +363,22 @@ export default abstract class Level extends Scene {
         }
     }
 
-    protected spawnBasicAttack(direction: string): void {
-		// Find the first visible bubble
+    protected spawnBasicAttack(direction: string, movementOffset?: number): void {
+		// Find the first visible basic attack
 		let basicAttack: Graphic = this.basicAttacks.find((basicAttack: Graphic) => { return !basicAttack.visible });
         console.log("basicAttack:", basicAttack);
 		if (basicAttack){
-			// Bring this bubble to life
+			// Bring this basic attack to life
 			basicAttack.visible = true;
             basicAttack.alpha = 1;
 
-            // Calculate bubble offset from player center
+            // Calculate basic attack offset from player center
             let newPosition = this.player.position.clone();
             let xOffset = basicAttack.boundary.getHalfSize().x
             newPosition.x += (direction == "left")? -1 * xOffset : xOffset;
+            newPosition.x += movementOffset
             basicAttack.position = newPosition;
-            // console.log("basicAttack",basicAttack.position.x);
-            // console.log("PLAYER",this.player.position.x);
 
-            // bubble.addAI(BubbleAI);
 			basicAttack.setAIActive(true, {direction: direction});
             basicAttack.tweens.play("fadeout");
 		}

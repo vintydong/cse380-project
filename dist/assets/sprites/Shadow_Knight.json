@@ -142,11 +142,11 @@
 			"frames": [
 				{
 					"index": 30,
-					"duration": 5
+					"duration": 2
 				},
 				{
 					"index": 31,
-					"duration": 5
+					"duration": 3
 				},
 				{
 					"index": 32,
@@ -154,11 +154,11 @@
 				},
 				{
 					"index": 33,
-					"duration": 5
+					"duration": 3
 				},
 				{
 					"index": 34,
-					"duration": 5
+					"duration": 2
 				}
 			]
 		},
