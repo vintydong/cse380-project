@@ -363,7 +363,7 @@ export default abstract class Level extends Scene {
         }
     }
 
-    protected spawnBasicAttack(direction: string, movementOffset?: number): void {
+    protected spawnBasicAttack(direction: string): void {
 		// Find the first visible basic attack
 		let basicAttack: Graphic = this.basicAttacks.find((basicAttack: Graphic) => { return !basicAttack.visible });
         console.log("basicAttack:", basicAttack);
@@ -376,7 +376,6 @@ export default abstract class Level extends Scene {
             let newPosition = this.player.position.clone();
             let xOffset = basicAttack.boundary.getHalfSize().x
             newPosition.x += (direction == "left")? -1 * xOffset : xOffset;
-            newPosition.x += movementOffset
             basicAttack.position = newPosition;
 
 			basicAttack.setAIActive(true, {direction: direction});
