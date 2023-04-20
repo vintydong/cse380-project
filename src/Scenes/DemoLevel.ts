@@ -8,21 +8,13 @@ import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Level, { LevelLayers } from "./Level";
 import ParticleShaderType from "../Shaders/ParticleShaderType";
-import { LayerManager } from "./LayerManager";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
-import { CustomGameEvents } from "../CustomGameEvents";
-import Graphic from "../Wolfie2D/Nodes/Graphic";
 import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
 import MainMenu from "./MainMenu";
-import Color from "../Wolfie2D/Utils/Color";
-import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
-import BasicAttack from "../AI/BasicAttackBehavior";
-import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
-import CanvasNode from "../Wolfie2D/Nodes/CanvasNode";
 
 export default class DemoLevel extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "DEMO_ENEMY_KEY";
-    public static readonly ENEMY_SPRITE_PATH = "assets/sprites/Slime.json";
+    public static readonly ENEMY_SPRITE_PATH = "assets/spritesheets/Enemies/Slime.json";
     public static readonly ENEMY_POSITIONS_KEY = "DEMO_ENEMY_POSITIONS";
     public static readonly ENEMY_POSIITIONS_PATH = "assets/data/demo_enemy.json";
 
@@ -63,10 +55,10 @@ export default class DemoLevel extends Level {
 
         // Load in the tilemap
         this.load.tilemap(this.tilemapKey, DemoLevel.TILEMAP_PATH);
-        // Load in the player's sprite
-        this.load.spritesheet(this.playerSpriteKey, DemoLevel.PLAYER_SPRITE_PATH);
+        // // Load in the player's sprite
+        // this.load.spritesheet(this.playerSpriteKey, DemoLevel.PLAYER_SPRITE_PATH);
         // Load in ability icons
-        this.load.image(this.abilityIconsKey, DemoLevel.ABILITY_ICONS_PATH);
+        // this.load.image(this.abilityIconsKey, DemoLevel.ABILITY_ICONS_PATH);
         
         // Load in the shader for basic attack.
         this.load.shader(
@@ -149,24 +141,6 @@ export default class DemoLevel extends Level {
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
             // Let Level.ts handle it by default
-
-            case CustomGameEvents.SKILL_1_FIRED: {
-                this.spawnBasicAttack(event.data.get("direction"));
-                break;
-            }
-
-            case CustomGameEvents.SKILL_2_FIRED: {
-                this.spawnBubble(event.data.get("direction"));
-                break;
-            }
-
-            case CustomGameEvents.UPDATE_HEALTH: {
-                let currentHealth = event.data.get('currentHealth');
-				let maxHealth = event.data.get('maxHealth');
-				this.handleHealthChange(currentHealth, maxHealth);
-				break;
-            }
-
             default:
                 super.handleEvent(event);
                 break;

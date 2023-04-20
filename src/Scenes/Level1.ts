@@ -15,7 +15,7 @@ import MainMenu from "./MainMenu";
 
 export default class Level1 extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "LEVEL1_ENEMY_KEY";
-    public static readonly ENEMY_SPRITE_PATH = "assets/sprites/Slime.json";
+    public static readonly ENEMY_SPRITE_PATH = "assets/spritesheets/Enemies/Slime.json";
     public static readonly ENEMY_POSITIONS_KEY = "LEVEL1_ENEMY_POSITIONS";
     // public static readonly ENEMY_POSIITIONS_PATH = "assets/data/demo_enemy.json";
 
@@ -43,7 +43,7 @@ export default class Level1 extends Level {
         this.tilemapScale = Level1.TILEMAP_SCALE;
 
         // Set the player's spawn
-        this.playerSpawn = new Vec2(128, 128);
+        this.playerSpawn = new Vec2(128, 600);
         // Music and sound
     }
 
@@ -81,12 +81,10 @@ export default class Level1 extends Level {
         // Initialize demo_level enemies
         let tilemap_json = this.load.getObject(Level1.ENEMY_POSITIONS_KEY);
         let enemies = tilemap_json.layers.find(layer => layer.name === "Enemy")
-        console.log("Eenemy", enemies, typeof enemies)
 
         for (let i = 0; i < enemies.objects.length; i++) {
             let enemy = this.factory.addAnimatedSprite(demoEnemyActor, Level1.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as demoEnemyActor
             enemy.position.set(enemies.objects[i].x * 6, enemies.objects[i].y * 6);
-            console.log(enemy.position)
             enemy.addPhysics(new Circle(enemy.position, 16));
             enemy.setGroup(PhysicsGroups.NPC);
             enemy.setTrigger(PhysicsGroups.WEAPON, 'ENEMY_HIT', null);

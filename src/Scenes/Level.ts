@@ -51,7 +51,7 @@ export default abstract class Level extends Scene {
 
     /** Attributes for the player */
     public static readonly PLAYER_SPRITE_KEY = "PLAYER_SPRITE_KEY";
-    public static readonly PLAYER_SPRITE_PATH = "assets/sprites/Shadow_Knight.json";
+    public static readonly PLAYER_SPRITE_PATH = "assets/spritesheets/Player/Shadow_Knight.json";
     public static readonly PLAYER_SPAWN = new Vec2(128, 256);
 
     protected abilityIconsKey: string;
@@ -105,7 +105,7 @@ export default abstract class Level extends Scene {
         // Initialize Layers
         this.layer_manager = new LayerManager(this);
         this.primary = this.addLayer(LevelLayers.PRIMARY);
-        this.ui = this.addLayer(LevelLayers.UI);
+        this.ui = this.addUILayer(LevelLayers.UI);
         this.layers.add(LevelLayers.PRIMARY, this.primary);
         this.layers.add(LevelLayers.UI, this.ui);
 
@@ -122,7 +122,7 @@ export default abstract class Level extends Scene {
         this.initUI();
 
         // Initialize player
-        if (this.playerSpawn === undefined) throw new Error("Player weapon system must be initialized before initializing the player!");
+        if (this.playerSpawn === undefined) throw new Error("Player spawn missing!");
         this.player = this.factory.animatedSprite(this.playerSpriteKey, LevelLayers.PRIMARY);
         this.player.scale.set(2, 2);
         this.player.position.copy(this.playerSpawn)
@@ -187,9 +187,20 @@ export default abstract class Level extends Scene {
         let type = event.type as MenuEvent | CustomGameEvent;
         switch (type) {
             case CustomGameEvents.SKILL_1_FIRED: {
+                this.spawnBasicAttack(event.data.get("direction"));
+                break;
+            }
+            case CustomGameEvents.SKILL_2_FIRED: {
                 this.spawnBubble(event.data.get("direction"));
                 break;
             }
+            case CustomGameEvents.UPDATE_HEALTH: {
+                let currentHealth = event.data.get('currentHealth');
+				let maxHealth = event.data.get('maxHealth');
+				this.handleHealthChange(currentHealth, maxHealth);
+				break;
+            }
+
             //Main menu options
             case MenuEvents.PAUSE:
                 this.layer_manager.showPauseMenu();
