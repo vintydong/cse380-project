@@ -108,7 +108,6 @@ export default abstract class Level extends Scene {
     public startScene(): void {
         // Initialize Layers
         this.layer_manager = new LayerManager(this);
-        this.skill_manager = new SkillManager(this);
         this.primary = this.addLayer(LevelLayers.PRIMARY);
         this.ui = this.addUILayer(LevelLayers.UI);
         this.layers.add(LevelLayers.PRIMARY, this.primary);
@@ -137,6 +136,9 @@ export default abstract class Level extends Scene {
         this.player.addPhysics(new AABB(this.player.position.clone(), this.player.boundary.getHalfSize().clone()))
         this.player.setGroup(PhysicsGroups.PLAYER);
 
+        // Initialize Skill Manager
+        this.skill_manager = new SkillManager(this, this.player);
+
         // Initialize viewport
         if (this.player === undefined) {
             throw new Error("Player must be initialized before setting the viewport to folow the player");
@@ -161,7 +163,7 @@ export default abstract class Level extends Scene {
         this.receiver.subscribe(CustomGameEvents.SKILL_3_FIRED);
         this.receiver.subscribe(CustomGameEvents.SKILL_4_FIRED);
         this.receiver.subscribe(CustomGameEvents.UPDATE_HEALTH);
-        this.receiver.subscribe(CustomGameEvents.OPEN_SKILL_BOOK);
+        this.receiver.subscribe(CustomGameEvents.TOGGLE_SKILL_BOOK);
 
         this.receiver.subscribe(MenuEvents.RESUME);
         this.receiver.subscribe(MenuEvents.PAUSE);
@@ -178,7 +180,7 @@ export default abstract class Level extends Scene {
         let skillButton = Input.isKeyJustPressed("k");
 
         if(skillButton)
-            this.emitter.fireEvent(CustomGameEvents.OPEN_SKILL_BOOK);
+            this.emitter.fireEvent(CustomGameEvents.TOGGLE_SKILL_BOOK);
 
         if(escButton)
             paused 
@@ -199,11 +201,13 @@ export default abstract class Level extends Scene {
         let type = event.type as MenuEvent | CustomGameEvent;
         switch (type) {
             case CustomGameEvents.SKILL_1_FIRED: {
-                this.spawnBasicAttack(event.data.get("direction"));
+                // this.spawnBasicAttack(event.data.get("direction"));
+                this.skill_manager.activateSkill(0, {direction: event.data.get("direction")})
                 break;
             }
             case CustomGameEvents.SKILL_2_FIRED: {
-                this.spawnBubble(event.data.get("direction"));
+                // this.spawnBubble(event.data.get("direction"));
+                this.skill_manager.activateSkill(1, {direction: event.data.get("direction")})
                 break;
             }
             case CustomGameEvents.UPDATE_HEALTH: {
@@ -211,6 +215,11 @@ export default abstract class Level extends Scene {
 				let maxHealth = event.data.get('maxHealth');
 				this.handleHealthChange(currentHealth, maxHealth);
 				break;
+            }
+
+            case CustomGameEvents.TOGGLE_SKILL_BOOK: {
+                this.skill_manager.toggleSkillBook();
+                break;
             }
 
             //Main menu options
@@ -355,7 +364,7 @@ export default abstract class Level extends Scene {
             this.basicAttacks[i].setCollisionShape(collider);
             this.basicAttacks[i].addPhysics();
             this.basicAttacks[i].setGroup(PhysicsGroups.WEAPON);
-            this.basicAttacks[i].setTrigger(PhysicsGroups.NPC, 'ENEMY_HIT', null);
+            this.basicAttacks[i].setTrigger(PhysicsGroups.NPC, CustomGameEvents.ENEMY_HIT, null);
 
             // Add tween to particle
             this.basicAttacks[i].tweens.add("fadeout", {
