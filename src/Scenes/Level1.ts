@@ -99,7 +99,7 @@ export default class Level1 extends Level {
             this.enemies.push(enemy);
         }
 
-        this.viewport.setBounds(0, 0, 8 * 6 * 57, 8 * 6 * 30);
+        this.viewport.setBounds(8 * 6, 0, 8 * 6 * 58, 8 * 6 * 30);
     }
 
     public updateScene(deltaT) {
