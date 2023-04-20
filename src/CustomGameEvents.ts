@@ -7,7 +7,7 @@ export const CustomGameEvents = {
   SKILL_3_FIRED: "SKILL_3_FIRED",
   SKILL_4_FIRED: "SKILL_4_FIRED",
   UPDATE_HEALTH: "UPDATE_HEALTH",
-  OPEN_SKILL_BOOK: "OPEN_SKILL_BOOK",
+  TOGGLE_SKILL_BOOK: "TOGGLE_SKILL_BOOK",
 } as const;
 
 export type CustomGameEvent = typeof CustomGameEvents[keyof typeof CustomGameEvents]
