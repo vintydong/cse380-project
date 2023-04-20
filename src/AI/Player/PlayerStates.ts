@@ -55,8 +55,11 @@ export abstract class PlayerState extends State {
 }
 
 export class Attack extends PlayerState {
+    private stepLeft: boolean;
+    private skillFired: string;
     public onEnter(options: Record<string, any>): void {
-        this.emitter.fireEvent(options.skillFired, {direction: this.parent.facing});
+        this.stepLeft = true;
+        this.skillFired = options.skillFired;
         this.owner.animation.play(PlayerAnimations.ATTACKING);
     }
 
@@ -64,14 +67,14 @@ export class Attack extends PlayerState {
 
     public update(deltaT: number): void {
         let dir = this.parent.moveDir;
-        if (!dir.isZero() && dir.y === 0)
-            this.finished(PlayerStates.WALK);
+        if (this.stepLeft){
+            this.emitter.fireEvent(this.skillFired, {direction: this.parent.facing});
+            this.stepLeft = false;
+        }
         else if (Input.isJustPressed(PlayerControls.MOVE_UP))
             this.finished(PlayerStates.JUMP);
         else if (Input.isJustPressed(PlayerControls.DASH) && this.parent.dashTimer.isStopped())
             this.finished(PlayerStates.DASH);
-        // else if (Input.isJustPressed(PlayerControls.SKILL_ONE))
-        //     this.finished(PlayerStates.ATTACKING);
 
         // Go idle after animation finishes
         if (!this.owner.animation.isPlaying(PlayerAnimations.ATTACKING)) {
@@ -88,12 +91,20 @@ export class Attack extends PlayerState {
 export class Dash extends PlayerState {
     private timestepsLeft: number;
     private direction: string;
+    private jumpBuffer: boolean;
+    private attackBuffer: boolean;
+    private grounded: boolean;
+    private skillFired: string;
 
     public onEnter(options: Record<string, any>): void {
         this.parent.speed = this.parent.MAX_SPEED;
-        this.parent.velocity.y = 0;
+        this.parent.velocity.y = 1;
         this.timestepsLeft =  15;
         this.direction = this.parent.facing;
+        this.jumpBuffer = false;
+        this.attackBuffer = false;
+        this.grounded = this.owner.onGround;
+        this.skillFired = "";
         this.owner.animation.play(PlayerAnimations.DASH);
     }
 
@@ -103,28 +114,36 @@ export class Dash extends PlayerState {
         super.update(deltaT);
         let dx = (this.direction == "left") ? -1 : 1
     
-        // this.parent.velocity.y += this.gravity * deltaT;
         this.parent.velocity.x = dx * 2 * this.parent.speed
         this.owner.move(this.parent.velocity.scaled(deltaT));
+
+        if(Input.isJustPressed(PlayerControls.MOVE_UP)) {
+            this.jumpBuffer = true;
+        }
+        if(Input.isJustPressed(PlayerControls.SKILL_ONE)) {
+            this.attackBuffer = true;
+            this.skillFired = CustomGameEvents.SKILL_1_FIRED
+        }
         
         if(this.timestepsLeft > 0){
             this.timestepsLeft--
             return;
         }
-
-        if (Input.isPressed(PlayerControls.MOVE_UP))
+        
+        if (this.grounded && this.jumpBuffer)
             this.finished(PlayerStates.JUMP)
-        else if (!this.owner.onGround && this.parent.velocity.y !== 0) {
+        else if (this.attackBuffer)
+            this.finished(PlayerStates.ATTACKING)
+        else if (!this.owner.onGround && this.parent.velocity.y !== 0) 
             this.finished(PlayerStates.FALL);
-        }
         else
-            this.finished(PlayerStates.IDLE)
+            this.finished(PlayerStates.IDLE);
     }
 
     public onExit(): Record<string, any> {
         this.owner.animation.stop();
         this.parent.dashTimer.start();
-        return {};
+        return {skillFired: this.skillFired};
     }
 }
 
@@ -144,7 +163,7 @@ export class Dead extends PlayerState {
 
 export class Fall extends PlayerState {
     public onEnter(options: Record<string, any>): void {
-        this.parent.velocity.y = 0;
+        this.parent.velocity.y = 100;
         this.owner.animation.play(PlayerAnimations.FALLING);
     }
 
@@ -153,8 +172,6 @@ export class Fall extends PlayerState {
     public update(deltaT: number): void {
         super.update(deltaT);
         if (this.owner.onGround) {
-            // TODO: If we want fall damage or not
-            // this.parent.health -= Math.floor(this.parent.velocity.y / 200);
             this.parent.airDash = true;
             this.finished(PlayerStates.IDLE);
         } 
@@ -181,8 +198,7 @@ export class Idle extends PlayerState {
     skillFired = "";
     public onEnter(options: Record<string, any>): void {        
         this.parent.speed = this.parent.MIN_SPEED;
-        this.parent.velocity.x = 0;
-        this.parent.velocity.y = 0;
+        this.parent.velocity.copy(Vec2.ZERO)
         this.owner.animation.play(PlayerAnimations.IDLE);
     }
 
@@ -223,9 +239,11 @@ export class Idle extends PlayerState {
 
 export class Jump extends PlayerState {
     private shortjump: boolean;
+    skillFired = "";
     
     public onEnter(options: Record<string, any>): void {
         this.parent.velocity.y = -700;
+        console.log("jumping", this.parent.velocity.y)
         this.owner.animation.playIfNotAlready(PlayerAnimations.JUMPING);
     }
     
@@ -236,10 +254,7 @@ export class Jump extends PlayerState {
         // console.log("Long press?", Input.isPressed(PlayerControls.MOVE_UP));
         // console.log("short press?", Input.isJustPressed(PlayerControls.MOVE_UP));
         super.update(deltaT);
-        if (this.owner.onGround) {
-			this.finished(PlayerStates.IDLE);
-		} 
-        else if (this.owner.onCeiling || this.parent.velocity.y >= 0){
+        if (this.owner.onCeiling || this.parent.velocity.y >= 0){
             this.finished(PlayerStates.FALL);
 		}
         else if (Input.isPressed(PlayerControls.MOVE_DOWN)) {
@@ -249,17 +264,27 @@ export class Jump extends PlayerState {
             this.parent.airDash = false;
             this.finished(PlayerStates.DASH);
         }
-        else {
+        else if (Input.isJustPressed(PlayerControls.SKILL_ONE) || Input.isJustPressed(PlayerControls.SKILL_TWO)){
+            if (Input.isJustPressed(PlayerControls.SKILL_ONE))
+                this.skillFired = CustomGameEvents.SKILL_1_FIRED
+            else if (Input.isJustPressed(PlayerControls.SKILL_TWO))
+                this.skillFired = CustomGameEvents.SKILL_2_FIRED
+            this.finished(PlayerStates.ATTACKING);
+        }
+        else if (this.parent.velocity.y < 0) {
             let dir = this.parent.moveDir;
             this.parent.velocity.x += dir.x * this.parent.speed / 3.5 - 0.3 * this.parent.velocity.x;
             this.parent.velocity.y += this.gravity * deltaT;
             this.owner.move(this.parent.velocity.scaled(deltaT));
         }
+        else if (this.owner.onGround){
+            this.finished(PlayerStates.IDLE)
+        }
     }
 
     public onExit(): Record<string, any> { 
         this.owner.animation.stop();
-        return {};
+        return {skillFired: this.skillFired};
      }
 }
 

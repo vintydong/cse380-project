@@ -54,7 +54,7 @@ export default abstract class Level extends Scene {
 
     /** Attributes for the player */
     public static readonly PLAYER_SPRITE_KEY = "PLAYER_SPRITE_KEY";
-    public static readonly PLAYER_SPRITE_PATH = "assets/sprites/Shadow_Knight.json";
+    public static readonly PLAYER_SPRITE_PATH = "assets/spritesheets/Player/Shadow_Knight.json";
     public static readonly PLAYER_SPAWN = new Vec2(128, 256);
 
     protected playerSpriteKey: string;
@@ -110,7 +110,7 @@ export default abstract class Level extends Scene {
         this.layer_manager = new LayerManager(this);
         this.skill_manager = new SkillManager(this);
         this.primary = this.addLayer(LevelLayers.PRIMARY);
-        this.ui = this.addLayer(LevelLayers.UI);
+        this.ui = this.addUILayer(LevelLayers.UI);
         this.layers.add(LevelLayers.PRIMARY, this.primary);
         this.layers.add(LevelLayers.UI, this.ui);
 
@@ -127,7 +127,7 @@ export default abstract class Level extends Scene {
         this.initUI();
 
         // Initialize player
-        if (this.playerSpawn === undefined) throw new Error("Player weapon system must be initialized before initializing the player!");
+        if (this.playerSpawn === undefined) throw new Error("Player spawn missing!");
         this.player = this.factory.animatedSprite(this.playerSpriteKey, LevelLayers.PRIMARY);
         this.player.scale.set(2, 2);
         this.player.position.copy(this.playerSpawn)
@@ -199,9 +199,20 @@ export default abstract class Level extends Scene {
         let type = event.type as MenuEvent | CustomGameEvent;
         switch (type) {
             case CustomGameEvents.SKILL_1_FIRED: {
+                this.spawnBasicAttack(event.data.get("direction"));
+                break;
+            }
+            case CustomGameEvents.SKILL_2_FIRED: {
                 this.spawnBubble(event.data.get("direction"));
                 break;
             }
+            case CustomGameEvents.UPDATE_HEALTH: {
+                let currentHealth = event.data.get('currentHealth');
+				let maxHealth = event.data.get('maxHealth');
+				this.handleHealthChange(currentHealth, maxHealth);
+				break;
+            }
+
             //Main menu options
             case MenuEvents.PAUSE:
                 this.layer_manager.showPauseMenu();
@@ -329,7 +340,7 @@ export default abstract class Level extends Scene {
         // Init basic attack object pool
         this.basicAttacks = new Array(10);
         for (let i = 0; i < this.basicAttacks.length; i++) {
-            this.basicAttacks[i] = this.add.graphic(GraphicType.RECT, LevelLayers.PRIMARY, {position: new Vec2(0, 0), size: new Vec2(50, 100)});
+            this.basicAttacks[i] = this.add.graphic(GraphicType.RECT, LevelLayers.PRIMARY, {position: new Vec2(0, 0), size: new Vec2(75, 100)});
             
             // Give the basic attacks a custom shader
             this.basicAttacks[i].useCustomShader(BasicAttackShaderType.KEY);
@@ -376,23 +387,20 @@ export default abstract class Level extends Scene {
     }
 
     protected spawnBasicAttack(direction: string): void {
-		// Find the first visible bubble
+		// Find the first visible basic attack
 		let basicAttack: Graphic = this.basicAttacks.find((basicAttack: Graphic) => { return !basicAttack.visible });
         console.log("basicAttack:", basicAttack);
 		if (basicAttack){
-			// Bring this bubble to life
+			// Bring this basic attack to life
 			basicAttack.visible = true;
             basicAttack.alpha = 1;
 
-            // Calculate bubble offset from player center
+            // Calculate basic attack offset from player center
             let newPosition = this.player.position.clone();
             let xOffset = basicAttack.boundary.getHalfSize().x
             newPosition.x += (direction == "left")? -1 * xOffset : xOffset;
             basicAttack.position = newPosition;
-            // console.log("basicAttack",basicAttack.position.x);
-            // console.log("PLAYER",this.player.position.x);
 
-            // bubble.addAI(BubbleAI);
 			basicAttack.setAIActive(true, {direction: direction});
             basicAttack.tweens.play("fadeout");
 		}
