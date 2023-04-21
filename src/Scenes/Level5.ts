@@ -130,8 +130,6 @@ export default class Level5 extends Level {
         }
 
         // // Handle despawning of attacks
-        // for (let basicAttack of this.basicAttacks) if (basicAttack.visible) this.handleScreenDespawn(basicAttack);
-        // for (let bubble of this.bubbles) if (bubble.visible) this.handleScreenDespawn(bubble);
 
         let allEnemiesDefeated = true
         for(let i = 0; i < this.enemies.length; i++){
