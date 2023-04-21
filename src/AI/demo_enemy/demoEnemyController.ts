@@ -1,3 +1,4 @@
+import { CustomGameEvents } from "../../CustomGameEvents";
 import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
@@ -60,7 +61,7 @@ export default class demoEnemyController extends StateMachineAI  {
         this.addState(PlayerStates.JUMP, new Jump(this, this.owner));
 		this.addState(PlayerStates.WALK, new Walk(this, this.owner));
 
-        this.receiver.subscribe('ENEMY_HIT');
+        this.receiver.subscribe(CustomGameEvents.ENEMY_HIT);
         this.initialize(PlayerStates.FALL);
     }
 
@@ -80,7 +81,7 @@ export default class demoEnemyController extends StateMachineAI  {
             //     this.handleLasergunFired(event.data.get("actorId"), event.data.get("to"), event.data.get("from"));
             //     break;
             // }
-            case 'ENEMY_HIT':
+            case CustomGameEvents.ENEMY_HIT:
                 // console.log(event.data);
                 let id = event.data.get('node');
                 if(id === this.owner.id){

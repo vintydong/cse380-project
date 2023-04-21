@@ -11,6 +11,7 @@ export default abstract class Skill {
     protected skill_manager: SkillManager;
 
     private damage: number;
+    private cost: number;
     private cooldown: Timer;
 
     public constructor(skill_manager: SkillManager){

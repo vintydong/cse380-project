@@ -126,7 +126,7 @@ export class MeleeBehavior implements AI {
         }
     }
 
-    public update(deltaT: number): void {   
+    public update(deltaT: number): void {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }

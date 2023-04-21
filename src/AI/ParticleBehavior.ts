@@ -1,3 +1,4 @@
+import { CustomGameEvents } from "../CustomGameEvents";
 import AI from "../Wolfie2D/DataTypes/Interfaces/AI";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
@@ -28,7 +29,7 @@ export default class ParticleBehavior implements AI {
         this.owner = owner;
 
         this.receiver = new Receiver();
-        this.receiver.subscribe('ENEMY_HIT');
+        this.receiver.subscribe(CustomGameEvents.ENEMY_HIT);
 
         this.currentXSpeed = 50;
         this.xSpeedIncrement = 20;
@@ -51,7 +52,7 @@ export default class ParticleBehavior implements AI {
 
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
-            case 'ENEMY_HIT':
+            case CustomGameEvents.ENEMY_HIT:
                 let id = event.data.get('other');
                 if(id === this.owner.id){
                     this.owner.position.copy(Vec2.ZERO);

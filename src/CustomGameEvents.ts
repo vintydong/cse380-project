@@ -2,6 +2,7 @@
  * Events that get emitted in Shadow Knight
 */
 export const CustomGameEvents = {
+  ENEMY_HIT: "ENEMY_HIT",
   SKILL_1_FIRED: "SKILL_1_FIRED",
   SKILL_2_FIRED: "SKILL_2_FIRED",
   SKILL_3_FIRED: "SKILL_3_FIRED",

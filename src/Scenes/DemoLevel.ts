@@ -11,6 +11,7 @@ import ParticleShaderType from "../Shaders/ParticleShaderType";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
 import MainMenu from "./MainMenu";
+import { CustomGameEvents } from "../CustomGameEvents";
 
 export default class DemoLevel extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "DEMO_ENEMY_KEY";
@@ -99,7 +100,7 @@ export default class DemoLevel extends Level {
             enemy.position.set(enemies.positions[i].x * 6, enemies.positions[i].y * 6);
             enemy.addPhysics(new Circle(enemy.position, 16));
             enemy.setGroup(PhysicsGroups.NPC);
-            enemy.setTrigger(PhysicsGroups.WEAPON, 'ENEMY_HIT', null);
+            enemy.setTrigger(PhysicsGroups.WEAPON, CustomGameEvents.ENEMY_HIT, null);
             enemy.setTrigger(PhysicsGroups.PLAYER, 'ENEMY_COLLISION', null);
             enemy.navkey = "navmesh";
 
