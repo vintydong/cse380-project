@@ -13,7 +13,7 @@ import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import FactoryManager from "../Wolfie2D/Scene/Factories/FactoryManager";
 import Color from "../Wolfie2D/Utils/Color";
 import { CustomGameEvents, MenuEvent } from "../CustomGameEvents"
-import { LevelUILayer } from "../Scenes/LayerManager";
+import { LevelUILayer } from "../Systems/LayerManager";
 
 interface uiElementProps {
     size?: Vec2;

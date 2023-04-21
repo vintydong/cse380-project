@@ -28,8 +28,8 @@ import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Color from "../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
 import DemoLevel from "./DemoLevel";
-import { LayerManager } from "./LayerManager";
-import MainMenu from "./MainMenu";
+import { LayerManager } from "../Systems/LayerManager";
+import MainMenu from "./MenuScenes/MainMenu";
 
 export const LevelLayers = {
     PRIMARY: "PRIMARY",

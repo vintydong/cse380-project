@@ -1,12 +1,12 @@
-import Vec2 from "../Wolfie2D/DataTypes/Vec2";
-import GameEvent from "../Wolfie2D/Events/GameEvent";
-import { TweenableProperties } from "../Wolfie2D/Nodes/GameNode";
-import Sprite from "../Wolfie2D/Nodes/Sprites/Sprite";
-import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
-import Layer from "../Wolfie2D/Scene/Layer";
-import Scene from "../Wolfie2D/Scene/Scene";
-import Color from "../Wolfie2D/Utils/Color";
-import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
+import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
+import GameEvent from "../../Wolfie2D/Events/GameEvent";
+import { TweenableProperties } from "../../Wolfie2D/Nodes/GameNode";
+import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
+import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
+import Layer from "../../Wolfie2D/Scene/Layer";
+import Scene from "../../Wolfie2D/Scene/Scene";
+import Color from "../../Wolfie2D/Utils/Color";
+import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import MainMenu from "./MainMenu";
 
 export default class SplashScreen extends Scene{

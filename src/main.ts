@@ -1,8 +1,8 @@
 import Game from "./Wolfie2D/Loop/Game";
-import MainMenu from "./Scenes/MainMenu";
+import MainMenu from "./Scenes/MenuScenes/MainMenu";
 import RegistryManager from "./Wolfie2D/Registry/RegistryManager";
 import { PlayerControls } from "./AI/Player/PlayerController";
-import SplashScreen from "./Scenes/SplashScreen";
+import SplashScreen from "./Scenes/MenuScenes/SplashScreen";
 
 import ParticleShaderType from "./Shaders/ParticleShaderType"
 import BasicAttackShaderType from "./Shaders/BasicAttackShaderType";

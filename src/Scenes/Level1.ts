@@ -11,7 +11,7 @@ import ParticleShaderType from "../Shaders/ParticleShaderType";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import { CustomGameEvents } from "../CustomGameEvents";
 import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
-import MainMenu from "./MainMenu";
+import MainMenu from "./MenuScenes/MainMenu";
 
 export default class Level1 extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "LEVEL1_ENEMY_KEY";

@@ -11,7 +11,7 @@ import UILayer from "../Wolfie2D/Scene/Layers/UILayer";
 import Scene from "../Wolfie2D/Scene/Scene";
 import Color from "../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
-import Level from "./Level";
+import Level from "../Scenes/Level";
 
 export const LevelUILayers = {
     PAUSE: "PAUSE",

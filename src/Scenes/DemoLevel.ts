@@ -10,7 +10,7 @@ import Level, { LevelLayers } from "./Level";
 import ParticleShaderType from "../Shaders/ParticleShaderType";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
-import MainMenu from "./MainMenu";
+import MainMenu from "./MenuScenes/MainMenu";
 import { CustomGameEvents } from "../CustomGameEvents";
 
 export default class DemoLevel extends Level {    
