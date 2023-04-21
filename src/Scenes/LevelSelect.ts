@@ -10,6 +10,7 @@ import Color from "../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
 
 import DemoLevel from "./DemoLevel";
+import Level1 from "./Level1";
 import Level5 from "./Level5";
 import MainMenu from "./MainMenu";
 
@@ -117,7 +118,7 @@ export default class LevelSelect extends Scene{
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
             case "levelOne":
-                this.sceneManager.changeToScene(DemoLevel);
+                this.sceneManager.changeToScene(Level1);
                 break;
 
             case "levelTwo":

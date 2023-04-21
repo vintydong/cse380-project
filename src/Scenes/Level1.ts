@@ -9,17 +9,18 @@ import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Level, { LevelLayers } from "./Level";
 import ParticleShaderType from "../Shaders/ParticleShaderType";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
+import { CustomGameEvents } from "../CustomGameEvents";
 import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
 import MainMenu from "./MainMenu";
 
-export default class DemoLevel extends Level {    
-    public static readonly ENEMY_SPRITE_KEY = "DEMO_ENEMY_KEY";
+export default class Level1 extends Level {    
+    public static readonly ENEMY_SPRITE_KEY = "LEVEL1_ENEMY_KEY";
     public static readonly ENEMY_SPRITE_PATH = "assets/spritesheets/Enemies/Slime.json";
-    public static readonly ENEMY_POSITIONS_KEY = "DEMO_ENEMY_POSITIONS";
-    public static readonly ENEMY_POSIITIONS_PATH = "assets/data/demo_enemy.json";
+    public static readonly ENEMY_POSITIONS_KEY = "LEVEL1_ENEMY_POSITIONS";
+    // public static readonly ENEMY_POSIITIONS_PATH = "assets/data/demo_enemy.json";
 
-    public static readonly TILEMAP_KEY = "DemoLevel";
-    public static readonly TILEMAP_PATH = "assets/tilemaps/demo_tilemap.json";
+    public static readonly TILEMAP_KEY = "Level1";
+    public static readonly TILEMAP_PATH = "assets/tilemaps/level1_tilemap.json";
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
     // public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
@@ -38,11 +39,11 @@ export default class DemoLevel extends Level {
         super(viewport, sceneManager, renderingManager, options);
 
         // Set the keys for the different layers of the tilemap
-        this.tilemapKey = DemoLevel.TILEMAP_KEY;
-        this.tilemapScale = DemoLevel.TILEMAP_SCALE;
+        this.tilemapKey = Level1.TILEMAP_KEY;
+        this.tilemapScale = Level1.TILEMAP_SCALE;
 
-        this.playerSpawn = new Vec2(128, 256);
         // Set the player's spawn
+        this.playerSpawn = new Vec2(128, 600);
         // Music and sound
     }
 
@@ -54,29 +55,15 @@ export default class DemoLevel extends Level {
         super.loadScene();
 
         // Load in the tilemap
-        this.load.tilemap(this.tilemapKey, DemoLevel.TILEMAP_PATH);
-        // // Load in the player's sprite
-        // this.load.spritesheet(this.playerSpriteKey, DemoLevel.PLAYER_SPRITE_PATH);
+        this.load.tilemap(this.tilemapKey, Level1.TILEMAP_PATH);
+        // Load in the player's sprite
+        this.load.spritesheet(this.playerSpriteKey, Level1.PLAYER_SPRITE_PATH);
         // Load in ability icons
-        // this.load.image(this.abilityIconsKey, DemoLevel.ABILITY_ICONS_PATH);
+        this.load.image(this.abilityIconsKey, Level1.ABILITY_ICONS_PATH);
         
-        // Load in the shader for basic attack.
-        this.load.shader(
-            BasicAttackShaderType.KEY,
-            BasicAttackShaderType.VSHADER,
-            BasicAttackShaderType.FSHADER
-        );
-
-        // Load in demo level enemies
-        this.load.spritesheet(DemoLevel.ENEMY_SPRITE_KEY, DemoLevel.ENEMY_SPRITE_PATH);
-        this.load.object(DemoLevel.ENEMY_POSITIONS_KEY, DemoLevel.ENEMY_POSIITIONS_PATH);
-        
-        // Load in the shader for bubble.
-        this.load.shader(
-            ParticleShaderType.KEY,
-            ParticleShaderType.VSHADER,
-            ParticleShaderType.FSHADER
-        );
+        // Load in level 1 enemies
+        this.load.spritesheet(Level1.ENEMY_SPRITE_KEY, Level1.ENEMY_SPRITE_PATH);
+        this.load.object(Level1.ENEMY_POSITIONS_KEY, Level1.TILEMAP_PATH);
 
         // Load UI layer sprites
         // Audio and music
@@ -92,11 +79,12 @@ export default class DemoLevel extends Level {
     public startScene(): void {
         super.startScene();
         // Initialize demo_level enemies
-        let enemies = this.load.getObject(DemoLevel.ENEMY_POSITIONS_KEY);
+        let tilemap_json = this.load.getObject(Level1.ENEMY_POSITIONS_KEY);
+        let enemies = tilemap_json.layers.find(layer => layer.name === "Enemy")
 
-        for (let i = 0; i < enemies.positions.length; i++) {
-            let enemy = this.factory.addAnimatedSprite(demoEnemyActor, DemoLevel.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as demoEnemyActor
-            enemy.position.set(enemies.positions[i].x * 6, enemies.positions[i].y * 6);
+        for (let i = 0; i < enemies.objects.length; i++) {
+            let enemy = this.factory.addAnimatedSprite(demoEnemyActor, Level1.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as demoEnemyActor
+            enemy.position.set(enemies.objects[i].x * 6, enemies.objects[i].y * 6);
             enemy.addPhysics(new Circle(enemy.position, 16));
             enemy.setGroup(PhysicsGroups.NPC);
             enemy.setTrigger(PhysicsGroups.WEAPON, 'ENEMY_HIT', null);
@@ -110,6 +98,8 @@ export default class DemoLevel extends Level {
             enemy.animation.play("IDLE");
             this.enemies.push(enemy);
         }
+
+        this.viewport.setBounds(8 * 6, 0, 8 * 6 * 58, 8 * 6 * 30);
     }
 
     public updateScene(deltaT) {
@@ -128,8 +118,8 @@ export default class DemoLevel extends Level {
 
         super.updateScene(deltaT);
 
-        if(allEnemiesDefeated)
-            this.sceneManager.changeToScene(MainMenu);
+        // if(allEnemiesDefeated)
+        //     this.sceneManager.changeToScene(MainMenu);
     }
 
     /**
@@ -141,6 +131,24 @@ export default class DemoLevel extends Level {
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
             // Let Level.ts handle it by default
+
+            case CustomGameEvents.SKILL_1_FIRED: {
+                this.spawnBasicAttack(event.data.get("direction"));
+                break;
+            }
+
+            case CustomGameEvents.SKILL_2_FIRED: {
+                this.spawnBubble(event.data.get("direction"));
+                break;
+            }
+
+            case CustomGameEvents.UPDATE_HEALTH: {
+                let currentHealth = event.data.get('currentHealth');
+				let maxHealth = event.data.get('maxHealth');
+				this.handleHealthChange(currentHealth, maxHealth);
+				break;
+            }
+
             default:
                 super.handleEvent(event);
                 break;
