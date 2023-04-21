@@ -177,6 +177,10 @@ export default abstract class Level extends Scene {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
+
+        // Handle despawning of attacks
+        for (let basicAttack of this.basicAttacks) if (basicAttack.visible) this.handleScreenDespawn(basicAttack);
+        for (let weaponParticle of this.weaponParticles.getPool()) if (weaponParticle.visible) this.handleScreenDespawn(weaponParticle);
     }
 
     /**
@@ -187,7 +191,7 @@ export default abstract class Level extends Scene {
         let type = event.type as MenuEvent | CustomGameEvent;
         switch (type) {
             case CustomGameEvents.SKILL_1_FIRED: {
-                this.spawnBubble(event.data.get("direction"));
+                this.spawnBasicAttack(event.data.get("direction"));
                 break;
             }
             //Main menu options
@@ -384,19 +388,9 @@ export default abstract class Level extends Scene {
 	}
 
     public handleScreenDespawn(node: CanvasNode): void {
-        // Extract the size of the viewport
-		// let paddedViewportSize = this.viewport.getHalfSize().scaled(2).add(this.worldPadding);
-		let viewportSize = this.viewport.getHalfSize().scaled(2);
+        let inViewport = this.viewport.includes(node)
 
-        // Check if node is outside viewport
-        let padding = 100
-        let leftBound = 0 - padding
-        let topBound = 0 - padding
-        let rightBound = viewportSize.x + padding
-        let botBound = viewportSize.y + padding
-        let outOfBounds = node.position.x < leftBound || node.position.y < topBound || node.position.x > rightBound || node.position.y > botBound
-
-		if(outOfBounds || node.alpha == 0) {
+		if(!inViewport || node.alpha == 0) {
 			node.position.copy(Vec2.ZERO);
 			node.visible = false;
 		}
