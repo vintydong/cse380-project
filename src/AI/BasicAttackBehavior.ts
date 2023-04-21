@@ -1,3 +1,4 @@
+import { CustomGameEvents } from "../CustomGameEvents";
 import AI from "../Wolfie2D/DataTypes/Interfaces/AI";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
@@ -22,7 +23,7 @@ export default class BasicAttack implements AI {
 
         this.receiver = new Receiver();
         // this.receiver.subscribe(HW2Events.PLAYER_BUBBLE_COLLISION);
-        this.receiver.subscribe('ENEMY_HIT');
+        this.receiver.subscribe(CustomGameEvents.ENEMY_HIT);
 
         this.activate(options);
     }

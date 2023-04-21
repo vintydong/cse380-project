@@ -87,7 +87,7 @@ export default class Level1 extends Level {
             enemy.position.set(enemies.objects[i].x * 6, enemies.objects[i].y * 6);
             enemy.addPhysics(new Circle(enemy.position, 16));
             enemy.setGroup(PhysicsGroups.NPC);
-            enemy.setTrigger(PhysicsGroups.WEAPON, 'ENEMY_HIT', null);
+            enemy.setTrigger(PhysicsGroups.WEAPON, CustomGameEvents.ENEMY_HIT, null);
             enemy.setTrigger(PhysicsGroups.PLAYER, 'ENEMY_COLLISION', null);
             enemy.navkey = "navmesh";
 
@@ -131,17 +131,6 @@ export default class Level1 extends Level {
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
             // Let Level.ts handle it by default
-
-            case CustomGameEvents.SKILL_1_FIRED: {
-                this.spawnBasicAttack(event.data.get("direction"));
-                break;
-            }
-
-            case CustomGameEvents.SKILL_2_FIRED: {
-                this.spawnBubble(event.data.get("direction"));
-                break;
-            }
-
             case CustomGameEvents.UPDATE_HEALTH: {
                 let currentHealth = event.data.get('currentHealth');
 				let maxHealth = event.data.get('maxHealth');

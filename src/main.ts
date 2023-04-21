@@ -22,6 +22,7 @@ import BasicAttackShaderType from "./Shaders/BasicAttackShaderType";
             {name: PlayerControls.MOVE_LEFT, keys: ["a"]},
             {name: PlayerControls.MOVE_RIGHT, keys: ["d"]},
             {name: PlayerControls.DASH, keys: ["shift"]},
+            {name: PlayerControls.SKILL_BOOK, keys: ["k"]},
             {name: PlayerControls.SKILL_ONE, keys: ["u"]},
             {name: PlayerControls.SKILL_TWO, keys: ["i"]},
             {name: PlayerControls.SKILL_THREE, keys: ["o"]},

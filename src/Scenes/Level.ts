@@ -7,6 +7,7 @@ import CustomFactoryManager from "../Factory/CustomFactoryManager";
 import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
 import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
 import ParticleShaderType from "../Shaders/ParticleShaderType";
+import { SkillManager } from "../Systems/SkillManager";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
@@ -33,6 +34,7 @@ import MainMenu from "./MainMenu";
 export const LevelLayers = {
     PRIMARY: "PRIMARY",
     UI: "UI",
+    SKILL_BOOK: "SKILL_BOOK",
 } as const;
 
 export type LevelLayer = typeof LevelLayers[keyof typeof LevelLayers]
@@ -40,6 +42,7 @@ export type LevelLayer = typeof LevelLayers[keyof typeof LevelLayers]
 export default abstract class Level extends Scene {
     public factory: CustomFactoryManager;
     protected layer_manager: LayerManager;
+    protected skill_manager: SkillManager;
 
     /** Attributes for the level */
     protected tilemapKey: string;
@@ -54,13 +57,13 @@ export default abstract class Level extends Scene {
     public static readonly PLAYER_SPRITE_PATH = "assets/spritesheets/Player/Shadow_Knight.json";
     public static readonly PLAYER_SPAWN = new Vec2(128, 256);
 
-    protected abilityIconsKey: string;
-    public static readonly ABILITY_ICONS_KEY = "ABILITY_ICONS_KEY";
-    public static readonly ABILITY_ICONS_PATH = "assets/sprites/ability_icons.png";
-
     protected playerSpriteKey: string;
     protected player: AnimatedSprite;
     protected playerSpawn: Vec2;
+
+    public static readonly ABILITY_ICONS_KEY = "ABILITY_ICONS_KEY";
+    public static readonly ABILITY_ICONS_PATH = "assets/sprites/ability_icons.png";
+    protected abilityIconsKey: string;
 
     protected weaponParticles: PlayerParticleSystem;
     // Object pool for basic attacks and bubbles
@@ -96,6 +99,7 @@ export default abstract class Level extends Scene {
         this.load.image(LayerManager.PAUSE_SPRITE_KEY, LayerManager.PAUSE_SPRITE_PATH);
         this.load.image(LayerManager.CONTROL_SPRITE_KEY, LayerManager.CONTROL_SPRITE_PATH);
         this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
+        this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
         
         this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
     }
@@ -132,6 +136,9 @@ export default abstract class Level extends Scene {
         this.player.addPhysics(new AABB(this.player.position.clone(), this.player.boundary.getHalfSize().clone()))
         this.player.setGroup(PhysicsGroups.PLAYER);
 
+        // Initialize Skill Manager
+        this.skill_manager = new SkillManager(this, this.player);
+
         // Initialize viewport
         if (this.player === undefined) {
             throw new Error("Player must be initialized before setting the viewport to folow the player");
@@ -156,6 +163,7 @@ export default abstract class Level extends Scene {
         this.receiver.subscribe(CustomGameEvents.SKILL_3_FIRED);
         this.receiver.subscribe(CustomGameEvents.SKILL_4_FIRED);
         this.receiver.subscribe(CustomGameEvents.UPDATE_HEALTH);
+        this.receiver.subscribe(CustomGameEvents.TOGGLE_SKILL_BOOK);
 
         this.receiver.subscribe(MenuEvents.RESUME);
         this.receiver.subscribe(MenuEvents.PAUSE);
@@ -168,6 +176,12 @@ export default abstract class Level extends Scene {
     public updateScene(deltaT: number) {
         let escButton = Input.isKeyJustPressed("escape");
         let paused = this.layer_manager.isPaused();
+
+        let skillButton = Input.isKeyJustPressed("k");
+
+        if(skillButton)
+            this.emitter.fireEvent(CustomGameEvents.TOGGLE_SKILL_BOOK);
+
         if(escButton)
             paused 
                 ? this.emitter.fireEvent(MenuEvents.RESUME)
@@ -191,11 +205,13 @@ export default abstract class Level extends Scene {
         let type = event.type as MenuEvent | CustomGameEvent;
         switch (type) {
             case CustomGameEvents.SKILL_1_FIRED: {
-                this.spawnBasicAttack(event.data.get("direction"));
+                // this.spawnBasicAttack(event.data.get("direction"));
+                this.skill_manager.activateSkill(0, {direction: event.data.get("direction")})
                 break;
             }
             case CustomGameEvents.SKILL_2_FIRED: {
-                this.spawnBubble(event.data.get("direction"));
+                // this.spawnBubble(event.data.get("direction"));
+                this.skill_manager.activateSkill(1, {direction: event.data.get("direction")})
                 break;
             }
             case CustomGameEvents.UPDATE_HEALTH: {
@@ -203,6 +219,11 @@ export default abstract class Level extends Scene {
 				let maxHealth = event.data.get('maxHealth');
 				this.handleHealthChange(currentHealth, maxHealth);
 				break;
+            }
+
+            case CustomGameEvents.TOGGLE_SKILL_BOOK: {
+                this.skill_manager.toggleSkillBook();
+                break;
             }
 
             //Main menu options
@@ -347,7 +368,7 @@ export default abstract class Level extends Scene {
             this.basicAttacks[i].setCollisionShape(collider);
             this.basicAttacks[i].addPhysics();
             this.basicAttacks[i].setGroup(PhysicsGroups.WEAPON);
-            this.basicAttacks[i].setTrigger(PhysicsGroups.NPC, 'ENEMY_HIT', null);
+            this.basicAttacks[i].setTrigger(PhysicsGroups.NPC, CustomGameEvents.ENEMY_HIT, null);
 
             // Add tween to particle
             this.basicAttacks[i].tweens.add("fadeout", {
