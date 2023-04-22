@@ -30,6 +30,7 @@ import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
 import DemoLevel from "./DemoLevel";
 import { LayerManager } from "../Systems/LayerManager";
 import MainMenu from "./MenuScenes/MainMenu";
+import { TweenableProperties } from "../Wolfie2D/Nodes/GameNode";
 
 export const LevelLayers = {
     PRIMARY: "PRIMARY",
@@ -48,6 +49,8 @@ export default abstract class Level extends Scene {
     protected tilemapKey: string;
     protected tilemapScale: Vec2;
     // protected tilemaps: Array<Tilemap>;
+
+    protected nextLevel: new (...args: any) => Level;
 
     protected levelMusicKey: string;
     // protected jumpAudioKey: string;
@@ -100,7 +103,6 @@ export default abstract class Level extends Scene {
         this.load.image(LayerManager.CONTROL_SPRITE_KEY, LayerManager.CONTROL_SPRITE_PATH);
         this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
         this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
-        
         this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
     }
 
@@ -149,12 +151,11 @@ export default abstract class Level extends Scene {
 
         this.subscribeEvents();
 
-        // TODO: Probably want a level transition here
-        // See hw3
-
         // Fire events to start game (e.g. music)
-
-        // Input.disableInput();
+        // this.emitter.fireEvent(CustomGameEvents.LEVEL_START)
+        this.layer_manager.startLevel();
+        Input.disableInput();
+        this.ui.disable();
     }
     
     private subscribeEvents() {
@@ -164,6 +165,11 @@ export default abstract class Level extends Scene {
         this.receiver.subscribe(CustomGameEvents.SKILL_4_FIRED);
         this.receiver.subscribe(CustomGameEvents.UPDATE_HEALTH);
         this.receiver.subscribe(CustomGameEvents.TOGGLE_SKILL_BOOK);
+
+        this.receiver.subscribe(CustomGameEvents.LEVEL_START);
+        this.receiver.subscribe(CustomGameEvents.PLAYER_ENTER_LEVEL_END);
+        this.receiver.subscribe(CustomGameEvents.LEVEL_NEXT);
+        this.receiver.subscribe(CustomGameEvents.LEVEL_END);
 
         this.receiver.subscribe(MenuEvents.RESUME);
         this.receiver.subscribe(MenuEvents.PAUSE);
@@ -203,17 +209,38 @@ export default abstract class Level extends Scene {
      */
     protected handleEvent(event: GameEvent): void {
         let type = event.type as MenuEvent | CustomGameEvent;
+        console.log("Handling event type", type);
         switch (type) {
             case CustomGameEvents.SKILL_1_FIRED: {
-                // this.spawnBasicAttack(event.data.get("direction"));
                 this.skill_manager.activateSkill(0, {direction: event.data.get("direction")})
                 break;
             }
             case CustomGameEvents.SKILL_2_FIRED: {
-                // this.spawnBubble(event.data.get("direction"));
                 this.skill_manager.activateSkill(1, {direction: event.data.get("direction")})
                 break;
             }
+
+            case CustomGameEvents.LEVEL_START: {
+                Input.enableInput();
+                this.ui.enable();
+                break;
+            }
+
+            case CustomGameEvents.PLAYER_ENTER_LEVEL_END: {
+
+            }
+
+            case CustomGameEvents.LEVEL_END: {
+                this.ui.disable();
+                this.layer_manager.endLevel();
+                break;
+            }
+
+            case CustomGameEvents.LEVEL_NEXT: {
+                this.sceneManager.changeToScene(this.nextLevel);
+                break;
+            }
+
             case CustomGameEvents.UPDATE_HEALTH: {
                 let currentHealth = event.data.get('currentHealth');
 				let maxHealth = event.data.get('maxHealth');
@@ -229,30 +256,18 @@ export default abstract class Level extends Scene {
             //Main menu options
             case MenuEvents.PAUSE:
                 this.layer_manager.showPauseMenu();
-                for (let enemy of this.enemies) {
-                    enemy.animation.pause();
-                    enemy.freeze();
-                }
-                this.player.freeze();
+                this.freezeLevel();
                 break;
 
             case MenuEvents.RESUME:
                 this.layer_manager.hidePauseMenu();
-                for (let enemy of this.enemies) {
-                    enemy.animation.resume();
-                    enemy.unfreeze();
-                }
-                this.player.unfreeze();
+                this.unfreezeLevel();
                 break;
-
+            // This should be overriden in individual levels
             case MenuEvents.RESTART:
                 this.layer_manager.hidePauseMenu();
-                for (let enemy of this.enemies) {
-                    enemy.animation.play("IDLE");
-                    enemy.unfreeze();
-                }
-                this.player.unfreeze();
-                this.sceneManager.changeToScene(DemoLevel);
+                this.unfreezeLevel();
+                this.sceneManager.changeToScene(MainMenu);
                 break;
 
             case MenuEvents.CONTROLS:
@@ -322,6 +337,24 @@ export default abstract class Level extends Scene {
             ability.size = new Vec2(16, 16);
             ability.scale = new Vec2(2.5, 2.5);
         }
+    }
+
+    protected freezeLevel() {
+        for (let enemy of this.enemies) {
+            enemy.animation.pause();
+            enemy.freeze();
+        }
+        this.player.freeze();
+        this.ui.disable();
+    }
+
+    protected unfreezeLevel() {
+        for (let enemy of this.enemies) {
+            enemy.animation.resume();
+            enemy.unfreeze();
+        }
+        this.player.unfreeze();
+        this.ui.enable();
     }
 
     protected initWeaponParticles(): void {

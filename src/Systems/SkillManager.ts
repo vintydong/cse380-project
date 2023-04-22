@@ -35,6 +35,7 @@ export class SkillManager {
 
     private skillBookLayer: UILayer;
 
+    // TODO: Change to singleton so it is preserved across levels
     public constructor(scene: Level, player?: AnimatedSprite) {
         this.scene = scene;
         this.player = player;

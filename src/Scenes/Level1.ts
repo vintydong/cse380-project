@@ -12,6 +12,8 @@ import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import { CustomGameEvents } from "../CustomGameEvents";
 import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
 import MainMenu from "./MenuScenes/MainMenu";
+import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
+import Color from "../Wolfie2D/Utils/Color";
 
 export default class Level1 extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "LEVEL1_ENEMY_KEY";
@@ -98,6 +100,14 @@ export default class Level1 extends Level {
             enemy.animation.play("IDLE");
             this.enemies.push(enemy);
         }
+        
+        // Set level end
+        const levelEnd = new Vec2(54.5, 14).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
+        let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(3 * 8 * 6, 4 * 8 * 6));
+        rect.color = Color.RED;
+        rect.addPhysics();
+        rect.setGroup(PhysicsGroups.LEVEL_END);
+        rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
         this.viewport.setBounds(8 * 6, 0, 8 * 6 * 58, 8 * 6 * 30);
     }
@@ -118,8 +128,8 @@ export default class Level1 extends Level {
 
         super.updateScene(deltaT);
 
-        // if(allEnemiesDefeated)
-        //     this.sceneManager.changeToScene(MainMenu);
+        if(allEnemiesDefeated)
+            this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
     }
 
     /**

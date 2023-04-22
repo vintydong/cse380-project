@@ -14,6 +14,7 @@ import FactoryManager from "../Wolfie2D/Scene/Factories/FactoryManager";
 import Color from "../Wolfie2D/Utils/Color";
 import { CustomGameEvents, MenuEvent } from "../CustomGameEvents"
 import { LevelUILayer } from "../Systems/LayerManager";
+import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 
 interface uiElementProps {
     size?: Vec2;
@@ -51,11 +52,11 @@ export default class CustomFactoryManager extends FactoryManager {
         return button;
     }
 
-    public addLabel(layer: LevelLayer, position: Vec2, text?: string): Label{
+    public addLabel(layer: LevelLayer | LevelUILayer, position: Vec2, text?: string): Label{
         return super.uiElement(UIElementType.LABEL, layer, {position, text}) as Label
     }
 
-    public addSprite(key, layer: LevelLayer, offset?: Vec2): Sprite {
+    public addSprite(key, layer: LevelLayer | LevelUILayer, offset?: Vec2): Sprite {
         let sprite = super.sprite(key, layer);
         if(offset !== undefined)
             sprite.setImageOffset(offset);
@@ -70,8 +71,8 @@ export default class CustomFactoryManager extends FactoryManager {
         return this.genericAnimatedSprite(constr, key, layerName);
     }
 
-    public graphic(type: string, layer: LevelLayer, options?: Record<string, any>): Graphic {
-        return super.graphic(type, layer, options);
+    public addGraphic(type: string, layer: LevelLayer | LevelUILayer, position: Vec2, size: Vec2): Graphic {
+        return super.graphic(type, layer, {position, size});
     }
 
     public sprite(key: string, layer: LevelLayer): Sprite {
