@@ -2,7 +2,7 @@
  * Manages Pause, Controls, Help, and Level Transition Layers for Level and MainMenu
  */
 
-import { MenuEvents } from "../CustomGameEvents";
+import { CustomGameEvents, MenuEvents } from "../CustomGameEvents";
 import CustomFactoryManager from "../Factory/CustomFactoryManager";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import { TweenableProperties } from "../Wolfie2D/Nodes/GameNode";
@@ -12,6 +12,10 @@ import Scene from "../Wolfie2D/Scene/Scene";
 import Color from "../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
 import Level from "../Scenes/Level";
+import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
+import Rect from "../Wolfie2D/Nodes/Graphics/Rect";
+import Label from "../Wolfie2D/Nodes/UIElements/Label";
+import Timer from "../Wolfie2D/Timing/Timer";
 
 export const LevelUILayers = {
     PAUSE: "PAUSE",
@@ -41,6 +45,11 @@ export class LayerManager {
     private helpLayer: UILayer;
     private transitionLayer: Layer;
 
+    // Components for the transition layer
+    private transitionScreen: Rect;
+    private transitionLabel: Label;
+    private endLevelTimer: Timer;
+
     public constructor(scene: Level){
         this.scene = scene;
 
@@ -52,12 +61,12 @@ export class LayerManager {
         this.initPauseLayer();
         this.initControlLayer();
         this.initHelplayer();
+        this.initTransitionLayer();
 
         this.pauseLayer.disable();
         this.controlLayer.disable();
         this.helpLayer.disable();
-        
-        // this.initTransitionLayer();
+        // this.transitionLayer.disable();
     }
 
     public isPaused(): boolean {
@@ -160,6 +169,7 @@ export class LayerManager {
             onClickEventId: MenuEvents.PAUSE
         })
     }
+
     private initHelplayer() {
         let help = this.scene.add.sprite(LayerManager.HELP_SPRITE_KEY, LevelUILayers.HELP);
 
@@ -191,8 +201,97 @@ export class LayerManager {
             onClickEventId: MenuEvents.PAUSE
         })
     }
+
     private initTransitionLayer() {
-        throw new Error("Method not implemented.");
+        // throw new Error("Method not implemented.");
+        let viewport = this.scene.getViewport();
+        let viewportCenter = viewport.getCenter();
+        let viewportSize = viewport.getHalfSize().clone().scale(2,2);
+
+        this.transitionScreen = this.scene.factory.addGraphic(GraphicType.RECT, LevelUILayers.TRANSITION, viewportCenter.clone(), viewportSize) as Rect;
+        this.transitionScreen.color = Color.BLACK;
+        this.transitionScreen.alpha = 1;
+        this.transitionScreen.scale = new Vec2(1,1);
+        
+        this.transitionScreen.tweens.add("fadeIn", {
+            startDelay: 0,
+            duration: 1000,
+            effects: [
+                {
+                    property: TweenableProperties.alpha,
+                    start: 0,
+                    end: 1,
+                    ease: EaseFunctionType.IN_OUT_QUAD
+                },
+            ],
+            onEnd: CustomGameEvents.LEVEL_NEXT
+        });
+
+        this.transitionScreen.tweens.add("fadeOut", {
+            startDelay: 0,
+            duration: 1000,
+            effects: [
+                {
+                    property: TweenableProperties.alpha,
+                    start: 1,
+                    end: 0,
+                    ease: EaseFunctionType.IN_OUT_SINE
+                },{
+                    property: TweenableProperties.scaleX,
+                    start: 1, 
+                    end: 0,
+                    ease: EaseFunctionType.IN_OUT_QUAD,
+                },{
+                    property: TweenableProperties.scaleY,
+                    start: 1, 
+                    end: 0,
+                    ease: EaseFunctionType.IN_OUT_QUAD,
+                }
+            ],
+            onEnd: CustomGameEvents.LEVEL_START
+        });
+
+        this.transitionLabel = this.scene.factory.addLabel(LevelUILayers.TRANSITION, viewportCenter.clone(), "Level Complete")
+        this.transitionLabel.tweens.add("slideIn", {
+            startDelay: 0,
+            duration: 1000,
+            effects: [
+                {
+                    property: TweenableProperties.posX,
+                    start: -300,
+                    end: 300,
+                    ease: EaseFunctionType.OUT_SINE
+                }
+            ]
+        })
+        this.transitionLabel.visible = false;
+
+        this.endLevelTimer = new Timer(2000, () => { this.transitionScreen.tweens.play("fadeIn"); })
     }
 
+    public startLevel(){
+        this.transitionScreen.tweens.play("fadeOut");
+    }
+
+    public endLevel(){
+        if(!this.endLevelTimer.hasRun() && this.endLevelTimer.isStopped()){
+            console.log("Starting end level timer");
+            this.transitionScreen.scale.x = 1;
+            this.transitionScreen.scale.y = 1;
+            this.endLevelTimer.start();
+            this.transitionLabel.visible = true;
+            this.transitionLabel.tweens.play('slideIn')
+        }
+    }
+
+    // /** Sets transition background active if state == true else disables it */
+    // public setTransitionLayer(state: boolean) {
+    //     state ? this.transitionLayer.enable() : this.transitionLayer.disable();
+    // }
+    
+    // /** Plays fadeIn animation if state == true else fadeOut animation */
+    // public playTransition(state: boolean) {
+    //     let tweens = this.transitionScreen.tweens;
+    //     state ? tweens.play('fadeIn') : tweens.play('fadeOut');
+    // }
 }
