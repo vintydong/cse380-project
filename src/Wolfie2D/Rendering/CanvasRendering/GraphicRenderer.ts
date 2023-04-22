@@ -59,14 +59,14 @@ export default class GraphicRenderer {
         // Draw the interior of the rect
         if(rect.color.a !== 0){
             this.ctx.fillStyle = rect.color.toStringRGB();
-            this.ctx.fillRect((-rect.size.x/2)*zoom, (-rect.size.y/2)*zoom, rect.size.x*zoom, rect.size.y*zoom);
+            this.ctx.fillRect((-rect.size.x/2)*zoom*rect.scale.x, (-rect.size.y/2)*zoom*rect.scale.y, rect.size.x*zoom*rect.scale.x, rect.size.y*zoom*rect.scale.y);
         }
 
         // Draw the border of the rect if it isn't transparent
         if(rect.borderColor.a !== 0){
             this.ctx.strokeStyle = rect.getBorderColor().toStringRGB();
             this.ctx.lineWidth = rect.getBorderWidth();
-            this.ctx.strokeRect((-rect.size.x/2)*zoom, (-rect.size.y/2)*zoom, rect.size.x*zoom, rect.size.y*zoom);
+            this.ctx.strokeRect((-rect.size.x/2)*zoom, (-rect.size.y/2)*zoom, rect.size.x*zoom*rect.scale.x, rect.size.y*zoom*rect.scale.y);
         }
     }
 }
