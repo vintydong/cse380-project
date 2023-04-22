@@ -155,6 +155,7 @@ export default abstract class Level extends Scene {
         // this.emitter.fireEvent(CustomGameEvents.LEVEL_START)
         this.layer_manager.startLevel();
         Input.disableInput();
+        this.ui.disable();
     }
     
     private subscribeEvents() {
@@ -221,14 +222,16 @@ export default abstract class Level extends Scene {
 
             case CustomGameEvents.LEVEL_START: {
                 Input.enableInput();
+                this.ui.enable();
                 break;
             }
 
             case CustomGameEvents.PLAYER_ENTER_LEVEL_END: {
-                
+
             }
 
             case CustomGameEvents.LEVEL_END: {
+                this.ui.disable();
                 this.layer_manager.endLevel();
                 break;
             }

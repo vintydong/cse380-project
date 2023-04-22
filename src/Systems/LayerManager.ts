@@ -26,7 +26,9 @@ export const LevelUILayers = {
 
 export type LevelUILayer = typeof LevelUILayers[keyof typeof LevelUILayers]
 
-/** Manages the "hidden" UI layers in a Level such as pause menu, controls, help, etc. */
+/** Manages the "hidden" UI layers in a Level such as pause menu, controls, help, etc.
+ * @author vintydong
+ */
 export class LayerManager {
     /** The level that will use this LayerManager */
     private scene: Level;
@@ -275,6 +277,7 @@ export class LayerManager {
     }
 
     public startLevel(){
+        this.transitionLabel.visible = false;
         this.transitionScreen.tweens.play("fadeOut");
     }
 
