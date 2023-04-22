@@ -118,8 +118,8 @@ export default class Level1 extends Level {
 
         super.updateScene(deltaT);
 
-        // if(allEnemiesDefeated)
-        //     this.sceneManager.changeToScene(MainMenu);
+        if(allEnemiesDefeated)
+            this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
     }
 
     /**
