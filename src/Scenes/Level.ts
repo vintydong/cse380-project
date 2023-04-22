@@ -166,6 +166,8 @@ export default abstract class Level extends Scene {
         this.receiver.subscribe(CustomGameEvents.TOGGLE_SKILL_BOOK);
 
         this.receiver.subscribe(CustomGameEvents.LEVEL_START);
+        this.receiver.subscribe(CustomGameEvents.PLAYER_ENTER_LEVEL_END);
+        this.receiver.subscribe(CustomGameEvents.LEVEL_NEXT);
         this.receiver.subscribe(CustomGameEvents.LEVEL_END);
 
         this.receiver.subscribe(MenuEvents.RESUME);
@@ -220,6 +222,10 @@ export default abstract class Level extends Scene {
             case CustomGameEvents.LEVEL_START: {
                 Input.enableInput();
                 break;
+            }
+
+            case CustomGameEvents.PLAYER_ENTER_LEVEL_END: {
+                
             }
 
             case CustomGameEvents.LEVEL_END: {

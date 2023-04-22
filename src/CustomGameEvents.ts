@@ -15,6 +15,10 @@ export const CustomGameEvents = {
   LEVEL_END: "LEVEL_END",
   /** Event emitted when level should change to next */
   LEVEL_NEXT: "LEVEL_NEXT",
+  /* Event emitted when player has entered the level end area 
+   * Level end condition should be checked e.g. all enemies defeated 
+  */
+  PLAYER_ENTER_LEVEL_END: "PLAYER_ENTER_LEVEL_END"
 } as const;
 
 export type CustomGameEvent = typeof CustomGameEvents[keyof typeof CustomGameEvents]

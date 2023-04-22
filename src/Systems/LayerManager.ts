@@ -251,15 +251,20 @@ export class LayerManager {
             onEnd: CustomGameEvents.LEVEL_START
         });
 
-        this.transitionLabel = this.scene.factory.addLabel(LevelUILayers.TRANSITION, viewportCenter.clone(), "Level Complete")
+        let viewportTopRight = viewportCenter.clone();
+        viewportTopRight.x = viewportTopRight.x + viewportSize.x/2;
+        viewportTopRight.y = viewportTopRight.y - viewportSize.y/2;
+
+        this.transitionLabel = this.scene.factory.addLabel(LevelUILayers.TRANSITION, viewportTopRight, "Level Complete")
+        this.transitionLabel.backgroundColor = new Color(100, 100, 100);
         this.transitionLabel.tweens.add("slideIn", {
             startDelay: 0,
             duration: 1000,
             effects: [
                 {
                     property: TweenableProperties.posX,
-                    start: -300,
-                    end: 300,
+                    start: viewportTopRight.x,
+                    end: viewportTopRight.x - 300,
                     ease: EaseFunctionType.OUT_SINE
                 }
             ]
