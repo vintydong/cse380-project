@@ -211,6 +211,14 @@ export default abstract class Level extends Scene {
         let type = event.type as MenuEvent | CustomGameEvent;
         console.log("Handling event type", type);
         switch (type) {
+             // Let Level.ts handle it by default
+            case CustomGameEvents.UPDATE_HEALTH: {
+                let currentHealth = event.data.get('currentHealth');
+                let maxHealth = event.data.get('maxHealth');
+                this.handleHealthChange(currentHealth, maxHealth);
+                break;
+            }
+
             case CustomGameEvents.SKILL_1_FIRED: {
                 this.skill_manager.activateSkill(0, {direction: event.data.get("direction")})
                 break;
@@ -419,38 +427,38 @@ export default abstract class Level extends Scene {
         }
     }
 
-    protected spawnBubble(direction: string): void {
-        // Find the first visible particle
-        let particle: Particle = this.weaponParticles.getPool().find((bubble: Particle) => { return !bubble.visible });
-        if (particle) {
-            // Bring this bubble to life
-            particle.visible = true;
+    // protected spawnBubble(direction: string): void {
+    //     // Find the first visible particle
+    //     let particle: Particle = this.weaponParticles.getPool().find((bubble: Particle) => { return !bubble.visible });
+    //     if (particle) {
+    //         // Bring this bubble to life
+    //         particle.visible = true;
 
-            particle.position = this.player.position.clone();
+    //         particle.position = this.player.position.clone();
 
-            particle.setAIActive(true, { direction: direction });
-        }
-    }
+    //         particle.setAIActive(true, { direction: direction });
+    //     }
+    // }
 
-    protected spawnBasicAttack(direction: string): void {
-		// Find the first visible basic attack
-		let basicAttack: Graphic = this.basicAttacks.find((basicAttack: Graphic) => { return !basicAttack.visible });
-        console.log("basicAttack:", basicAttack);
-		if (basicAttack){
-			// Bring this basic attack to life
-			basicAttack.visible = true;
-            basicAttack.alpha = 1;
+    // protected spawnBasicAttack(direction: string): void {
+	// 	// Find the first visible basic attack
+	// 	let basicAttack: Graphic = this.basicAttacks.find((basicAttack: Graphic) => { return !basicAttack.visible });
+    //     console.log("basicAttack:", basicAttack);
+	// 	if (basicAttack){
+	// 		// Bring this basic attack to life
+	// 		basicAttack.visible = true;
+    //         basicAttack.alpha = 1;
 
-            // Calculate basic attack offset from player center
-            let newPosition = this.player.position.clone();
-            let xOffset = basicAttack.boundary.getHalfSize().x
-            newPosition.x += (direction == "left")? -1 * xOffset : xOffset;
-            basicAttack.position = newPosition;
+    //         // Calculate basic attack offset from player center
+    //         let newPosition = this.player.position.clone();
+    //         let xOffset = basicAttack.boundary.getHalfSize().x
+    //         newPosition.x += (direction == "left")? -1 * xOffset : xOffset;
+    //         basicAttack.position = newPosition;
 
-			basicAttack.setAIActive(true, {direction: direction});
-            basicAttack.tweens.play("fadeout");
-		}
-	}
+	// 		basicAttack.setAIActive(true, {direction: direction});
+    //         basicAttack.tweens.play("fadeout");
+	// 	}
+	// }
 
     public handleScreenDespawn(node: CanvasNode): void {
         let inViewport = this.viewport.includes(node)
@@ -469,4 +477,8 @@ export default abstract class Level extends Scene {
 
 		this.healthBar.backgroundColor = currentHealth < maxHealth * 1/4 ? Color.RED: currentHealth < maxHealth * 3/4 ? Color.YELLOW : Color.GREEN;
 	}
+
+    public getPlayer() { 
+        return this.player;
+    }
 }
