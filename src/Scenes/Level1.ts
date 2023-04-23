@@ -140,14 +140,6 @@ export default class Level1 extends Level {
      */
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
-            // Let Level.ts handle it by default
-            case CustomGameEvents.UPDATE_HEALTH: {
-                let currentHealth = event.data.get('currentHealth');
-				let maxHealth = event.data.get('maxHealth');
-				this.handleHealthChange(currentHealth, maxHealth);
-				break;
-            }
-
             default:
                 super.handleEvent(event);
                 break;
