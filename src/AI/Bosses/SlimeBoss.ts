@@ -11,8 +11,7 @@ import { Air, Dead, EnemyState, Ground } from "../demo_enemy/EnemyStates";
 
 enum SlimeAnimations {
     IDLE = "IDLE",
-    RUNNING_LEFT = "RUNNING_LEFT",
-    RUNNING_RIGHT = "RUNNING_RIGHT",
+    RUNNING = "RUNNING",
     TAKING_DAMAGE = "TAKING_DAMAGE",
     DEAD = "DEAD",
 }
@@ -84,14 +83,17 @@ export class SlimeBossController extends BasicEnemyController {
         this.velocity = Vec2.ZERO;
         this.MAX_SPEED = 1000;
         this.MIN_SPEED = 500;
+        this._health = 100;
         this.speed = this.MIN_SPEED
 
         this.addState(SlimeBossStates.AIR, new Air(this, this.owner));
         this.addState(SlimeBossStates.GROUND, new SlimeGround(this, this.owner));
         this.addState(SlimeBossStates.DEAD, new Dead(this, this.owner));
 
-        this.receiver.subscribe(CustomGameEvents.ENEMY_HIT);
+        // this.receiver.subscribe(CustomGameEvents.ENEMY_HIT);
+        this.receiver.subscribe('DAMAGE_ENEMY');
         this.initialize(SlimeBossStates.AIR);
+        console.log(this);
     }
 
     public activate(options: Record<string, any>): void { }
@@ -105,18 +107,33 @@ export class SlimeBossController extends BasicEnemyController {
      */
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
-            case CustomGameEvents.ENEMY_HIT:
-                // console.log(event.data);
+            case 'DAMAGE_ENEMY':
+                // break;
+                // case CustomGameEvents.ENEMY_HIT:
                 let id = event.data.get('node');
+                let dmg = event.data.get('damage')
+                console.log("SLIMEBOSS: ENEMY HIT", id, dmg, this.owner.id);
                 if (id === this.owner.id) {
-                    this.owner.position = new Vec2(3000, 3000);
-                    this.owner.visible = false;
+                    console.log("DAMAGE", dmg)
+                    // this.owner.position = new Vec2(3000, 3000);
+                    // this.owner.visible = false;
+                    this.takeDamage(dmg);
                 }
                 break;
             default: {
                 super.handleEvent(event);
                 break;
             }
+        }
+    }
+
+    public takeDamage(damage: number){
+        this.health = this.health - damage;
+        console.log("AFTER DAMG:", this.health)
+        if(this.health <= 0){
+            console.log("DEAD");
+            this.owner.position = new Vec2(3000, 3000);
+            this.owner.visible = false;
         }
     }
 }

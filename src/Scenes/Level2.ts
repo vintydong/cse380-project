@@ -84,7 +84,7 @@ export default class Level2 extends Level {
         enemy.scale = new Vec2(2,2);
         enemy.addPhysics(new Circle(enemy.position, 16 * 2));
         enemy.setGroup(PhysicsGroups.NPC);
-        enemy.setTrigger(PhysicsGroups.WEAPON, CustomGameEvents.ENEMY_HIT, null);
+        // enemy.setTrigger(PhysicsGroups.WEAPON, CustomGameEvents.ENEMY_HIT, null);
         enemy.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENEMY_COLLISION, null);
         enemy.navkey = "navmesh";
 

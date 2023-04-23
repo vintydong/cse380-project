@@ -34,6 +34,9 @@ export abstract class EnemyState extends State {
      */
     public handleInput(event: GameEvent): void {
         switch (event.type) {
+            case 'DAMAGE_ENEMY':
+                console.log("HANDIEKN)UT DAMAGED");
+                break;
             // Default - throw an error
             default: {
                 throw new Error(`Unhandled event in EnemeyState of type ${event.type}`);

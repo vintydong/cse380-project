@@ -6,6 +6,7 @@ import BasicAttackShaderType from "../../Shaders/BasicAttackShaderType";
 import AI from "../../Wolfie2D/DataTypes/Interfaces/AI";
 import Circle from "../../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
+import Emitter from "../../Wolfie2D/Events/Emitter";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Receiver from "../../Wolfie2D/Events/Receiver";
 import Graphic from "../../Wolfie2D/Nodes/Graphic";
@@ -37,10 +38,8 @@ export default class Melee extends Skill {
         this.hitbox.visible = false;
         this.hitbox.color = Color.BLUE;
 
-        this.hitbox.addAI(BasicAttack);
+        this.hitbox.addAI(MeleeBehavior);
 
-        let collider = new Circle(Vec2.ZERO, 25);
-        this.hitbox.setCollisionShape(collider);
         this.hitbox.addPhysics();
         this.hitbox.setGroup(PhysicsGroups.WEAPON);
         this.hitbox.setTrigger(PhysicsGroups.NPC, CustomGameEvents.ENEMY_HIT, null);
@@ -56,7 +55,8 @@ export default class Melee extends Skill {
                     end: 0,
                     ease: EaseFunctionType.IN_OUT_SINE
                 }
-            ]
+            ],
+            onEnd: 'MELEE_ATTACK_END',
         });
     }
 
@@ -85,6 +85,7 @@ export class MeleeBehavior implements AI {
     // The GameNode that owns this behavior
     private owner: Graphic;
     private receiver: Receiver;
+    private emitter: Emitter;
 
     // The direction to fire the bubble
     private direction: string;
@@ -92,8 +93,10 @@ export class MeleeBehavior implements AI {
     public initializeAI(owner: Graphic, options: Record<string, any>): void {
         this.owner = owner;
 
+        this.emitter = new Emitter();
         this.receiver = new Receiver();
         this.receiver.subscribe(CustomGameEvents.ENEMY_HIT);
+        this.receiver.subscribe('MELEE_ATTACK_END');
 
         this.activate(options);
     }
@@ -111,7 +114,14 @@ export class MeleeBehavior implements AI {
 
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
+            case 'MELEE_ATTACK_END':
+                this.owner.position.copy(Vec2.ZERO);
+                this.owner._velocity.copy(Vec2.ZERO);
+                this.owner.visible = false;
+                break;
             case CustomGameEvents.ENEMY_HIT:
+                console.log("WIJDQOIWJDOIQW", event.data);
+                this.emitter.fireEvent('DAMAGE_ENEMY', {'node': event.data.get('node'), 'damage': 50});
                 // console.log(event.data);
                 let id = event.data.get('other');
                 if(id === this.owner.id){
