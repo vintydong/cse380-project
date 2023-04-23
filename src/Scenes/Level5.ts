@@ -22,7 +22,7 @@ import CanvasNode from "../Wolfie2D/Nodes/CanvasNode";
 
 export default class Level5 extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "LEVEL5_ENEMY_KEY";
-    public static readonly ENEMY_SPRITE_PATH = "assets/sprites/Slime.json";
+    public static readonly ENEMY_SPRITE_PATH = "assets/spritesheets/Enemies/Slime.json";
     public static readonly ENEMY_POSITIONS_KEY = "LEVEL5_ENEMY_POSITIONS";
     // public static readonly ENEMY_POSIITIONS_PATH = "assets/data/demo_enemy.json";
 
