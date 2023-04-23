@@ -1,7 +1,5 @@
 import { SlimeBossActor, SlimeBossController } from "../AI/Bosses/SlimeBoss";
-import { SlimeBehavior, SlimeController } from "../AI/Bosses/SlimeBossAI";
 import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
-import demoEnemyController from "../AI/demo_enemy/demoEnemyController";
 import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";

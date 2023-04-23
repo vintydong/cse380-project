@@ -25,22 +25,47 @@ enum SlimeBossStates {
 
 class SlimeGround extends EnemyState {
     private dir: number = null;
-    private time: number = 100;
+    private time: number = 0;
+    private jumping: boolean = false;
 
     public onEnter(options: Record<string, any>): void {
         this.parent.speed = 750;
     }
 
     public update(deltaT: number): void {
-        if (this.dir && this.time > 0) {
-            this.owner.move(this.parent.velocity.scaled(deltaT));
+        super.update(deltaT);
+        this.owner.move(this.parent.velocity.scaled(deltaT));
+
+        if (this.time > 0 && !this.jumping) {
             this.time -= 1;
         }
-        else {
-            this.time = 100;
-            this.dir = (Math.random() - 0.5) * this.parent.speed;
-            this.parent.velocity.x = this.dir;
-            console.log("move", this.parent.velocity.x, this.parent.velocity.y);
+        
+        if (!this.owner.onGround && (this.owner.onCeiling || this.parent.velocity.y > 0)){
+            this.jumping = false;
+            return this.finished(SlimeBossStates.AIR);
+		} else if (this.parent.velocity.y < 0) {
+            this.parent.velocity.y += this.parent.gravity * deltaT;
+            this.owner.move(this.parent.velocity.scaled(deltaT));
+        }
+
+        if (!this.jumping && this.time <= 0) {
+            let r = Math.random();
+            if (r < .15){
+                this.time = 100;
+                this.dir = (Math.random() - 0.5) * this.parent.speed;
+                this.parent.velocity.x = this.dir;
+            }
+            else if (r < .65){
+                let scene = this.owner.getScene() as Level;
+                let player = scene.getPlayer().position.clone();
+                let dir = this.owner.position.dirTo(player);
+                this.parent.velocity.x = dir.x;
+                this.parent.velocity.y = -2;
+                this.parent.velocity.scaleTo(this.parent.speed);
+                this.jumping = true;
+            }
+            else // Add attack here
+                this.parent;
         }
     }
 
@@ -52,12 +77,6 @@ class SlimeGround extends EnemyState {
 
 export class SlimeBossController extends BasicEnemyController {
     protected override owner: SlimeBossActor;
-    
-    // protected _maxHealth: number = 100;
-    // protected _health: number = 100;
-    // protected _speed: number = 100;
-    // protected _velocity: Vec2;
-    // protected _gravity: number = 1000;
 
     public initializeAI(owner: SlimeBossActor, options: Record<string, any>): void {
         super.initializeAI(owner, options);
