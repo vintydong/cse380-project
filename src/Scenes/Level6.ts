@@ -1,16 +1,15 @@
 import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
 import demoEnemyController from "../AI/demo_enemy/demoEnemyController";
 import { PhysicsGroups } from "../Physics";
+import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
+import ParticleShaderType from "../Shaders/ParticleShaderType";
+import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Level, { LevelLayers } from "./Level";
-import ParticleShaderType from "../Shaders/ParticleShaderType";
-import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
-import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
-import MainMenu from "./MainMenu";
 
 export default class Level6 extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "LEVEL6_ENEMY_KEY";
@@ -101,7 +100,6 @@ export default class Level6 extends Level {
             enemy.position.set(enemies.objects[i].x * 6, enemies.objects[i].y * 6);
             enemy.addPhysics(new Circle(enemy.position, 16));
             enemy.setGroup(PhysicsGroups.NPC);
-            enemy.setTrigger(PhysicsGroups.WEAPON, 'ENEMY_HIT', null);
             enemy.setTrigger(PhysicsGroups.PLAYER, 'ENEMY_COLLISION', null);
             enemy.navkey = "navmesh";
 
@@ -118,20 +116,7 @@ export default class Level6 extends Level {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
-
-        // Handle despawning of attacks
-        for (let basicAttack of this.basicAttacks) if (basicAttack.visible) this.handleScreenDespawn(basicAttack);
-        // for (let bubble of this.bubbles) if (bubble.visible) this.handleScreenDespawn(bubble);
-
-        let allEnemiesDefeated = true
-        for(let i = 0; i < this.enemies.length; i++){
-            if(this.enemies[i].visible) allEnemiesDefeated = false;
-        }
-
         super.updateScene(deltaT);
-
-        if(allEnemiesDefeated)
-            this.sceneManager.changeToScene(MainMenu);
     }
 
     /**
