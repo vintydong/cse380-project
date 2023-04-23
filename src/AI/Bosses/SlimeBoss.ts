@@ -90,8 +90,7 @@ export class SlimeBossController extends BasicEnemyController {
         this.addState(SlimeBossStates.GROUND, new SlimeGround(this, this.owner));
         this.addState(SlimeBossStates.DEAD, new Dead(this, this.owner));
 
-        // this.receiver.subscribe(CustomGameEvents.ENEMY_HIT);
-        this.receiver.subscribe('DAMAGE_ENEMY');
+        this.receiver.subscribe(CustomGameEvents.ENEMY_DAMAGE);
         this.initialize(SlimeBossStates.AIR);
         console.log(this);
     }
@@ -107,14 +106,11 @@ export class SlimeBossController extends BasicEnemyController {
      */
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
-            case 'DAMAGE_ENEMY':
-                // break;
-                // case CustomGameEvents.ENEMY_HIT:
+            case CustomGameEvents.ENEMY_DAMAGE:
                 let id = event.data.get('node');
                 let dmg = event.data.get('damage')
-                console.log("SLIMEBOSS: ENEMY HIT", id, dmg, this.owner.id);
+                // console.log("SLIMEBOSS: ENEMY HIT", id, dmg, this.owner.id);
                 if (id === this.owner.id) {
-                    console.log("DAMAGE", dmg)
                     // this.owner.position = new Vec2(3000, 3000);
                     // this.owner.visible = false;
                     this.takeDamage(dmg);
@@ -129,9 +125,7 @@ export class SlimeBossController extends BasicEnemyController {
 
     public takeDamage(damage: number){
         this.health = this.health - damage;
-        console.log("AFTER DAMG:", this.health)
         if(this.health <= 0){
-            console.log("DEAD");
             this.owner.position = new Vec2(3000, 3000);
             this.owner.visible = false;
         }

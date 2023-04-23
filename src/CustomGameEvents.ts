@@ -3,6 +3,12 @@
 */
 export const CustomGameEvents = {
   ENEMY_HIT: "ENEMY_HIT",
+  /** Event emitted when an enemy has been damaged
+   * Data: { node: number, damage: number}
+   * node is the id of the GameNode (enemy) that should be damaged
+   * damage is the amount of health that should be decreased
+   */
+  ENEMY_DAMAGE: "ENEMY_DAMAGE",
   PLAYER_ENEMY_COLLISION: "ENEMY_COLLISION",
   BOSS_KILLED: "BOSS_KILLED",
 
