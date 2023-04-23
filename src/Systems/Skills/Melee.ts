@@ -37,7 +37,7 @@ export default class Melee extends Skill {
         this.hitbox.visible = false;
         this.hitbox.color = Color.BLUE;
 
-        this.hitbox.addAI(BasicAttack);
+        this.hitbox.addAI(MeleeBehavior);
 
         let collider = new Circle(Vec2.ZERO, 25);
         this.hitbox.setCollisionShape(collider);
