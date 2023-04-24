@@ -1,6 +1,6 @@
 {
 	"name": "Enemy_Knight",
-	"spriteSheetImage": "Enemy_Knight_Blue.png",
+	"spriteSheetImage": "Enemy_Knight_Green.png",
 	"spriteWidth": 32,
 	"spriteHeight": 32,
 	"leftBuffer": 0,

@@ -208,7 +208,6 @@ export class Knockback extends PlayerState {
     private direction: string;
 
     public onEnter(options: Record<string, any>): void {
-        this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
         this.parent.speed = this.parent.MAX_SPEED;
         this.parent.velocity.y = 0;
         this.direction = this.parent.facing;
@@ -217,7 +216,6 @@ export class Knockback extends PlayerState {
     public handleInput(event: GameEvent): void { }
 
     public update(deltaT: number): void {
-        this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
         super.update(deltaT);
         let dx = (this.direction == "left") ? 1 : -1
 
@@ -228,7 +226,6 @@ export class Knockback extends PlayerState {
     }
 
     public onExit(): Record<string, any> { 
-        this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
         return {}; 
     }
 }
