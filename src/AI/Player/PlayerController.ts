@@ -8,7 +8,7 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
-import { Attack, Dash, Dead, Fall, Idle, Jump, Walk } from './PlayerStates';
+import { Ground, Air, Dash, Dead } from './PlayerStates';
 
 /**
  * Specify any keybindings needed for the player
@@ -20,7 +20,6 @@ export enum PlayerControls {
     MOVE_LEFT = "MOVE_LEFT",
     MOVE_RIGHT = "MOVE_RIGHT",
     DASH = "DASH",
-    // ATTACKING = "ATTACKING",
     SKILL_ONE = "SKILL_ONE",
     SKILL_TWO = "SKILL_TWO",
     SKILL_THREE = "SKILL_THREE",
@@ -30,12 +29,9 @@ export enum PlayerControls {
 }
 
 export enum PlayerStates {
-    IDLE = "IDLE",
-    WALK = "WALK",
+    GROUND = "GROUND",
+    AIR = "AIR",
     DASH = "DASH",
-    JUMP = "JUMP",
-    FALL = "FALL",
-    ATTACKING = "ATTACKING",
     DEAD = "DEAD",
 }
 
@@ -91,17 +87,14 @@ export default class PlayerController extends StateMachineAI {
         this._iFrameTimer = new Timer(1000, this.handleIFrameTimerEnd, false);
 
         // Add the different states the player can be in to the PlayerController 
-        this.addState(PlayerStates.ATTACKING, new Attack(this, this.owner));
+        this.addState(PlayerStates.GROUND, new Ground(this, this.owner));
+        this.addState(PlayerStates.AIR, new Air(this, this.owner));
         this.addState(PlayerStates.DASH, new Dash(this, this.owner));
         this.addState(PlayerStates.DEAD, new Dead(this, this.owner));
-        this.addState(PlayerStates.FALL, new Fall(this, this.owner));
-		this.addState(PlayerStates.IDLE, new Idle(this, this.owner));
-        this.addState(PlayerStates.JUMP, new Jump(this, this.owner));
-		this.addState(PlayerStates.WALK, new Walk(this, this.owner));
 
         this.receiver.subscribe('ENEMY_COLLISION');
 
-        this.initialize(PlayerStates.IDLE);
+        this.initialize(PlayerStates.GROUND);
     }
 
     public handleEvent(event: GameEvent): void{
@@ -155,16 +148,11 @@ export default class PlayerController extends StateMachineAI {
     public get maxHealth(): number { return this._maxHealth; }
     public set maxHealth(maxHealth: number) { 
         this._maxHealth = maxHealth; 
-        // When the health changes, fire an event up to the scene.
-        // this.emitter.fireEvent(HW3Events.HEALTH_CHANGE, {curhp: this.health, maxhp: this.maxHealth});
     }
 
     public get health(): number { return this._health; }
     public set health(health: number) { 
         this._health = MathUtils.clamp(health, 0, this.maxHealth);
-        // When the health changes, fire an event up to the scene.
-        // this.emitter.fireEvent(HW3Events.HEALTH_CHANGE, {curhp: this.health, maxhp: this.maxHealth});
-        // If the health hit 0, change the state of the player
     }
 
     public get facing(): string { return this._facing; }
