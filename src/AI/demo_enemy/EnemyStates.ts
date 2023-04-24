@@ -98,7 +98,6 @@ export class Ground extends EnemyState {
 
     public update(deltaT: number): void {
         super.update(deltaT);
-        // console.log(this.parent.velocity.x, this.parent.velocity.y, this.time);
         if (this.dir && this.time > 0) {
             this.owner.move(this.parent.velocity.scaled(deltaT));
             this.time -= 1;

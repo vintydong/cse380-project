@@ -117,20 +117,7 @@ export default class DemoLevel extends Level {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
-
-        // Handle despawning of attacks
-        for (let basicAttack of this.basicAttacks) if (basicAttack.visible) this.handleScreenDespawn(basicAttack);
-        // for (let bubble of this.bubbles) if (bubble.visible) this.handleScreenDespawn(bubble);
-
-        let allEnemiesDefeated = true
-        for(let i = 0; i < this.enemies.length; i++){
-            if(this.enemies[i].visible) allEnemiesDefeated = false;
-        }
-
         super.updateScene(deltaT);
-
-        if(allEnemiesDefeated)
-            this.sceneManager.changeToScene(MainMenu);
     }
 
     /**
@@ -145,7 +132,6 @@ export default class DemoLevel extends Level {
             default:
                 super.handleEvent(event);
                 break;
-                // throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
     }
 }

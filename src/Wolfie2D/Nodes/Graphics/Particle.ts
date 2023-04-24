@@ -26,6 +26,7 @@ export default class Particle extends Point {
         // Are we making this a circle?
         super(position);
         this.inUse = false;
+        this.size = size;
         this.mass = mass;
     }
 

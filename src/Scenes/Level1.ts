@@ -89,7 +89,6 @@ export default class Level1 extends Level {
             enemy.position.set(enemies.objects[i].x * 6, enemies.objects[i].y * 6);
             enemy.addPhysics(new Circle(enemy.position, 16));
             enemy.setGroup(PhysicsGroups.NPC);
-            enemy.setTrigger(PhysicsGroups.WEAPON, CustomGameEvents.ENEMY_HIT, null);
             enemy.setTrigger(PhysicsGroups.PLAYER, 'ENEMY_COLLISION', null);
             enemy.navkey = "navmesh";
 
@@ -116,11 +115,7 @@ export default class Level1 extends Level {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
-
-        // Handle despawning of attacks
-        for (let basicAttack of this.basicAttacks) if (basicAttack.visible) this.handleScreenDespawn(basicAttack);
-        // for (let bubble of this.bubbles) if (bubble.visible) this.handleScreenDespawn(bubble);
-
+        
         let allEnemiesDefeated = true
         for(let i = 0; i < this.enemies.length; i++){
             if(this.enemies[i].visible) allEnemiesDefeated = false;
