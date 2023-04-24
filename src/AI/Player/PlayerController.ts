@@ -8,7 +8,6 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
-// import { Attack, Dash, Dead, Fall, Idle, Jump, Walk } from './PlayerStates';
 import { Ground, Air, Dash, Dead } from './PlayerStates';
 
 /**
@@ -21,7 +20,6 @@ export enum PlayerControls {
     MOVE_LEFT = "MOVE_LEFT",
     MOVE_RIGHT = "MOVE_RIGHT",
     DASH = "DASH",
-    // ATTACKING = "ATTACKING",
     SKILL_ONE = "SKILL_ONE",
     SKILL_TWO = "SKILL_TWO",
     SKILL_THREE = "SKILL_THREE",
@@ -29,16 +27,6 @@ export enum PlayerControls {
     SKILL_BOOK = "SKILL_BOOK",
     PAUSE_GAME = "PAUSE_GAME",
 }
-
-// export enum PlayerStates {
-//     IDLE = "IDLE",
-//     WALK = "WALK",
-//     DASH = "DASH",
-//     JUMP = "JUMP",
-//     FALL = "FALL",
-//     ATTACKING = "ATTACKING",
-//     DEAD = "DEAD",
-// }
 
 export enum PlayerStates {
     GROUND = "GROUND",
@@ -160,16 +148,11 @@ export default class PlayerController extends StateMachineAI {
     public get maxHealth(): number { return this._maxHealth; }
     public set maxHealth(maxHealth: number) { 
         this._maxHealth = maxHealth; 
-        // When the health changes, fire an event up to the scene.
-        // this.emitter.fireEvent(HW3Events.HEALTH_CHANGE, {curhp: this.health, maxhp: this.maxHealth});
     }
 
     public get health(): number { return this._health; }
     public set health(health: number) { 
         this._health = MathUtils.clamp(health, 0, this.maxHealth);
-        // When the health changes, fire an event up to the scene.
-        // this.emitter.fireEvent(HW3Events.HEALTH_CHANGE, {curhp: this.health, maxhp: this.maxHealth});
-        // If the health hit 0, change the state of the player
     }
 
     public get facing(): string { return this._facing; }
