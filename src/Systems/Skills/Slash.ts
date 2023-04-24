@@ -14,6 +14,7 @@ import Receiver from "../../Wolfie2D/Events/Receiver";
 import Graphic from "../../Wolfie2D/Nodes/Graphic";
 import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Particle from "../../Wolfie2D/Nodes/Graphics/Particle";
+import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Color from "../../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
@@ -26,6 +27,9 @@ import Skill from "./Skill";
  */
 export default class Slash extends Skill {
     private weaponParticles: PlayerParticleSystem;
+    private hitbox: Sprite;
+    public static readonly SLASH_SPRITE_KEY = "SLASH_SPRITE_KEY";
+    public static readonly SLASH_SPRITE_PATH = "assets/sprites/attacks/ranged.png";
 
     public constructor(skill_manager: SkillManager) {
         super(skill_manager);
@@ -35,6 +39,17 @@ export default class Slash extends Skill {
 
     public initialize() {
         let scene = this.skill_manager.getScene();
+
+        this.hitbox = scene.add.sprite(Slash.SLASH_SPRITE_KEY, LevelLayers.PRIMARY)
+        this.hitbox.scale = new Vec2(2,2);
+        this.hitbox.visible = false;
+
+        this.hitbox.addAI(SlashBehavior);
+
+        this.hitbox.addPhysics();
+        this.hitbox.setGroup(PhysicsGroups.WEAPON);
+        this.hitbox.setTrigger(PhysicsGroups.NPC, CustomGameEvents.ENEMY_HIT, null);
+
         // Init particle system of 50 particles
         const particle_size = 3;
         this.weaponParticles = new PlayerParticleSystem(50, Vec2.ZERO, 3000, particle_size, 0, 50);
@@ -61,6 +76,15 @@ export default class Slash extends Skill {
 
     public activate(options?: Record<string, any>) {
         const { direction } = options;
+        // Bring this ranged attack to life
+        if (!this.hitbox.visible) {
+            this.hitbox.visible = true;
+            this.hitbox.alpha = 1;
+            this.hitbox.position = this.skill_manager.getPlayer().position.clone();
+
+            this.hitbox.setAIActive(true, {direction: direction});
+        }
+
        // Find the first visible particle
        let particle: Particle = this.weaponParticles.getPool().find((bubble: Particle) => { return !bubble.visible });
        if (particle) {
@@ -77,7 +101,7 @@ export default class Slash extends Skill {
  */
 export class SlashBehavior implements AI {
     // The GameNode that owns this behavior
-    private owner: Graphic;
+    private owner: Sprite;
     private receiver: Receiver;
 
     // The direction to fire the bubble
@@ -94,16 +118,16 @@ export class SlashBehavior implements AI {
     private minXSpeed: number;
     private maxXSpeed: number;
 
-    public initializeAI(owner: Graphic, options: Record<string, any>): void {
+    public initializeAI(owner: Sprite, options: Record<string, any>): void {
         this.owner = owner;
 
         this.receiver = new Receiver();
         this.receiver.subscribe(CustomGameEvents.ENEMY_HIT);
 
-        this.currentXSpeed = 50;
-        this.xSpeedIncrement = 20;
-        this.minXSpeed = 75;
-        this.maxXSpeed = 150;
+        this.currentXSpeed = 300;
+        this.xSpeedIncrement = 600;
+        this.minXSpeed = 300;
+        this.maxXSpeed = 1500;
 
         this.activate(options);
     }
@@ -115,8 +139,11 @@ export class SlashBehavior implements AI {
     public activate(options: Record<string, any>): void {
         // console.log(options);
         if (options) {
+            this.currentXSpeed = 300;
             this.direction = options.direction;
         }
+        if (this.direction == "left") { this.owner.invertX = true; }
+        if (this.direction == "right") { this.owner.invertX = false; }
     }
 
     public handleEvent(event: GameEvent): void {
@@ -136,6 +163,7 @@ export class SlashBehavior implements AI {
     }
 
     public update(deltaT: number): void {
+        console.log(this.currentXSpeed)
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }

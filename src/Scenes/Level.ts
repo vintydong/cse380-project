@@ -31,6 +31,8 @@ import DemoLevel from "./DemoLevel";
 import { LayerManager } from "../Systems/LayerManager";
 import MainMenu from "./MenuScenes/MainMenu";
 import { TweenableProperties } from "../Wolfie2D/Nodes/GameNode";
+import Melee from "../Systems/Skills/Melee";
+import Slash from "../Systems/Skills/Slash";
 
 export const LevelLayers = {
     PRIMARY: "PRIMARY",
@@ -104,6 +106,9 @@ export default abstract class Level extends Scene {
         this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
         this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
         this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
+
+        this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH)
+        this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH)
     }
 
     /** Common initializations between all levels */
@@ -154,8 +159,8 @@ export default abstract class Level extends Scene {
         // Fire events to start game (e.g. music)
         // this.emitter.fireEvent(CustomGameEvents.LEVEL_START)
         this.layer_manager.startLevel();
-        Input.disableInput();
-        this.ui.disable();
+        // Input.disableInput();
+        // this.ui.disable();
     }
     
     private subscribeEvents() {

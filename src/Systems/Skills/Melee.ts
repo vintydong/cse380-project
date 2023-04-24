@@ -11,6 +11,7 @@ import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Receiver from "../../Wolfie2D/Events/Receiver";
 import Graphic from "../../Wolfie2D/Nodes/Graphic";
 import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
+import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Color from "../../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import { SkillManager } from "../SkillManager";
@@ -21,7 +22,9 @@ import Skill from "./Skill";
  * @author vintydong
  */
 export default class Melee extends Skill {
-    private hitbox: Graphic;
+    private hitbox: Sprite;
+    public static readonly MELEE_SPRITE_KEY = "MELEE_SPRITE_KEY";
+    public static readonly MELEE_SPRITE_PATH = "assets/sprites/attacks/melee.png";
 
     public constructor(skill_manager: SkillManager) {
         super(skill_manager);
@@ -32,11 +35,9 @@ export default class Melee extends Skill {
     public initialize(){
         let scene = this.skill_manager.getScene();
         
-        this.hitbox = scene.add.graphic(GraphicType.RECT, LevelLayers.PRIMARY, { position: new Vec2(0, 0), size: new Vec2(75, 100) });
-
-        this.hitbox.useCustomShader(BasicAttackShaderType.KEY);
+        this.hitbox = scene.add.sprite(Melee.MELEE_SPRITE_KEY, LevelLayers.PRIMARY)
+        this.hitbox.scale = new Vec2(3,3);
         this.hitbox.visible = false;
-        this.hitbox.color = Color.BLUE;
 
         this.hitbox.addAI(MeleeBehavior);
 
@@ -83,14 +84,14 @@ export default class Melee extends Skill {
  */
 export class MeleeBehavior implements AI {
     // The GameNode that owns this behavior
-    private owner: Graphic;
+    private owner: Sprite;
     private receiver: Receiver;
     private emitter: Emitter;
 
     // The direction to fire the bubble
     private direction: string;
 
-    public initializeAI(owner: Graphic, options: Record<string, any>): void {
+    public initializeAI(owner: Sprite, options: Record<string, any>): void {
         this.owner = owner;
 
         this.emitter = new Emitter();
@@ -110,6 +111,8 @@ export class MeleeBehavior implements AI {
         if (options) {
             this.direction = options.direction;
         }
+        if (this.direction == "left") { this.owner.invertX = true; }
+        if (this.direction == "right") { this.owner.invertX = false; }
     }
 
     public handleEvent(event: GameEvent): void {
