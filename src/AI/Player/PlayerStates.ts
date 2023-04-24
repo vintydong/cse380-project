@@ -162,6 +162,8 @@ export class Dash extends PlayerState {
         this.parent.speed = this.parent.MAX_SPEED;
         this.timestepsLeft = 15;
         this.direction = this.parent.facing;
+        this.parent.iFrameTimer.start();
+        this.parent.hit = true;
         this.owner.animation.play(PlayerAnimations.DASH);
         
     }
@@ -171,7 +173,7 @@ export class Dash extends PlayerState {
     public update(deltaT: number): void {
         super.update(deltaT);
         let xdir = (this.direction == "left") ? -1 : 1
-        this.parent.velocity.x = xdir * 2 * this.parent.speed
+        this.parent.velocity.x = xdir * 2.5 * this.parent.speed
         this.parent.velocity.y = 0;
         this.owner.move(this.parent.velocity.scaled(deltaT));
         
@@ -185,6 +187,7 @@ export class Dash extends PlayerState {
     public onExit(): Record<string, any> {
         this.owner.animation.stop();
         this.parent.dashTimer.start();
+        this.parent.hit = false;
         return {fromGround: this.fromGround};
     }
 }
@@ -199,4 +202,33 @@ export class Dead extends PlayerState {
     public update(deltaT: number): void {}
 
     public onExit(): Record<string, any> { return {}; }
+}
+
+export class Knockback extends PlayerState {
+    private direction: string;
+
+    public onEnter(options: Record<string, any>): void {
+        this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
+        this.parent.speed = this.parent.MAX_SPEED;
+        this.parent.velocity.y = 0;
+        this.direction = this.parent.facing;
+    }
+
+    public handleInput(event: GameEvent): void { }
+
+    public update(deltaT: number): void {
+        this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
+        super.update(deltaT);
+        let dx = (this.direction == "left") ? 1 : -1
+
+        this.parent.velocity.x = dx * 2000
+        this.parent.velocity.y = -750;
+        this.owner.move(this.parent.velocity.scale(deltaT));
+        this.finished(PlayerStates.GROUND);
+    }
+
+    public onExit(): Record<string, any> { 
+        this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
+        return {}; 
+    }
 }
