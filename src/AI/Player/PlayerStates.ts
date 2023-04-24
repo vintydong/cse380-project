@@ -115,8 +115,6 @@ export class Ground extends PlayerState {
 }
 
 export class Air extends PlayerState {
-    private jumping: boolean;
-    private falling: boolean;
     
     public onEnter(options: Record<string, any>): void {
         // First onGround is inaccurate, we care about subsequent ones
@@ -129,19 +127,6 @@ export class Air extends PlayerState {
     public update(deltaT: number): void {
         super.update(deltaT);
 
-        // Accurately update status with animation played, otherwise transitions are interleaved
-        if (this.owner.animation.isPlaying(PlayerAnimations.JUMPING)) {
-            this.jumping = true;
-            this.falling = false;
-        }
-        else if (this.owner.animation.isPlaying(PlayerAnimations.FALLING)) {
-            this.jumping = false;
-            this.falling = true;
-        }
-        else {
-            this.falling = false;
-        }
-
         // Handle inputs
         if (Input.isJustPressed(PlayerControls.MOVE_DOWN) || this.owner.onCeiling) {
             if (Input.isJustPressed(PlayerControls.MOVE_DOWN)) this.parent.velocity.y += 100;
@@ -151,7 +136,7 @@ export class Air extends PlayerState {
         else if (Input.isJustPressed(PlayerControls.DASH) && this.parent.airDash && this.parent.dashTimer.isStopped()) {
             this.finished(PlayerStates.DASH);
         }
-        else if (this.owner.onGround && !this.jumping && !this.falling){
+        else if (this.owner.onGround && this.parent.velocity.y >= 0){
             this.parent.airDash = true;
             this.finished(PlayerStates.GROUND);
         }
@@ -196,8 +181,6 @@ export class Dash extends PlayerState {
 
         // Transition states
         this.finished(PlayerStates.AIR)
-        // if (this.fromGround) { this.finished(PlayerStates.GROUND); }
-        // else { this.finished(PlayerStates.AIR); }p
     }
 
     public onExit(): Record<string, any> {
