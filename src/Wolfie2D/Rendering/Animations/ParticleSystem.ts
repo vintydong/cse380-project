@@ -66,6 +66,7 @@ export default class ParticleSystem implements Updateable {
         for (let i = 0; i < this.particlePool.length; i++) {
             this.particlePool[i] = <Particle>scene.add.graphic(GraphicType.PARTICLE, layer,
                 { position: this.sourcePoint.clone(), size: this.particleSize.clone(), mass: this.particleMass });
+            console.log(this.particlePool[i], this.particleSize);
             this.particlePool[i].addPhysics();
             this.particlePool[i].isCollidable = false;
             this.particlePool[i].visible = false;

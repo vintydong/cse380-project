@@ -36,8 +36,8 @@ export default class Slash extends Skill {
     public initialize() {
         let scene = this.skill_manager.getScene();
         // Init particle system of 50 particles
-        const particle_size = 3;
-        this.weaponParticles = new PlayerParticleSystem(50, Vec2.ZERO, 3000, particle_size, 0, 50);
+        const particle_size = 5;
+        this.weaponParticles = new PlayerParticleSystem(50, Vec2.ZERO, 2000, particle_size, 0, 50);
         this.weaponParticles.initializePool(scene, LevelLayers.PRIMARY);
 
         let pool = this.weaponParticles.getPool();
@@ -48,7 +48,7 @@ export default class Slash extends Skill {
             pool[i].color = Color.BLUE;
 
             // Give the particles AI
-            pool[i].addAI(ParticleBehavior);
+            pool[i].addAI(SlashBehavior);
 
             // Give the particles a collider
             let collider = new Circle(Vec2.ZERO, particle_size*particle_size);
@@ -62,6 +62,7 @@ export default class Slash extends Skill {
     public activate(options?: Record<string, any>) {
         const { direction } = options;
        // Find the first visible particle
+       // this.weaponParticles.startSystem(2000, 0, this.skill_manager.getPlayer().position.clone());
        let particle: Particle = this.weaponParticles.getPool().find((bubble: Particle) => { return !bubble.visible });
        if (particle) {
            // Bring this bubble to life
