@@ -1,18 +1,14 @@
-import BasicAttack from "../../AI/BasicAttackBehavior";
-import ParticleBehavior from "../../AI/ParticleBehavior";
 import PlayerParticleSystem from "../../AI/Player/PlayerParticleSystem";
 import { CustomGameEvents } from "../../CustomGameEvents";
 import { PhysicsGroups } from "../../Physics";
 import { LevelLayers } from "../../Scenes/Level";
-import BasicAttackShaderType from "../../Shaders/BasicAttackShaderType";
 import ParticleShaderType from "../../Shaders/ParticleShaderType";
 import AI from "../../Wolfie2D/DataTypes/Interfaces/AI";
 import Circle from "../../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
+import Emitter from "../../Wolfie2D/Events/Emitter";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Receiver from "../../Wolfie2D/Events/Receiver";
-import Graphic from "../../Wolfie2D/Nodes/Graphic";
-import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Particle from "../../Wolfie2D/Nodes/Graphics/Particle";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Color from "../../Wolfie2D/Utils/Color";
@@ -22,7 +18,7 @@ import { SkillManager } from "../SkillManager";
 import Skill from "./Skill";
 
 /**
- * A class that represents a melee attack that can be used by the player
+ * A class that represents a ranged attack that can be used by the player
  * @author vintydong
  */
 export default class Slash extends Skill {
@@ -50,28 +46,42 @@ export default class Slash extends Skill {
         this.hitbox.setGroup(PhysicsGroups.WEAPON);
         this.hitbox.setTrigger(PhysicsGroups.NPC, CustomGameEvents.ENEMY_HIT, null);
 
+        this.hitbox.tweens.add("fadeout", {
+            startDelay: 0,
+            duration: 1000,
+            effects: [
+                {
+                    property: "alpha",
+                    start: 1,
+                    end: 0,
+                    ease: EaseFunctionType.IN_OUT_SINE
+                }
+            ],
+            onEnd: 'SLASH_ATTACK_END',
+        });
+
         // Init particle system of 50 particles
-        const particle_size = 5;
-        this.weaponParticles = new PlayerParticleSystem(50, Vec2.ZERO, 2000, particle_size, 0, 50);
-        this.weaponParticles.initializePool(scene, LevelLayers.PRIMARY);
+        // const particle_size = 5;
+        // this.weaponParticles = new PlayerParticleSystem(50, Vec2.ZERO, 2000, particle_size, 0, 50);
+        // this.weaponParticles.initializePool(scene, LevelLayers.PRIMARY);
 
-        let pool = this.weaponParticles.getPool();
+        // let pool = this.weaponParticles.getPool();
 
-        for (let i = 0; i < this.weaponParticles.getPool().length; i++) {
-            pool[i].useCustomShader(ParticleShaderType.KEY);
-            pool[i].visible = false;
-            pool[i].color = Color.BLUE;
+        // for (let i = 0; i < this.weaponParticles.getPool().length; i++) {
+        //     pool[i].useCustomShader(ParticleShaderType.KEY);
+        //     pool[i].visible = false;
+        //     pool[i].color = Color.BLUE;
 
-            // Give the particles AI
-            pool[i].addAI(SlashBehavior);
+        //     // Give the particles AI
+        //     pool[i].addAI(SlashBehavior);
 
-            // Give the particles a collider
-            let collider = new Circle(Vec2.ZERO, particle_size*particle_size);
-            pool[i].setCollisionShape(collider);
-            pool[i].addPhysics();
-            pool[i].setGroup(PhysicsGroups.WEAPON);
-            pool[i].setTrigger(PhysicsGroups.NPC, CustomGameEvents.ENEMY_HIT, null);
-        }
+        //     // Give the particles a collider
+        //     let collider = new Circle(Vec2.ZERO, particle_size*particle_size);
+        //     pool[i].setCollisionShape(collider);
+        //     pool[i].addPhysics();
+        //     pool[i].setGroup(PhysicsGroups.WEAPON);
+        //     pool[i].setTrigger(PhysicsGroups.NPC, CustomGameEvents.ENEMY_HIT, null);
+        // }
     }
 
     public activate(options?: Record<string, any>) {
@@ -83,17 +93,18 @@ export default class Slash extends Skill {
             this.hitbox.position = this.skill_manager.getPlayer().position.clone();
 
             this.hitbox.setAIActive(true, {direction: direction});
+            this.hitbox.tweens.play("fadeout");
         }
 
        // Find the first visible particle
        // this.weaponParticles.startSystem(2000, 0, this.skill_manager.getPlayer().position.clone());
-       let particle: Particle = this.weaponParticles.getPool().find((bubble: Particle) => { return !bubble.visible });
-       if (particle) {
-           // Bring this bubble to life
-           particle.visible = true;
-           particle.position = this.skill_manager.getPlayer().position.clone();
-           particle.setAIActive(true, { direction: direction });
-       }
+    //    let particle: Particle = this.weaponParticles.getPool().find((bubble: Particle) => { return !bubble.visible });
+    //    if (particle) {
+    //        // Bring this bubble to life
+    //        particle.visible = true;
+    //        particle.position = this.skill_manager.getPlayer().position.clone();
+    //        particle.setAIActive(true, { direction: direction });
+    //    }
     }
 }
 
@@ -104,6 +115,7 @@ export class SlashBehavior implements AI {
     // The GameNode that owns this behavior
     private owner: Sprite;
     private receiver: Receiver;
+    private emitter: Emitter;
 
     // The direction to fire the bubble
     private direction: string;
@@ -123,7 +135,9 @@ export class SlashBehavior implements AI {
         this.owner = owner;
 
         this.receiver = new Receiver();
+        this.emitter = new Emitter();
         this.receiver.subscribe(CustomGameEvents.ENEMY_HIT);
+        this.receiver.subscribe('SLASH_ATTACK_END');
 
         this.currentXSpeed = 300;
         this.xSpeedIncrement = 600;
@@ -149,9 +163,16 @@ export class SlashBehavior implements AI {
 
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
+            case 'SLASH_ATTACK_END':
+                this.owner.position.copy(Vec2.ZERO);
+                this.owner._velocity.copy(Vec2.ZERO);
+                this.owner.visible = false;
+                break;
             case CustomGameEvents.ENEMY_HIT:
                 let id = event.data.get('other');
                 if (id === this.owner.id) {
+                    console.log("Hit an enemy with Slash", event.data);
+                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: 15});    
                     this.owner.position.copy(Vec2.ZERO);
                     this.owner._velocity.copy(Vec2.ZERO);
                     this.owner.visible = false;
@@ -164,7 +185,6 @@ export class SlashBehavior implements AI {
     }
 
     public update(deltaT: number): void {
-        console.log(this.currentXSpeed)
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }

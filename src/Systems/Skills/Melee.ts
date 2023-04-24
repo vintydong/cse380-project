@@ -1,18 +1,12 @@
-import BasicAttack from "../../AI/BasicAttackBehavior";
 import { CustomGameEvents } from "../../CustomGameEvents";
 import { PhysicsGroups } from "../../Physics";
 import { LevelLayers } from "../../Scenes/Level";
-import BasicAttackShaderType from "../../Shaders/BasicAttackShaderType";
 import AI from "../../Wolfie2D/DataTypes/Interfaces/AI";
-import Circle from "../../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Emitter from "../../Wolfie2D/Events/Emitter";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Receiver from "../../Wolfie2D/Events/Receiver";
-import Graphic from "../../Wolfie2D/Nodes/Graphic";
-import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
-import Color from "../../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import { SkillManager } from "../SkillManager";
 import Skill from "./Skill";
@@ -123,11 +117,11 @@ export class MeleeBehavior implements AI {
                 this.owner.visible = false;
                 break;
             case CustomGameEvents.ENEMY_HIT:
-                console.log("Hit an enemy with Melee", event.data);
-                this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: 20});
                 // console.log(event.data);
                 let id = event.data.get('other');
                 if(id === this.owner.id){
+                    console.log("Hit an enemy with Melee", event.data);
+                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: 20});
                     this.owner.position.copy(Vec2.ZERO);
                     this.owner._velocity.copy(Vec2.ZERO);
                     this.owner.visible = false;

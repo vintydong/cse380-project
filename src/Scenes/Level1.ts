@@ -14,6 +14,7 @@ import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
 import MainMenu from "./MenuScenes/MainMenu";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Color from "../Wolfie2D/Utils/Color";
+import Level2 from "./Level2";
 
 export default class Level1 extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "LEVEL1_ENEMY_KEY";
@@ -109,6 +110,8 @@ export default class Level1 extends Level {
         rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
         this.viewport.setBounds(8 * 6, 0, 8 * 6 * 58, 8 * 6 * 30);
+
+        this.nextLevel = Level2;
     }
 
     public updateScene(deltaT) {

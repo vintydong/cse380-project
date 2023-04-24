@@ -1,22 +1,17 @@
-import BasicAttack from "../AI/BasicAttackBehavior";
-import ParticleBehavior from "../AI/ParticleBehavior";
 import PlayerController from "../AI/Player/PlayerController";
 import PlayerParticleSystem from "../AI/Player/PlayerParticleSystem";
 import { CustomGameEvent, CustomGameEvents, MenuEvent, MenuEvents } from "../CustomGameEvents";
 import CustomFactoryManager from "../Factory/CustomFactoryManager";
 import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
-import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
-import ParticleShaderType from "../Shaders/ParticleShaderType";
+import { LayerManager } from "../Systems/LayerManager";
 import { SkillManager } from "../Systems/SkillManager";
+import Melee from "../Systems/Skills/Melee";
+import Slash from "../Systems/Skills/Slash";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
-import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import Input from "../Wolfie2D/Input/Input";
-import CanvasNode from "../Wolfie2D/Nodes/CanvasNode";
 import Graphic from "../Wolfie2D/Nodes/Graphic";
-import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
-import Particle from "../Wolfie2D/Nodes/Graphics/Particle";
 import AnimatedSprite from "../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Label from "../Wolfie2D/Nodes/UIElements/Label";
 import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
@@ -26,13 +21,7 @@ import Scene from "../Wolfie2D/Scene/Scene";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Color from "../Wolfie2D/Utils/Color";
-import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
-import DemoLevel from "./DemoLevel";
-import { LayerManager } from "../Systems/LayerManager";
 import MainMenu from "./MenuScenes/MainMenu";
-import { TweenableProperties } from "../Wolfie2D/Nodes/GameNode";
-import Melee from "../Systems/Skills/Melee";
-import Slash from "../Systems/Skills/Slash";
 
 export const LevelLayers = {
     PRIMARY: "PRIMARY",
