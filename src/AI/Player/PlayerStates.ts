@@ -105,6 +105,7 @@ export class Dash extends PlayerState {
         this.attackBuffer = false;
         this.grounded = this.owner.onGround;
         this.skillFired = "";
+        this.parent.iFrameTimer.start();
         this.owner.animation.play(PlayerAnimations.DASH);
     }
 
@@ -323,6 +324,48 @@ export class Walk extends PlayerState {
             this.parent.velocity.y += this.gravity * deltaT;
             this.parent.velocity.x = dir.x * this.parent.speed
             this.owner.move(this.parent.velocity.scaled(deltaT));
+        }
+    }
+
+    public onExit(): Record<string, any> {
+        this.owner.animation.stop();
+        return {skillFired: this.skillFired};
+    }
+}
+
+export class Knockback extends PlayerState {
+    private direction: string;
+    skillFired: "";
+
+    public onEnter(options: Record<string, any>): void {
+        this.parent.speed = this.parent.MAX_SPEED;
+        this.parent.velocity.y = 0;
+        this.direction = this.parent.facing;
+        this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
+    }
+
+    public handleInput(event: GameEvent): void { }
+
+    public update(deltaT: number): void {
+        super.update(deltaT);
+        let dx = (this.direction == "left") ? 1 : -1
+    
+        // this.parent.velocity.y += this.gravity * deltaT;
+        this.parent.velocity.x = dx * 1000
+        this.parent.velocity.y = dx * 500;
+        this.owner.move(this.parent.velocity.scaled(deltaT));
+
+        if (Input.isPressed(PlayerControls.MOVE_RIGHT) || Input.isPressed(PlayerControls.MOVE_LEFT)){
+            this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
+            this.finished(PlayerStates.WALK);
+        }
+        else if (!this.owner.onGround && this.parent.velocity.y !== 0) {
+            this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
+            this.finished(PlayerStates.FALL);
+        }
+        else{
+            this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
+            this.finished(PlayerStates.IDLE);
         }
     }
 

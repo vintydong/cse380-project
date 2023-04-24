@@ -8,7 +8,7 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
-import { Attack, Dash, Dead, Fall, Idle, Jump, Walk } from './PlayerStates';
+import { Attack, Dash, Dead, Fall, Idle, Jump, Knockback, PlayerState, Walk } from './PlayerStates';
 
 /**
  * Specify any keybindings needed for the player
@@ -37,6 +37,7 @@ export enum PlayerStates {
     FALL = "FALL",
     ATTACKING = "ATTACKING",
     DEAD = "DEAD",
+    KNOCKBACK = "KNOCKBACK"
 }
 
 export enum PlayerAnimations {
@@ -98,6 +99,7 @@ export default class PlayerController extends StateMachineAI {
 		this.addState(PlayerStates.IDLE, new Idle(this, this.owner));
         this.addState(PlayerStates.JUMP, new Jump(this, this.owner));
 		this.addState(PlayerStates.WALK, new Walk(this, this.owner));
+        this.addState(PlayerStates.KNOCKBACK, new Knockback(this, this.owner));
 
         this.receiver.subscribe('ENEMY_COLLISION');
 
@@ -111,7 +113,9 @@ export default class PlayerController extends StateMachineAI {
                     this.handlePlayerCollision(event);
                     if (this.health <= 0){
                         this.changeState(PlayerStates.DEAD);
+                        break;
                     }
+                    this.changeState(PlayerStates.KNOCKBACK);
                 }
                 break;
             }
@@ -175,6 +179,9 @@ export default class PlayerController extends StateMachineAI {
 
     public get airDash(): boolean { return this._airDash; }
     public set airDash(airDash: boolean) { this._airDash = airDash; }
+
+    public get iFrameTimer(): Timer { return this._iFrameTimer; }
+    public set iFrameTimer(Timer: Timer) { this._iFrameTimer = Timer; }
 
     public handlePlayerCollision(event): void{
         if (this._iFrameTimer.isStopped){
