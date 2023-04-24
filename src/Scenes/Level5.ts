@@ -1,24 +1,15 @@
 import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
 import demoEnemyController from "../AI/demo_enemy/demoEnemyController";
 import { PhysicsGroups } from "../Physics";
+import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
+import ParticleShaderType from "../Shaders/ParticleShaderType";
+import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Level, { LevelLayers } from "./Level";
-import ParticleShaderType from "../Shaders/ParticleShaderType";
-import { LayerManager } from "../Systems/LayerManager";
-import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
-import { CustomGameEvents } from "../CustomGameEvents";
-import Graphic from "../Wolfie2D/Nodes/Graphic";
-import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
-import MainMenu from "./MenuScenes/MainMenu";
-import Color from "../Wolfie2D/Utils/Color";
-import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
-import BasicAttack from "../AI/BasicAttackBehavior";
-import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
-import CanvasNode from "../Wolfie2D/Nodes/CanvasNode";
 
 export default class Level5 extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "LEVEL5_ENEMY_KEY";
@@ -109,7 +100,6 @@ export default class Level5 extends Level {
             enemy.position.set(enemies.objects[i].x * 6, enemies.objects[i].y * 6);
             enemy.addPhysics(new Circle(enemy.position, 16));
             enemy.setGroup(PhysicsGroups.NPC);
-            enemy.setTrigger(PhysicsGroups.WEAPON, 'ENEMY_HIT', null);
             enemy.setTrigger(PhysicsGroups.PLAYER, 'ENEMY_COLLISION', null);
             enemy.navkey = "navmesh";
 
@@ -128,18 +118,7 @@ export default class Level5 extends Level {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
-
-        // // Handle despawning of attacks
-
-        let allEnemiesDefeated = true
-        for(let i = 0; i < this.enemies.length; i++){
-            if(this.enemies[i].visible) allEnemiesDefeated = false;
-        }
-
         super.updateScene(deltaT);
-
-        if(allEnemiesDefeated)
-            this.sceneManager.changeToScene(MainMenu);
     }
 
     /**
@@ -151,28 +130,9 @@ export default class Level5 extends Level {
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
             // Let Level.ts handle it by default
-
-            case CustomGameEvents.SKILL_1_FIRED: {
-                this.spawnBasicAttack(event.data.get("direction"));
-                break;
-            }
-
-            case CustomGameEvents.SKILL_2_FIRED: {
-                this.spawnBubble(event.data.get("direction"));
-                break;
-            }
-
-            case CustomGameEvents.UPDATE_HEALTH: {
-                let currentHealth = event.data.get('currentHealth');
-				let maxHealth = event.data.get('maxHealth');
-				this.handleHealthChange(currentHealth, maxHealth);
-				break;
-            }
-
             default:
                 super.handleEvent(event);
                 break;
-                // throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
     }
 }

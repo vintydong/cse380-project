@@ -118,11 +118,7 @@ export default abstract class Level extends Scene {
         // Initialize Tilemaps
         if (this.tilemapKey === undefined || this.tilemapScale === undefined)
             throw new Error("Missing tilemap key or scale");
-
         this.factory.tilemap(this.tilemapKey, this.tilemapScale);
-
-        this.initWeaponParticles();
-        this.initObjectPools();
 
         // Initialize UI layer components such as health bar, ability bar, etc.
         this.initUI();
@@ -197,10 +193,6 @@ export default abstract class Level extends Scene {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
-
-        // Handle despawning of attacks
-        for (let basicAttack of this.basicAttacks) if (basicAttack.visible) this.handleScreenDespawn(basicAttack);
-        for (let weaponParticle of this.weaponParticles.getPool()) if (weaponParticle.visible) this.handleScreenDespawn(weaponParticle);
     }
 
     /**
@@ -364,110 +356,6 @@ export default abstract class Level extends Scene {
         this.player.unfreeze();
         this.ui.enable();
     }
-
-    protected initWeaponParticles(): void {
-        // Init particle system of 50 particles
-        const particle_size = 3;
-        this.weaponParticles = new PlayerParticleSystem(50, Vec2.ZERO, 3000, particle_size, 0, 50);
-        this.weaponParticles.initializePool(this, LevelLayers.PRIMARY);
-
-        let pool = this.weaponParticles.getPool();
-
-        for (let i = 0; i < this.weaponParticles.getPool().length; i++) {
-            pool[i].useCustomShader(ParticleShaderType.KEY);
-            pool[i].visible = false;
-            pool[i].color = Color.BLUE;
-
-            // Give the particles AI
-            pool[i].addAI(ParticleBehavior);
-
-            // Give the particles a collider
-            let collider = new Circle(Vec2.ZERO, particle_size*particle_size);
-            pool[i].setCollisionShape(collider);
-            pool[i].addPhysics();
-            pool[i].setGroup(PhysicsGroups.WEAPON);
-            pool[i].setTrigger(PhysicsGroups.NPC, 'ENEMY_HIT', null);
-        }
-    }
-
-    protected initObjectPools(): void {
-        // Init basic attack object pool
-        this.basicAttacks = new Array(10);
-        for (let i = 0; i < this.basicAttacks.length; i++) {
-            this.basicAttacks[i] = this.add.graphic(GraphicType.RECT, LevelLayers.PRIMARY, {position: new Vec2(0, 0), size: new Vec2(75, 100)});
-            
-            // Give the basic attacks a custom shader
-            this.basicAttacks[i].useCustomShader(BasicAttackShaderType.KEY);
-            this.basicAttacks[i].visible = false;
-            this.basicAttacks[i].color = Color.BLUE;
-
-            // Give the basic attacks AI
-            this.basicAttacks[i].addAI(BasicAttack);
-
-            // Give the basic attacks a collider
-            let collider = new Circle(Vec2.ZERO, 25);
-            this.basicAttacks[i].setCollisionShape(collider);
-            this.basicAttacks[i].addPhysics();
-            this.basicAttacks[i].setGroup(PhysicsGroups.WEAPON);
-            this.basicAttacks[i].setTrigger(PhysicsGroups.NPC, CustomGameEvents.ENEMY_HIT, null);
-
-            // Add tween to particle
-            this.basicAttacks[i].tweens.add("fadeout", {
-                startDelay: 0,
-                duration: 200,
-                effects: [
-                    {
-                        property: "alpha",
-                        start: 1,
-                        end: 0,
-                        ease: EaseFunctionType.IN_OUT_SINE
-                    }
-                ]
-            });
-        }
-    }
-
-    // protected spawnBubble(direction: string): void {
-    //     // Find the first visible particle
-    //     let particle: Particle = this.weaponParticles.getPool().find((bubble: Particle) => { return !bubble.visible });
-    //     if (particle) {
-    //         // Bring this bubble to life
-    //         particle.visible = true;
-
-    //         particle.position = this.player.position.clone();
-
-    //         particle.setAIActive(true, { direction: direction });
-    //     }
-    // }
-
-    // protected spawnBasicAttack(direction: string): void {
-	// 	// Find the first visible basic attack
-	// 	let basicAttack: Graphic = this.basicAttacks.find((basicAttack: Graphic) => { return !basicAttack.visible });
-    //     console.log("basicAttack:", basicAttack);
-	// 	if (basicAttack){
-	// 		// Bring this basic attack to life
-	// 		basicAttack.visible = true;
-    //         basicAttack.alpha = 1;
-
-    //         // Calculate basic attack offset from player center
-    //         let newPosition = this.player.position.clone();
-    //         let xOffset = basicAttack.boundary.getHalfSize().x
-    //         newPosition.x += (direction == "left")? -1 * xOffset : xOffset;
-    //         basicAttack.position = newPosition;
-
-	// 		basicAttack.setAIActive(true, {direction: direction});
-    //         basicAttack.tweens.play("fadeout");
-	// 	}
-	// }
-
-    public handleScreenDespawn(node: CanvasNode): void {
-        let inViewport = this.viewport.includes(node)
-
-		if(!inViewport || node.alpha == 0) {
-			node.position.copy(Vec2.ZERO);
-			node.visible = false;
-		}
-	}
 
     protected handleHealthChange(currentHealth: number, maxHealth: number): void {
 		let unit = this.healthBarBg.size.x / maxHealth;
