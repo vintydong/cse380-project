@@ -110,7 +110,9 @@ export default class PlayerController extends StateMachineAI {
                     if (this.health <= 0){
                         this.changeState(PlayerStates.DEAD);
                     }
-                    this.changeState(PlayerStates.KNOCKBACK);
+                    else {
+                        this.changeState(PlayerStates.KNOCKBACK);
+                    }
                 }
                 break;
             }

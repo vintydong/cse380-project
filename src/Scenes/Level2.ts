@@ -133,6 +133,9 @@ export default class Level2 extends Level {
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
             // TODO: Remove temporarily change to main menu
+            case CustomGameEvents.PLAYER_ENTER_LEVEL_END: {
+                break;
+            }
             case CustomGameEvents.LEVEL_NEXT: {
                 this.sceneManager.changeToScene(MainMenu);
                 break;

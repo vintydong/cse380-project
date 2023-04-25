@@ -7,6 +7,7 @@ import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Input from "../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
+import Timer from "../../Wolfie2D/Timing/Timer";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 import PlayerController, { PlayerAnimations, PlayerControls, PlayerStates } from "./PlayerController";
 
@@ -214,6 +215,9 @@ export class Dead extends PlayerState {
         this.owner.animation.play(PlayerAnimations.DEAD);
         let dyingAudio = (this.owner.getScene() as Level).getDyingAudioKey()
         this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: dyingAudio, loop: false, holdReference: false});
+        
+        let timer = new Timer(1000, () => this.emitter.fireEvent(CustomGameEvents.LEVEL_FAILED));
+        timer.start();
     }
 
     public handleInput(event: GameEvent): void {}

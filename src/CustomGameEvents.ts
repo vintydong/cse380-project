@@ -24,6 +24,8 @@ export const CustomGameEvents = {
   LEVEL_END: "LEVEL_END",
   /** Event emitted when level should change to next */
   LEVEL_NEXT: "LEVEL_NEXT",
+  /** Event emitted when level failed e.g. player died */
+  LEVEL_FAILED: "LEVEL_FAILED",
   /* Event emitted when player has entered the level end area 
    * Level end condition should be checked e.g. all enemies defeated 
   */

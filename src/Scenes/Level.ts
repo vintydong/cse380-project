@@ -185,8 +185,8 @@ export default abstract class Level extends Scene {
     private subscribeEvents() {
         this.receiver.subscribe(CustomGameEvents.SKILL_1_FIRED);
         this.receiver.subscribe(CustomGameEvents.SKILL_2_FIRED);
-        this.receiver.subscribe(CustomGameEvents.SKILL_3_FIRED);
-        this.receiver.subscribe(CustomGameEvents.SKILL_4_FIRED);
+        // this.receiver.subscribe(CustomGameEvents.SKILL_3_FIRED);
+        // this.receiver.subscribe(CustomGameEvents.SKILL_4_FIRED);
         this.receiver.subscribe(CustomGameEvents.UPDATE_HEALTH);
         this.receiver.subscribe(CustomGameEvents.TOGGLE_SKILL_BOOK);
 
@@ -194,6 +194,7 @@ export default abstract class Level extends Scene {
         this.receiver.subscribe(CustomGameEvents.PLAYER_ENTER_LEVEL_END);
         this.receiver.subscribe(CustomGameEvents.LEVEL_NEXT);
         this.receiver.subscribe(CustomGameEvents.LEVEL_END);
+        this.receiver.subscribe(CustomGameEvents.LEVEL_FAILED);
 
         this.receiver.subscribe(MenuEvents.RESUME);
         this.receiver.subscribe(MenuEvents.PAUSE);
@@ -255,7 +256,8 @@ export default abstract class Level extends Scene {
             }
 
             case CustomGameEvents.PLAYER_ENTER_LEVEL_END: {
-
+                console.log("PLAYER_ENTER_LEVEL_END should be overridden in Levels!");
+                break;
             }
 
             case CustomGameEvents.LEVEL_END: {
@@ -266,6 +268,11 @@ export default abstract class Level extends Scene {
 
             case CustomGameEvents.LEVEL_NEXT: {
                 this.sceneManager.changeToScene(this.nextLevel);
+                break;
+            }
+
+            case CustomGameEvents.LEVEL_FAILED: {
+                this.sceneManager.changeToScene(MainMenu);
                 break;
             }
 
