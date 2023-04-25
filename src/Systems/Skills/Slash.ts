@@ -143,8 +143,7 @@ export class SlashBehavior implements AI {
             this.currentXSpeed = 300;
             this.direction = options.direction;
         }
-        if (this.direction == "left") { this.owner.invertX = true; }
-        if (this.direction == "right") { this.owner.invertX = false; }
+        this.owner.invertX = (this.direction == "left") ? true : false;
     }
 
     public handleEvent(event: GameEvent): void {
@@ -164,7 +163,6 @@ export class SlashBehavior implements AI {
     }
 
     public update(deltaT: number): void {
-        console.log(this.currentXSpeed)
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }

@@ -1,7 +1,9 @@
 import { CustomGameEvents, MenuEvents } from "../../CustomGameEvents";
+import Level from "../../Scenes/Level";
 import State from "../../Wolfie2D/DataTypes/State/State";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
+import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Input from "../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
@@ -68,6 +70,8 @@ export abstract class PlayerState extends State {
         if (this.skillFired) {
             this.emitter.fireEvent(this.skillFired, {direction: this.parent.facing})
             this.owner.animation.play(PlayerAnimations.ATTACKING)
+            let attackAudio = (this.owner.getScene() as Level).getAttackAudioKey()
+            this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: attackAudio, loop: false, holdReference: false});
             this.skillFired = null
         }
     }
@@ -119,6 +123,10 @@ export class Air extends PlayerState {
         // First onGround is inaccurate, we care about subsequent ones
         let animation = (options.fromGround) ? PlayerAnimations.JUMPING : PlayerAnimations.FALLING  
         this.owner.animation.playIfNotAlready(animation)
+        if (animation == PlayerAnimations.JUMPING) {
+            let jumpAudio = (this.owner.getScene() as Level).getJumpAudioKey()
+            this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: jumpAudio, loop: false, holdReference: false});
+        }
     }
 
     public handleInput(event: GameEvent): void {}
@@ -165,6 +173,8 @@ export class Dash extends PlayerState {
         this.parent.iFrameTimer.start();
         this.parent.hit = true;
         this.owner.animation.play(PlayerAnimations.DASH);
+        let dashAudio = (this.owner.getScene() as Level).getDashAudioKey()
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: dashAudio, loop: false, holdReference: false});
         
     }
 
@@ -195,6 +205,8 @@ export class Dash extends PlayerState {
 export class Dead extends PlayerState {
     public onEnter(options: Record<string, any>): void {
         this.owner.animation.play(PlayerAnimations.DEAD);
+        let dyingAudio = (this.owner.getScene() as Level).getDyingAudioKey()
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: dyingAudio, loop: false, holdReference: false});
     }
 
     public handleInput(event: GameEvent): void {}

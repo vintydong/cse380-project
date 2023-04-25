@@ -111,8 +111,7 @@ export class MeleeBehavior implements AI {
         if (options) {
             this.direction = options.direction;
         }
-        if (this.direction == "left") { this.owner.invertX = true; }
-        if (this.direction == "right") { this.owner.invertX = false; }
+        this.owner.invertX = (this.direction == "left") ? true : false;
     }
 
     public handleEvent(event: GameEvent): void {
