@@ -73,7 +73,10 @@ export class SkillManager {
             return true;
         if(index > 3 || index < 0) return false;
 
-        return this.activeSkills[index].getCooldown();
+        if(this.activeSkills[index])
+            return this.activeSkills[index].getCooldown();
+        
+        return false;
     }
 
     public getSkillCooldownFromEvent(event: string): boolean {
