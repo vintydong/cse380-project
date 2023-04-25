@@ -1,8 +1,10 @@
 import { CustomGameEvents } from "../../CustomGameEvents";
 import { PhysicsGroups } from "../../Physics";
+import Level from "../../Scenes/Level";
 import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
+import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Input from "../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
@@ -172,6 +174,8 @@ export default class PlayerController extends StateMachineAI {
 				currentHealth: this.health,
 				maxHealth: this.maxHealth
 			});
+            let hurtAudio = (this.owner.getScene() as Level).getHurtAudioKey()
+            this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: hurtAudio, loop: false, holdReference: false});
 			this._iFrameTimer.start();
 			this.hit = true;
 		}
