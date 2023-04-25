@@ -147,4 +147,8 @@ export default class Level1 extends Level {
             // throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
     }
+
+    public unloadScene(): void {
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: this.levelMusicKey})
+    }
 }
