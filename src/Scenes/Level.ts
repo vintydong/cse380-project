@@ -363,4 +363,8 @@ export default abstract class Level extends Scene {
     public getPlayer() { 
         return this.player;
     }
+
+    public getSkillManager() {
+        return this.skill_manager;
+    }
 }

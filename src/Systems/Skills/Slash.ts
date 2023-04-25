@@ -11,6 +11,7 @@ import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Receiver from "../../Wolfie2D/Events/Receiver";
 import Particle from "../../Wolfie2D/Nodes/Graphics/Particle";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
+import Timer from "../../Wolfie2D/Timing/Timer";
 import Color from "../../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
@@ -33,6 +34,7 @@ export default class Slash extends Skill {
         this.initialize();
 
         this.damage = 15;
+        this.cooldown = new Timer(1000);
     }
 
     public initialize() {
@@ -94,6 +96,8 @@ export default class Slash extends Skill {
             this.hitbox.alpha = 1;
             this.hitbox.position = this.skill_manager.getPlayer().position.clone();
 
+            this.cooldown.start();
+            
             this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
             this.hitbox.tweens.play("fadeout");
         }

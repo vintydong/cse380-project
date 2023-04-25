@@ -7,6 +7,7 @@ import Emitter from "../../Wolfie2D/Events/Emitter";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Receiver from "../../Wolfie2D/Events/Receiver";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
+import Timer from "../../Wolfie2D/Timing/Timer";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import { SkillManager } from "../SkillManager";
 import Skill from "./Skill";
@@ -25,6 +26,7 @@ export default class Melee extends Skill {
 
         this.initialize();
         this.damage = 20;
+        this.cooldown = new Timer(500);
     }
 
     public initialize(){
@@ -67,6 +69,8 @@ export default class Melee extends Skill {
         let xOffset = this.hitbox.boundary.getHalfSize().x
         newPosition.x += (direction == "left") ? -1 * xOffset : xOffset;
         this.hitbox.position = newPosition;
+
+        this.cooldown.start();
 
         this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
         this.hitbox.tweens.play("fadeout");

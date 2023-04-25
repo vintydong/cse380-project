@@ -1,5 +1,5 @@
 import PlayerController from "../AI/Player/PlayerController";
-import { MenuEvents } from "../CustomGameEvents";
+import { CustomGameEvent, CustomGameEvents, MenuEvents } from "../CustomGameEvents";
 import Level from "../Scenes/Level";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import { TweenableProperties } from "../Wolfie2D/Nodes/GameNode";
@@ -56,6 +56,31 @@ export class SkillManager {
         let center = this.scene.getViewport().getCenter();
         bg.position.set(center.x, center.y);
         bg.scale = new Vec2(9, 7);
+    }
+
+    /** Returns the cooldown of the skill at position index 
+     * 
+     * @param index The 0-indexed position of the skill (from 0 to 3)
+    */
+    public getSkillCooldown(index: number): boolean {
+        if(index > 3 || index < 0) return false;
+
+        return this.activeSkills[index].getCooldown();
+    }
+
+    public getSkillCooldownFromEvent(event: string): boolean {
+        switch(event){
+            case CustomGameEvents.SKILL_1_FIRED:
+                return this.getSkillCooldown(0);
+            case CustomGameEvents.SKILL_2_FIRED:
+                return this.getSkillCooldown(1);
+            case CustomGameEvents.SKILL_3_FIRED:
+                return this.getSkillCooldown(2);
+            case CustomGameEvents.SKILL_4_FIRED:
+                return this.getSkillCooldown(3);
+            default:
+                return false;
+        }
     }
 
     public activateSkill(index: number, options?: Record<string, any>){

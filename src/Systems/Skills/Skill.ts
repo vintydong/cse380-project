@@ -24,4 +24,10 @@ export default abstract class Skill {
     /** Defines what should happen when the skill button is pressed including spawning any projectiles/hitboxes */
     public abstract activate(options?: Record<string, any>): void
 
+    /** Returns the cooldown of this Skill
+     * 
+     * true if the skill can now be activated; false otherwise
+     */
+    public getCooldown(): boolean { return this.cooldown.isStopped() }
+
 }

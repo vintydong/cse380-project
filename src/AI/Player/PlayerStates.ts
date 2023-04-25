@@ -1,4 +1,5 @@
-import { CustomGameEvents, MenuEvents } from "../../CustomGameEvents";
+import { CustomGameEvent, CustomGameEvents, MenuEvents } from "../../CustomGameEvents";
+import Level from "../../Scenes/Level";
 import State from "../../Wolfie2D/DataTypes/State/State";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
@@ -56,6 +57,9 @@ export abstract class PlayerState extends State {
         this.parent.velocity.y += this.gravity * deltaT;
         this.owner.move(this.parent.velocity.scaled(deltaT));
 
+        let scene = this.owner.getScene() as Level;
+        let skill_manager = scene.getSkillManager();
+
         // Attacking animations
         if (Input.isJustPressed(PlayerControls.SKILL_ONE))
             this.skillFired = CustomGameEvents.SKILL_1_FIRED
@@ -65,11 +69,12 @@ export abstract class PlayerState extends State {
             this.skillFired = CustomGameEvents.SKILL_3_FIRED
         else if (Input.isJustPressed(PlayerControls.SKILL_FOUR))
             this.skillFired = CustomGameEvents.SKILL_4_FIRED
-        if (this.skillFired) {
+        if (this.skillFired && skill_manager.getSkillCooldownFromEvent(this.skillFired)) {
             this.emitter.fireEvent(this.skillFired, {direction: this.parent.facing})
             this.owner.animation.play(PlayerAnimations.ATTACKING)
-            this.skillFired = null
+            
         }
+        this.skillFired = null
     }
 
     public abstract onExit(): Record<string, any>;
