@@ -12,6 +12,8 @@ import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import DemoLevel from "../DemoLevel";
 import Level1 from "../Level1";
 import Level2 from "../Level2";
+import Level3 from "../Level3";
+import Level4 from "../Level4";
 import Level5 from "../Level5";
 import MainMenu from "./MainMenu";
 
@@ -127,11 +129,11 @@ export default class LevelSelect extends Scene{
                 break;
 
             case "levelThree":
-                this.sceneManager.changeToScene(DemoLevel);
+                this.sceneManager.changeToScene(Level3);
                 break;
 
             case "levelFour":
-                this.sceneManager.changeToScene(DemoLevel);
+                this.sceneManager.changeToScene(Level4);
                 break;
 
             case "levelFive":

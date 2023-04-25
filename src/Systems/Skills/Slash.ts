@@ -166,8 +166,7 @@ export class SlashBehavior implements AI {
             this.direction = options.direction;
             this.damage = options.damage;
         }
-        if (this.direction == "left") { this.owner.invertX = true; }
-        if (this.direction == "right") { this.owner.invertX = false; }
+        this.owner.invertX = (this.direction == "left") ? true : false;
     }
 
     public handleEvent(event: GameEvent): void {

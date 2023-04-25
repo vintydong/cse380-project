@@ -10,10 +10,6 @@ import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Level, { LevelLayers } from "./Level";
-import ParticleShaderType from "../Shaders/ParticleShaderType";
-import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
-import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
-import MainMenu from "./MenuScenes/MainMenu";
 
 export default class Level6 extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "LEVEL6_ENEMY_KEY";

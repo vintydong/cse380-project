@@ -44,7 +44,6 @@ export default abstract class Level extends Scene {
     protected nextLevel: new (...args: any) => Level;
 
     protected levelMusicKey: string;
-    // protected jumpAudioKey: string;
 
     /** Attributes for the player */
     public static readonly PLAYER_SPRITE_KEY = "PLAYER_SPRITE_KEY";
@@ -59,10 +58,32 @@ export default abstract class Level extends Scene {
     public static readonly ABILITY_ICONS_PATH = "assets/sprites/ability_icons.png";
     protected abilityIconsKey: string;
 
-    protected weaponParticles: PlayerParticleSystem;
+    /** Sounds for the player */
+    public static readonly JUMP_AUDIO_KEY = "JUMP_AUDIO_KEY";
+    public static readonly JUMP_AUDIO_PATH = "assets/sounds/jump.wav";
+
+    public static readonly DASH_AUDIO_KEY = "DASH_AUDIO_KEY";
+    public static readonly DASH_AUDIO_PATH = "assets/sounds/dash.wav";
+
+    public static readonly ATTACK_AUDIO_KEY = "ATTACK_AUDIO_KEY";
+    public static readonly ATTACK_AUDIO_PATH = "assets/sounds/attack.wav";
+
+    public static readonly HURT_AUDIO_KEY = "HURT_AUDIO_KEY";
+    public static readonly HURT_AUDIO_PATH = "assets/sounds/hurt.wav";
+
+    public static readonly DYING_AUDIO_KEY = "DYING_AUDIO_KEY";
+    public static readonly DYING_AUDIO_PATH = "assets/sounds/dying.wav";
+    
+    protected jumpAudioKey: string;
+    protected dashAudioKey: string;
+    protected attackAudioKey: string;
+    protected hurtAudioKey: string;
+    protected dyingAudioKey: string;
+
     // Object pool for basic attacks and bubbles
     protected basicAttacks: Array<Graphic>;
 	protected bubbles: Array<Graphic>;
+    protected weaponParticles: PlayerParticleSystem;
 
     /** Attributes for the UI */
     protected healthBar: Label;
@@ -82,6 +103,12 @@ export default abstract class Level extends Scene {
 
         this.playerSpriteKey = Level.PLAYER_SPRITE_KEY;
         this.abilityIconsKey = Level.ABILITY_ICONS_KEY;
+        this.jumpAudioKey = Level.JUMP_AUDIO_KEY;
+        this.dashAudioKey = Level.DASH_AUDIO_KEY;
+        this.attackAudioKey = Level.ATTACK_AUDIO_KEY;
+        this.hurtAudioKey = Level.HURT_AUDIO_KEY;
+        this.dyingAudioKey = Level.DYING_AUDIO_KEY;
+
         this.factory = new CustomFactoryManager(this, this.tilemaps);
         this.enemies = [];
     }
@@ -96,8 +123,15 @@ export default abstract class Level extends Scene {
         this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
         this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
 
-        this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH)
-        this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH)
+        this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
+        this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
+
+        /* Audio and Sounds */
+        this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
+        this.load.audio(Level.DASH_AUDIO_KEY, Level.DASH_AUDIO_PATH);
+        this.load.audio(Level.ATTACK_AUDIO_KEY, Level.ATTACK_AUDIO_PATH);
+        this.load.audio(Level.HURT_AUDIO_KEY, Level.HURT_AUDIO_PATH);
+        this.load.audio(Level.DYING_AUDIO_KEY, Level.DYING_AUDIO_PATH);
     }
 
     /** Common initializations between all levels */
@@ -366,5 +400,24 @@ export default abstract class Level extends Scene {
 
     public getSkillManager() {
         return this.skill_manager;
+    }
+    public getJumpAudioKey(): string {
+        return this.jumpAudioKey
+    }
+
+    public getDashAudioKey(): string {
+        return this.dashAudioKey
+    }
+
+    public getAttackAudioKey(): string {
+        return this.attackAudioKey
+    }
+
+    public getHurtAudioKey(): string {
+        return this.hurtAudioKey
+    }
+
+    public getDyingAudioKey(): string {
+        return this.dyingAudioKey
     }
 }

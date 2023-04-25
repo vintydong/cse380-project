@@ -15,6 +15,7 @@ import MainMenu from "./MenuScenes/MainMenu";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Color from "../Wolfie2D/Utils/Color";
 import Level2 from "./Level2";
+import { GameEventType } from "../Wolfie2D/Events/GameEventType";
 
 export default class Level1 extends Level {
     public static readonly ENEMY_SPRITE_KEY = "LEVEL1_ENEMY_KEY";
@@ -26,11 +27,8 @@ export default class Level1 extends Level {
     public static readonly TILEMAP_PATH = "assets/tilemaps/level1_tilemap.json";
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
-    // public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    // public static readonly LEVEL_MUSIC_PATH = "hw4_assets/music/hw5_level_music.wav";
-
-    // public static readonly JUMP_AUDIO_KEY = "PLAYER_JUMP";
-    // public static readonly JUMP_AUDIO_PATH = "hw4_assets/sounds/jump.wav";
+    public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
+    public static readonly LEVEL_MUSIC_PATH = "assets/music/area1_music.mp3";
 
     // public static readonly TILE_DESTROYED_KEY = "TILE_DESTROYED";
     // public static readonly TILE_DESTROYED_PATH = "hw4_assets/sounds/switch.wav";
@@ -44,6 +42,7 @@ export default class Level1 extends Level {
         // Set the keys for the different layers of the tilemap
         this.tilemapKey = Level1.TILEMAP_KEY;
         this.tilemapScale = Level1.TILEMAP_SCALE;
+        this.levelMusicKey = Level1.LEVEL_MUSIC_KEY;
 
         // Set the player's spawn
         this.playerSpawn = new Vec2(128, 600);
@@ -63,7 +62,9 @@ export default class Level1 extends Level {
         this.load.spritesheet(this.playerSpriteKey, Level1.PLAYER_SPRITE_PATH);
         // Load in ability icons
         this.load.image(this.abilityIconsKey, Level1.ABILITY_ICONS_PATH);
-
+        // Load in music
+        this.load.audio(this.levelMusicKey, Level1.LEVEL_MUSIC_PATH);
+        
         // Load in level 1 enemies
         this.load.spritesheet(Level1.ENEMY_SPRITE_KEY, Level1.ENEMY_SPRITE_PATH);
         this.load.object(Level1.ENEMY_POSITIONS_KEY, Level1.TILEMAP_PATH);
@@ -112,6 +113,7 @@ export default class Level1 extends Level {
         this.viewport.setBounds(8 * 6, 0, 8 * 6 * 58, 8 * 6 * 30);
 
         this.nextLevel = Level2;
+        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
     }
 
     public updateScene(deltaT) {

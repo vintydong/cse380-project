@@ -5,6 +5,7 @@ import { PhysicsGroups } from "../Physics";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
+import { GameEventType } from "../Wolfie2D/Events/GameEventType";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
@@ -21,8 +22,8 @@ export default class Level2 extends Level {
     public static readonly TILEMAP_PATH = "assets/tilemaps/level2_tilemap.json";
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
-    // public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    // public static readonly LEVEL_MUSIC_PATH = "hw4_assets/music/hw5_level_music.wav";
+    public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
+    public static readonly LEVEL_MUSIC_PATH = "assets/music/area1_music.mp3";
     
     // The padding of the world
 	private worldPadding: Vec2;
@@ -33,6 +34,7 @@ export default class Level2 extends Level {
         // Set the keys for the different layers of the tilemap
         this.tilemapKey = Level2.TILEMAP_KEY;
         this.tilemapScale = Level2.TILEMAP_SCALE;
+        this.levelMusicKey = Level2.LEVEL_MUSIC_KEY;
 
         // Set the player's spawn
         this.playerSpawn = new Vec2(164 * 6, 112 * 6);
@@ -51,6 +53,8 @@ export default class Level2 extends Level {
         this.load.spritesheet(this.playerSpriteKey, Level2.PLAYER_SPRITE_PATH);
         // Load in ability icons
         this.load.image(this.abilityIconsKey, Level2.ABILITY_ICONS_PATH);
+        // Load in music
+        this.load.audio(this.levelMusicKey, Level2.LEVEL_MUSIC_PATH)
         
         // Load in level 2 enemies
         this.load.spritesheet(Level2.ENEMY_SPRITE_KEY, Level2.ENEMY_SPRITE_PATH);
@@ -101,6 +105,7 @@ export default class Level2 extends Level {
         this.viewport.setBounds(8 * 6, 0, 8 * 6 * 40, 8 * 6 * 25);
 
         // this.nextLevel = MainMenu;
+        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
     }
 
     public updateScene(deltaT) {
