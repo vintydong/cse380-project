@@ -34,13 +34,13 @@ export class LayerManager {
     private scene: Level;
 
     public static readonly PAUSE_SPRITE_KEY = "PAUSE_MENU";
-    public static readonly PAUSE_SPRITE_PATH = "assets/sprites/menus/escMenu.png/";
+    public static readonly PAUSE_SPRITE_PATH = "assets/sprites/menus/escMenu.png";
     
     public static readonly CONTROL_SPRITE_KEY = "CONTROL_MENU";
-    public static readonly CONTROL_SPRITE_PATH = "assets/sprites/menus/controls.png/";
+    public static readonly CONTROL_SPRITE_PATH = "assets/sprites/menus/controls.png";
 
     public static readonly HELP_SPRITE_KEY = "HELP_MENU";
-    public static readonly HELP_SPRITE_PATH = "assets/sprites/menus/help.png/";
+    public static readonly HELP_SPRITE_PATH = "assets/sprites/menus/help.png";
 
     private pauseLayer: UILayer;
     private controlLayer: UILayer;
