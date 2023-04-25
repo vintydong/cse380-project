@@ -1,5 +1,6 @@
 import { CustomGameEvents } from "../../CustomGameEvents";
 import Level from "../../Scenes/Level";
+import Level2 from "../../Scenes/Level2";
 import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
@@ -26,6 +27,7 @@ class SlimeGround extends EnemyState {
     private dir: number = null;
     private time: number = 0;
     private jumping: boolean = false;
+    private hasSpawned: boolean = false;
 
     public onEnter(options: Record<string, any>): void {
         this.parent.speed = 750;
@@ -49,22 +51,32 @@ class SlimeGround extends EnemyState {
 
         if (!this.jumping && this.time <= 0) {
             let r = Math.random();
-            if (r < .15){
+            if (r < .24){
                 this.time = 100;
                 this.dir = (Math.random() - 0.5) * this.parent.speed;
                 this.parent.velocity.x = this.dir;
             }
-            else if (r < .65){
+            else if (r < .75){
                 let scene = this.owner.getScene() as Level;
                 let player = scene.getPlayer().position.clone();
                 let dir = this.owner.position.dirTo(player);
+
+                // Jump away from player after half health
                 this.parent.velocity.x = dir.x;
+                if(this.parent.health < this.parent.maxHealth/2)
+                    this.parent.velocity.x = -dir.x;
+
                 this.parent.velocity.y = -2;
                 this.parent.velocity.scaleTo(this.parent.speed);
                 this.jumping = true;
             }
-            else // Add attack here
-                this.parent;
+            else if (this.parent.health < this.parent.maxHealth/2 && !this.hasSpawned){ // Add attack here: spawn a slime
+                let scene = this.owner.getScene() as Level;
+                let player = scene.getPlayer().position.clone();
+                (scene as Level2).spawnEnemy(player);
+                (scene as Level2).spawnEnemy(player);         
+                this.hasSpawned = true;
+            }
         }
     }
 
