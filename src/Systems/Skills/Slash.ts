@@ -11,6 +11,7 @@ import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Receiver from "../../Wolfie2D/Events/Receiver";
 import Particle from "../../Wolfie2D/Nodes/Graphics/Particle";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
+import Timer from "../../Wolfie2D/Timing/Timer";
 import Color from "../../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
@@ -31,6 +32,9 @@ export default class Slash extends Skill {
         super(skill_manager);
 
         this.initialize();
+
+        this.damage = 15;
+        this.cooldown = new Timer(1000);
     }
 
     public initialize() {
@@ -92,7 +96,9 @@ export default class Slash extends Skill {
             this.hitbox.alpha = 1;
             this.hitbox.position = this.skill_manager.getPlayer().position.clone();
 
-            this.hitbox.setAIActive(true, {direction: direction});
+            this.cooldown.start();
+            
+            this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
             this.hitbox.tweens.play("fadeout");
         }
 
@@ -131,6 +137,8 @@ export class SlashBehavior implements AI {
     private minXSpeed: number;
     private maxXSpeed: number;
 
+    private damage: number;
+
     public initializeAI(owner: Sprite, options: Record<string, any>): void {
         this.owner = owner;
 
@@ -156,9 +164,9 @@ export class SlashBehavior implements AI {
         if (options) {
             this.currentXSpeed = 300;
             this.direction = options.direction;
+            this.damage = options.damage;
         }
-        if (this.direction == "left") { this.owner.invertX = true; }
-        if (this.direction == "right") { this.owner.invertX = false; }
+        this.owner.invertX = (this.direction == "left") ? true : false;
     }
 
     public handleEvent(event: GameEvent): void {
@@ -172,7 +180,7 @@ export class SlashBehavior implements AI {
                 let id = event.data.get('other');
                 if (id === this.owner.id) {
                     console.log("Hit an enemy with Slash", event.data);
-                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: 15});    
+                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: this.damage});    
                     this.owner.position.copy(Vec2.ZERO);
                     this.owner._velocity.copy(Vec2.ZERO);
                     this.owner.visible = false;

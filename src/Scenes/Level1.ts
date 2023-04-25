@@ -15,8 +15,9 @@ import MainMenu from "./MenuScenes/MainMenu";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Color from "../Wolfie2D/Utils/Color";
 import Level2 from "./Level2";
+import { GameEventType } from "../Wolfie2D/Events/GameEventType";
 
-export default class Level1 extends Level {    
+export default class Level1 extends Level {
     public static readonly ENEMY_SPRITE_KEY = "LEVEL1_ENEMY_KEY";
     public static readonly ENEMY_SPRITE_PATH = "assets/spritesheets/Enemies/Slime.json";
     public static readonly ENEMY_POSITIONS_KEY = "LEVEL1_ENEMY_POSITIONS";
@@ -26,17 +27,14 @@ export default class Level1 extends Level {
     public static readonly TILEMAP_PATH = "assets/tilemaps/level1_tilemap.json";
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
-    // public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    // public static readonly LEVEL_MUSIC_PATH = "hw4_assets/music/hw5_level_music.wav";
-
-    // public static readonly JUMP_AUDIO_KEY = "PLAYER_JUMP";
-    // public static readonly JUMP_AUDIO_PATH = "hw4_assets/sounds/jump.wav";
+    public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
+    public static readonly LEVEL_MUSIC_PATH = "assets/music/area1_music.mp3";
 
     // public static readonly TILE_DESTROYED_KEY = "TILE_DESTROYED";
     // public static readonly TILE_DESTROYED_PATH = "hw4_assets/sounds/switch.wav";
-    
+
     // The padding of the world
-	private worldPadding: Vec2;
+    private worldPadding: Vec2;
 
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);
@@ -44,6 +42,7 @@ export default class Level1 extends Level {
         // Set the keys for the different layers of the tilemap
         this.tilemapKey = Level1.TILEMAP_KEY;
         this.tilemapScale = Level1.TILEMAP_SCALE;
+        this.levelMusicKey = Level1.LEVEL_MUSIC_KEY;
 
         // Set the player's spawn
         this.playerSpawn = new Vec2(128, 600);
@@ -63,6 +62,8 @@ export default class Level1 extends Level {
         this.load.spritesheet(this.playerSpriteKey, Level1.PLAYER_SPRITE_PATH);
         // Load in ability icons
         this.load.image(this.abilityIconsKey, Level1.ABILITY_ICONS_PATH);
+        // Load in music
+        this.load.audio(this.levelMusicKey, Level1.LEVEL_MUSIC_PATH);
         
         // Load in level 1 enemies
         this.load.spritesheet(Level1.ENEMY_SPRITE_KEY, Level1.ENEMY_SPRITE_PATH);
@@ -100,11 +101,11 @@ export default class Level1 extends Level {
             enemy.animation.play("IDLE");
             this.enemies.push(enemy);
         }
-        
+
         // Set level end
         const levelEnd = new Vec2(54.5, 14).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
         let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(3 * 8 * 6, 4 * 8 * 6));
-        rect.color = Color.RED;
+        rect.color = Color.TRANSPARENT;
         rect.addPhysics();
         rect.setGroup(PhysicsGroups.LEVEL_END);
         rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
@@ -112,22 +113,15 @@ export default class Level1 extends Level {
         this.viewport.setBounds(8 * 6, 0, 8 * 6 * 58, 8 * 6 * 30);
 
         this.nextLevel = Level2;
+        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
     }
 
     public updateScene(deltaT) {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
-        
-        let allEnemiesDefeated = true
-        for(let i = 0; i < this.enemies.length; i++){
-            if(this.enemies[i].visible) allEnemiesDefeated = false;
-        }
 
         super.updateScene(deltaT);
-
-        if(allEnemiesDefeated)
-            this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
     }
 
     /**
@@ -138,10 +132,19 @@ export default class Level1 extends Level {
      */
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
+            case CustomGameEvents.PLAYER_ENTER_LEVEL_END: {
+                let allEnemiesDefeated = true
+                for (let i = 0; i < this.enemies.length; i++) {
+                    if (this.enemies[i].visible) allEnemiesDefeated = false;
+                }
+
+                if (allEnemiesDefeated)
+                    this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
+            }
             default:
                 super.handleEvent(event);
                 break;
-                // throw new Error(`Event handler not implemented for event type ${event.type}`)
+            // throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
     }
 }

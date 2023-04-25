@@ -1,7 +1,10 @@
-import { CustomGameEvents, MenuEvents } from "../../CustomGameEvents";
+import { CustomGameEvent, CustomGameEvents, MenuEvents } from "../../CustomGameEvents";
+import Level from "../../Scenes/Level";
+import CheatManager from "../../Systems/CheatManager";
 import State from "../../Wolfie2D/DataTypes/State/State";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
+import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Input from "../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
@@ -15,6 +18,8 @@ export abstract class PlayerState extends State {
     protected owner: AnimatedSprite;
     protected gravity: number;
     protected skillFired: string;
+
+    protected static cheatManager: CheatManager = CheatManager.getInstance();
 
     public constructor(parent: PlayerController, owner: AnimatedSprite) {
         super(parent);
@@ -56,6 +61,9 @@ export abstract class PlayerState extends State {
         this.parent.velocity.y += this.gravity * deltaT;
         this.owner.move(this.parent.velocity.scaled(deltaT));
 
+        let scene = this.owner.getScene() as Level;
+        let skill_manager = scene.getSkillManager();
+
         // Attacking animations
         if (Input.isJustPressed(PlayerControls.SKILL_ONE))
             this.skillFired = CustomGameEvents.SKILL_1_FIRED
@@ -65,11 +73,14 @@ export abstract class PlayerState extends State {
             this.skillFired = CustomGameEvents.SKILL_3_FIRED
         else if (Input.isJustPressed(PlayerControls.SKILL_FOUR))
             this.skillFired = CustomGameEvents.SKILL_4_FIRED
-        if (this.skillFired) {
+        if (this.skillFired && skill_manager.getSkillCooldownFromEvent(this.skillFired)) {
             this.emitter.fireEvent(this.skillFired, {direction: this.parent.facing})
             this.owner.animation.play(PlayerAnimations.ATTACKING)
+            let attackAudio = (this.owner.getScene() as Level).getAttackAudioKey()
+            this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: attackAudio, loop: false, holdReference: false});
             this.skillFired = null
         }
+        this.skillFired = null
     }
 
     public abstract onExit(): Record<string, any>;
@@ -90,7 +101,7 @@ export class Ground extends PlayerState {
         this.parent.velocity.y = 0;
 
         let dir = this.parent.moveDir;
-        if (Input.isJustPressed(PlayerControls.DASH) && this.parent.dashTimer.isStopped()) {
+        if (Input.isJustPressed(PlayerControls.DASH) && (this.parent.dashTimer.isStopped() || PlayerState.cheatManager.getInfiniteSkills())) {
             this.finished(PlayerStates.DASH);
         }
         else if (Input.isJustPressed(PlayerControls.MOVE_UP)) {
@@ -119,6 +130,10 @@ export class Air extends PlayerState {
         // First onGround is inaccurate, we care about subsequent ones
         let animation = (options.fromGround) ? PlayerAnimations.JUMPING : PlayerAnimations.FALLING  
         this.owner.animation.playIfNotAlready(animation)
+        if (animation == PlayerAnimations.JUMPING) {
+            let jumpAudio = (this.owner.getScene() as Level).getJumpAudioKey()
+            this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: jumpAudio, loop: false, holdReference: false});
+        }
     }
 
     public handleInput(event: GameEvent): void {}
@@ -132,7 +147,7 @@ export class Air extends PlayerState {
             this.parent.velocity.y += 100
             this.owner.animation.playIfNotAlready(PlayerAnimations.FALLING);
         }
-        else if (Input.isJustPressed(PlayerControls.DASH) && this.parent.airDash && this.parent.dashTimer.isStopped()) {
+        else if (Input.isJustPressed(PlayerControls.DASH) && ((this.parent.airDash && this.parent.dashTimer.isStopped()) || PlayerState.cheatManager.getInfiniteSkills())) {
             this.finished(PlayerStates.DASH);
         }
         else if (this.owner.onGround && this.parent.velocity.y >= 0){
@@ -162,7 +177,11 @@ export class Dash extends PlayerState {
         this.parent.speed = this.parent.MAX_SPEED;
         this.timestepsLeft = 15;
         this.direction = this.parent.facing;
+        this.parent.iFrameTimer.start();
+        this.parent.hit = true;
         this.owner.animation.play(PlayerAnimations.DASH);
+        let dashAudio = (this.owner.getScene() as Level).getDashAudioKey()
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: dashAudio, loop: false, holdReference: false});
         
     }
 
@@ -171,7 +190,7 @@ export class Dash extends PlayerState {
     public update(deltaT: number): void {
         super.update(deltaT);
         let xdir = (this.direction == "left") ? -1 : 1
-        this.parent.velocity.x = xdir * 2 * this.parent.speed
+        this.parent.velocity.x = xdir * 2.5 * this.parent.speed
         this.parent.velocity.y = 0;
         this.owner.move(this.parent.velocity.scaled(deltaT));
         
@@ -185,6 +204,7 @@ export class Dash extends PlayerState {
     public onExit(): Record<string, any> {
         this.owner.animation.stop();
         this.parent.dashTimer.start();
+        this.parent.hit = false;
         return {fromGround: this.fromGround};
     }
 }
@@ -192,6 +212,8 @@ export class Dash extends PlayerState {
 export class Dead extends PlayerState {
     public onEnter(options: Record<string, any>): void {
         this.owner.animation.play(PlayerAnimations.DEAD);
+        let dyingAudio = (this.owner.getScene() as Level).getDyingAudioKey()
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: dyingAudio, loop: false, holdReference: false});
     }
 
     public handleInput(event: GameEvent): void {}
@@ -199,4 +221,30 @@ export class Dead extends PlayerState {
     public update(deltaT: number): void {}
 
     public onExit(): Record<string, any> { return {}; }
+}
+
+export class Knockback extends PlayerState {
+    private direction: string;
+
+    public onEnter(options: Record<string, any>): void {
+        this.parent.speed = this.parent.MAX_SPEED;
+        this.parent.velocity.y = 0;
+        this.direction = this.parent.facing;
+    }
+
+    public handleInput(event: GameEvent): void { }
+
+    public update(deltaT: number): void {
+        super.update(deltaT);
+        let dx = (this.direction == "left") ? 1 : -1
+
+        this.parent.velocity.x = dx * 2000
+        this.parent.velocity.y = -750;
+        this.owner.move(this.parent.velocity.scale(deltaT));
+        this.finished(PlayerStates.GROUND);
+    }
+
+    public onExit(): Record<string, any> { 
+        return {}; 
+    }
 }

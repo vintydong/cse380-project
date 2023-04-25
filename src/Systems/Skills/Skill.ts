@@ -10,9 +10,9 @@ import { SkillManager } from "../SkillManager";
 export default abstract class Skill {
     protected skill_manager: SkillManager;
 
-    private damage: number;
-    private cost: number;
-    private cooldown: Timer;
+    protected damage: number;
+    protected cost: number;
+    protected cooldown: Timer;
 
     public constructor(skill_manager: SkillManager){
         this.skill_manager = skill_manager;
@@ -23,5 +23,11 @@ export default abstract class Skill {
     
     /** Defines what should happen when the skill button is pressed including spawning any projectiles/hitboxes */
     public abstract activate(options?: Record<string, any>): void
+
+    /** Returns the cooldown of this Skill
+     * 
+     * true if the skill can now be activated; false otherwise
+     */
+    public getCooldown(): boolean { return this.cooldown.isStopped() }
 
 }

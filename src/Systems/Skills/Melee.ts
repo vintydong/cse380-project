@@ -7,6 +7,7 @@ import Emitter from "../../Wolfie2D/Events/Emitter";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Receiver from "../../Wolfie2D/Events/Receiver";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
+import Timer from "../../Wolfie2D/Timing/Timer";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import { SkillManager } from "../SkillManager";
 import Skill from "./Skill";
@@ -24,6 +25,8 @@ export default class Melee extends Skill {
         super(skill_manager);
 
         this.initialize();
+        this.damage = 20;
+        this.cooldown = new Timer(500);
     }
 
     public initialize(){
@@ -67,7 +70,9 @@ export default class Melee extends Skill {
         newPosition.x += (direction == "left") ? -1 * xOffset : xOffset;
         this.hitbox.position = newPosition;
 
-        this.hitbox.setAIActive(true, {direction: direction});
+        this.cooldown.start();
+
+        this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
         this.hitbox.tweens.play("fadeout");
     }
 }
@@ -84,6 +89,7 @@ export class MeleeBehavior implements AI {
 
     // The direction to fire the bubble
     private direction: string;
+    private damage: number;
 
     public initializeAI(owner: Sprite, options: Record<string, any>): void {
         this.owner = owner;
@@ -103,10 +109,10 @@ export class MeleeBehavior implements AI {
     public activate(options: Record<string, any>): void {
         console.log(options);
         if (options) {
+            this.damage = options.damage || 10;
             this.direction = options.direction;
         }
-        if (this.direction == "left") { this.owner.invertX = true; }
-        if (this.direction == "right") { this.owner.invertX = false; }
+        this.owner.invertX = (this.direction == "left") ? true : false;
     }
 
     public handleEvent(event: GameEvent): void {
@@ -121,7 +127,7 @@ export class MeleeBehavior implements AI {
                 let id = event.data.get('other');
                 if(id === this.owner.id){
                     console.log("Hit an enemy with Melee", event.data);
-                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: 20});
+                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: this.damage});
                     this.owner.position.copy(Vec2.ZERO);
                     this.owner._velocity.copy(Vec2.ZERO);
                     this.owner.visible = false;
