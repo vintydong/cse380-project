@@ -10,7 +10,7 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
-import { Ground, Air, Dash, Dead } from './PlayerStates';
+import { Ground, Air, Dash, Dead, Knockback } from './PlayerStates';
 
 /**
  * Specify any keybindings needed for the player
@@ -35,6 +35,7 @@ export enum PlayerStates {
     AIR = "AIR",
     DASH = "DASH",
     DEAD = "DEAD",
+    KNOCKBACK = "KNOCKBACK"
 }
 
 export enum PlayerAnimations {
@@ -66,7 +67,7 @@ export default class PlayerController extends StateMachineAI {
     protected _airDash: boolean;
 
     protected _iFrameTimer: Timer;
-    protected hit: boolean;
+    protected _hit: boolean;
 
     // protected weapon: PlayerWeapon;
     protected tilemap: OrthogonalTilemap;
@@ -93,6 +94,7 @@ export default class PlayerController extends StateMachineAI {
         this.addState(PlayerStates.AIR, new Air(this, this.owner));
         this.addState(PlayerStates.DASH, new Dash(this, this.owner));
         this.addState(PlayerStates.DEAD, new Dead(this, this.owner));
+        this.addState(PlayerStates.KNOCKBACK, new Knockback(this, this.owner));
 
         this.receiver.subscribe('ENEMY_COLLISION');
 
@@ -102,11 +104,12 @@ export default class PlayerController extends StateMachineAI {
     public handleEvent(event: GameEvent): void{
         switch (event.type){
             case 'ENEMY_COLLISION': {
-                if (!this.hit){
+                if (!this._hit){
                     this.handlePlayerCollision(event);
                     if (this.health <= 0){
                         this.changeState(PlayerStates.DEAD);
                     }
+                    this.changeState(PlayerStates.KNOCKBACK);
                 }
                 break;
             }
@@ -166,6 +169,12 @@ export default class PlayerController extends StateMachineAI {
     public get airDash(): boolean { return this._airDash; }
     public set airDash(airDash: boolean) { this._airDash = airDash; }
 
+    public get iFrameTimer(): Timer { return this._iFrameTimer; }
+    public set iFrameTimer(Timer: Timer) { this._iFrameTimer = Timer; }
+
+    public get hit(): boolean { return this._hit; }
+    public set hit(flag: boolean) { this._hit = flag; }
+
     public handlePlayerCollision(event): void{
         if (this._iFrameTimer.isStopped){
 			this.health -= 10;
@@ -177,12 +186,11 @@ export default class PlayerController extends StateMachineAI {
             let hurtAudio = (this.owner.getScene() as Level).getHurtAudioKey()
             this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: hurtAudio, loop: false, holdReference: false});
 			this._iFrameTimer.start();
-			this.hit = true;
+			this._hit = true;
 		}
     }
 
     protected handleIFrameTimerEnd = () => {
-		// this.owner.animation.playIfNotAlready(PlayerAnimations.IDLE, false);
-		this.hit = false;
+		this._hit = false;
 	}
 }
