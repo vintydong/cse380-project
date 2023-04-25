@@ -8,6 +8,7 @@ import Layer from "../Wolfie2D/Scene/Layer"
 import UILayer from "../Wolfie2D/Scene/Layers/UILayer";
 import Color from "../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
+import CheatManager from "./CheatManager";
 import Melee from "./Skills/Melee";
 import Skill from "./Skills/Skill";
 import Slash from "./Skills/Slash";
@@ -35,6 +36,8 @@ export class SkillManager {
 
     private skillBookLayer: UILayer;
 
+    private cheatManager: CheatManager;
+
     // TODO: Change to singleton so it is preserved across levels
     public constructor(scene: Level, player?: AnimatedSprite) {
         this.scene = scene;
@@ -48,6 +51,8 @@ export class SkillManager {
         this.skillBookLayer = scene.addUILayer(SkillBookLayers.background);
         this.initSkillBook();
         this.skillBookLayer.disable();
+
+        this.cheatManager = CheatManager.getInstance();
     }
 
     private initSkillBook() {
@@ -61,8 +66,11 @@ export class SkillManager {
     /** Returns the cooldown of the skill at position index 
      * 
      * @param index The 0-indexed position of the skill (from 0 to 3)
+     * @returns true if the skill can be activated; false if on cooldown
     */
     public getSkillCooldown(index: number): boolean {
+        if(this.cheatManager.getInfiniteSkills())
+            return true;
         if(index > 3 || index < 0) return false;
 
         return this.activeSkills[index].getCooldown();

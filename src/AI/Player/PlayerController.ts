@@ -1,5 +1,6 @@
 import { CustomGameEvents } from "../../CustomGameEvents";
 import { PhysicsGroups } from "../../Physics";
+import CheatManager from "../../Systems/CheatManager";
 import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
@@ -165,7 +166,8 @@ export default class PlayerController extends StateMachineAI {
     public set airDash(airDash: boolean) { this._airDash = airDash; }
 
     public handlePlayerCollision(event): void{
-        if (this._iFrameTimer.isStopped){
+        let cheatManager = CheatManager.getInstance();
+        if (this._iFrameTimer.isStopped && !cheatManager.getInfiniteHP()){
 			this.health -= 10;
 			this.owner.animation.playIfNotAlready(PlayerAnimations.TAKING_DAMAGE, false);
             this.emitter.fireEvent(CustomGameEvents.UPDATE_HEALTH, {
