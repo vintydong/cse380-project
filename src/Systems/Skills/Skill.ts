@@ -10,9 +10,9 @@ import { SkillManager } from "../SkillManager";
 export default abstract class Skill {
     protected skill_manager: SkillManager;
 
-    private damage: number;
-    private cost: number;
-    private cooldown: Timer;
+    protected damage: number;
+    protected cost: number;
+    protected cooldown: Timer;
 
     public constructor(skill_manager: SkillManager){
         this.skill_manager = skill_manager;

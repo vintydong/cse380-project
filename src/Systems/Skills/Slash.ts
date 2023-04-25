@@ -31,6 +31,8 @@ export default class Slash extends Skill {
         super(skill_manager);
 
         this.initialize();
+
+        this.damage = 15;
     }
 
     public initialize() {
@@ -92,7 +94,7 @@ export default class Slash extends Skill {
             this.hitbox.alpha = 1;
             this.hitbox.position = this.skill_manager.getPlayer().position.clone();
 
-            this.hitbox.setAIActive(true, {direction: direction});
+            this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
             this.hitbox.tweens.play("fadeout");
         }
 
@@ -131,6 +133,8 @@ export class SlashBehavior implements AI {
     private minXSpeed: number;
     private maxXSpeed: number;
 
+    private damage: number;
+
     public initializeAI(owner: Sprite, options: Record<string, any>): void {
         this.owner = owner;
 
@@ -156,6 +160,7 @@ export class SlashBehavior implements AI {
         if (options) {
             this.currentXSpeed = 300;
             this.direction = options.direction;
+            this.damage = options.damage;
         }
         if (this.direction == "left") { this.owner.invertX = true; }
         if (this.direction == "right") { this.owner.invertX = false; }
@@ -172,7 +177,7 @@ export class SlashBehavior implements AI {
                 let id = event.data.get('other');
                 if (id === this.owner.id) {
                     console.log("Hit an enemy with Slash", event.data);
-                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: 15});    
+                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: this.damage});    
                     this.owner.position.copy(Vec2.ZERO);
                     this.owner._velocity.copy(Vec2.ZERO);
                     this.owner.visible = false;
