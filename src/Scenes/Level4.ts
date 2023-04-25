@@ -6,6 +6,7 @@ import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
+import { GameEventType } from "../Wolfie2D/Events/GameEventType";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
@@ -20,6 +21,9 @@ export default class Level4 extends Level {
     public static readonly TILEMAP_KEY = "Level4";
     public static readonly TILEMAP_PATH = "assets/tilemaps/level4_tilemap.json";
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
+
+    public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
+    public static readonly LEVEL_MUSIC_PATH = "assets/music/area2_music.wav";
 
     // public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
     // public static readonly LEVEL_MUSIC_PATH = "hw4_assets/music/hw5_level_music.wav";
@@ -39,6 +43,7 @@ export default class Level4 extends Level {
         // Set the keys for the different layers of the tilemap
         this.tilemapKey = Level4.TILEMAP_KEY;
         this.tilemapScale = Level4.TILEMAP_SCALE;
+        this.levelMusicKey = Level4.LEVEL_MUSIC_KEY;
 
         // Set the player's spawn
         this.playerSpawn = new Vec2(6 * 8 * 6, 15 * 6 * 8);
@@ -64,6 +69,7 @@ export default class Level4 extends Level {
 
         // Load UI layer sprites
         // Audio and music
+        this.load.audio(this.levelMusicKey, Level4.LEVEL_MUSIC_PATH)
     }
 
     /**
@@ -105,6 +111,7 @@ export default class Level4 extends Level {
         // rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
         this.viewport.setBounds(8 * 6, 8 * 6, 8 * 6 * 36, 8 * 6 * 19);
+        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
     }
 
     public updateScene(deltaT) {
