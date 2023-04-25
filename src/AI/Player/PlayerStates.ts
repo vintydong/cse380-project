@@ -1,5 +1,6 @@
 import { CustomGameEvent, CustomGameEvents, MenuEvents } from "../../CustomGameEvents";
 import Level from "../../Scenes/Level";
+import CheatManager from "../../Systems/CheatManager";
 import State from "../../Wolfie2D/DataTypes/State/State";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
@@ -16,6 +17,8 @@ export abstract class PlayerState extends State {
     protected owner: AnimatedSprite;
     protected gravity: number;
     protected skillFired: string;
+
+    protected static cheatManager: CheatManager = CheatManager.getInstance();
 
     public constructor(parent: PlayerController, owner: AnimatedSprite) {
         super(parent);
@@ -95,7 +98,7 @@ export class Ground extends PlayerState {
         this.parent.velocity.y = 0;
 
         let dir = this.parent.moveDir;
-        if (Input.isJustPressed(PlayerControls.DASH) && this.parent.dashTimer.isStopped()) {
+        if (Input.isJustPressed(PlayerControls.DASH) && (this.parent.dashTimer.isStopped() || PlayerState.cheatManager.getInfiniteSkills())) {
             this.finished(PlayerStates.DASH);
         }
         else if (Input.isJustPressed(PlayerControls.MOVE_UP)) {
@@ -137,7 +140,7 @@ export class Air extends PlayerState {
             this.parent.velocity.y += 100
             this.owner.animation.playIfNotAlready(PlayerAnimations.FALLING);
         }
-        else if (Input.isJustPressed(PlayerControls.DASH) && this.parent.airDash && this.parent.dashTimer.isStopped()) {
+        else if (Input.isJustPressed(PlayerControls.DASH) && ((this.parent.airDash && this.parent.dashTimer.isStopped()) || PlayerState.cheatManager.getInfiniteSkills())) {
             this.finished(PlayerStates.DASH);
         }
         else if (this.owner.onGround && this.parent.velocity.y >= 0){

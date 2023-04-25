@@ -95,6 +95,7 @@ export default class MainMenu extends Scene {
         // this.mainMenu.disable();
         help.onClickEventId = "help";
 
+        this.receiver.subscribe("play");
         this.receiver.subscribe("demo");
         this.receiver.subscribe("level");
         this.receiver.subscribe("controls");
