@@ -13,6 +13,7 @@ import DemoLevel from "../DemoLevel";
 import Help from "./Help";
 import LevelSelect from "./LevelSelect";
 import Controls from "./Controls";
+import Level1 from "../Level1";
 
 export default class MainMenu extends Scene {
     // Need layers for multiple scenes such as mainMenu, about, control, help, levels, etc.
@@ -60,7 +61,7 @@ export default class MainMenu extends Scene {
         play.borderWidth = 2;
         play.borderColor = Color.WHITE;
         play.backgroundColor = Color.TRANSPARENT;
-        // play.onClickEventId = "play";
+        play.onClickEventId = "play";
 
         const demo = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 75), text: "Demo"});
         demo.size.set(200, 50);
@@ -109,6 +110,9 @@ export default class MainMenu extends Scene {
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
             //Main menu options
+            case "play":
+                this.sceneManager.changeToScene(Level1);
+                break;
             case "demo":
                 this.sceneManager.changeToScene(DemoLevel);
                 break;
