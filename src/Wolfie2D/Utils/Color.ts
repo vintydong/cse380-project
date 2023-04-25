@@ -108,6 +108,10 @@ export default class Color {
 		return new Color(255, 100, 0, 1);
 	}
 
+	static get GRAY(): Color {
+		return new Color(15, 153, 113);
+	}
+
 	/**
 	 * Sets the color to the values provided
 	 * @param r Red

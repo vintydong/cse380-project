@@ -10,6 +10,7 @@ import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Level, { LevelLayers } from "./Level";
+import MainMenu from "./MenuScenes/MainMenu";
 
 export default class Level2 extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "LEVEL2_ENEMY_KEY";
@@ -23,9 +24,6 @@ export default class Level2 extends Level {
 
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
     public static readonly LEVEL_MUSIC_PATH = "assets/music/area1_music.mp3";
-
-    // public static readonly TILE_DESTROYED_KEY = "TILE_DESTROYED";
-    // public static readonly TILE_DESTROYED_PATH = "hw4_assets/sounds/switch.wav";
     
     // The padding of the world
 	private worldPadding: Vec2;
@@ -105,6 +103,8 @@ export default class Level2 extends Level {
         // rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
         this.viewport.setBounds(8 * 6, 0, 8 * 6 * 40, 8 * 6 * 25);
+
+        // this.nextLevel = MainMenu;
         this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
     }
 
@@ -132,10 +132,34 @@ export default class Level2 extends Level {
      */
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
+            // TODO: Remove temporarily change to main menu
+            case CustomGameEvents.LEVEL_NEXT: {
+                this.sceneManager.changeToScene(MainMenu);
+                break;
+            }
             default:
                 super.handleEvent(event);
                 break;
                 // throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
+    }
+
+    public spawnEnemy(pos: Vec2): void {
+        if(this.enemies.length >= 3) return;
+
+        let enemy = this.factory.addAnimatedSprite(SlimeBossActor, Level2.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as SlimeBossActor;
+        enemy.position.set(pos.x, pos.y);
+        enemy.scale = new Vec2(1.5,1.5);
+        enemy.addPhysics(new Circle(enemy.position, 16 * 1.5));
+        enemy.setGroup(PhysicsGroups.NPC);
+        enemy.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENEMY_COLLISION, null);
+        enemy.navkey = "navmesh";
+
+        // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
+        // this.healthbars.set(npc.id, healthbar);
+
+        enemy.addAI(SlimeBossController, { tilemap: this.tilemapKey });
+        enemy.animation.play("IDLE");
+        this.enemies.push(enemy);
     }
 }

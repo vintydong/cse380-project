@@ -22,7 +22,7 @@ export type PhysicOptions = {
  * Player       1       0       0       1               0   0           0
  * Weapon       1       0       0       1               1   0           0
  * Destructible 0       1       1       0               0   0           0
- * NPC          1       0       1       0               1   1           0
+ * NPC          1       0       1       0               0   1           0
  * NPC_Walls    0       0       0       0               1   1           0
  * LEVEL_END    0       0       0       0               0   0           0
  */
@@ -42,7 +42,7 @@ export const PhysicsCollisionMap: PhysicOptions = {
             [1, 0, 0, 1, 0, 0, 0],
             [1, 0, 0, 1, 1, 0, 0],
             [0, 1, 1, 0, 0, 0, 0],
-            [1, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 0, 1, 0],
             [0, 0, 0, 0, 1, 1, 0],
             [0, 0, 0, 0 ,0 ,0, 0]
         ]

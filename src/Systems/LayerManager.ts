@@ -14,7 +14,7 @@ import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
 import Level from "../Scenes/Level";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Rect from "../Wolfie2D/Nodes/Graphics/Rect";
-import Label from "../Wolfie2D/Nodes/UIElements/Label";
+import Label, { HAlign, VAlign } from "../Wolfie2D/Nodes/UIElements/Label";
 import Timer from "../Wolfie2D/Timing/Timer";
 
 export const LevelUILayers = {
@@ -258,7 +258,11 @@ export class LayerManager {
         viewportTopRight.y = viewportTopRight.y - viewportSize.y/2;
 
         this.transitionLabel = this.scene.factory.addLabel(LevelUILayers.TRANSITION, viewportTopRight, "Level Complete")
+        this.transitionLabel.size = new Vec2(250, 75);
+        this.transitionLabel.setHAlign(HAlign.CENTER);
+        this.transitionLabel.setVAlign(VAlign.BOTTOM);
         this.transitionLabel.backgroundColor = new Color(100, 100, 100);
+        this.transitionLabel.textColor = Color.WHITE;
         this.transitionLabel.tweens.add("slideIn", {
             startDelay: 0,
             duration: 1000,
@@ -266,7 +270,7 @@ export class LayerManager {
                 {
                     property: TweenableProperties.posX,
                     start: viewportTopRight.x,
-                    end: viewportTopRight.x - 300,
+                    end: viewportTopRight.x - 250,
                     ease: EaseFunctionType.OUT_SINE
                 }
             ]
