@@ -27,7 +27,7 @@ class SlimeGround extends EnemyState {
     private dir: number = null;
     private time: number = 0;
     private jumping: boolean = false;
-    private hasSpawned: boolean = false;
+    private spawns: number = 0;
 
     public onEnter(options: Record<string, any>): void {
         this.parent.speed = 750;
@@ -70,12 +70,12 @@ class SlimeGround extends EnemyState {
                 this.parent.velocity.scaleTo(this.parent.speed);
                 this.jumping = true;
             }
-            else if (this.parent.health < this.parent.maxHealth/2 && !this.hasSpawned){ // Add attack here: spawn a slime
+            else if (this.spawns < 2){ // Add attack here: spawn a slime
                 let scene = this.owner.getScene() as Level;
                 let player = scene.getPlayer().position.clone();
+                player.y = player.y - 200;
                 (scene as Level2).spawnEnemy(player);
-                (scene as Level2).spawnEnemy(player);         
-                this.hasSpawned = true;
+                this.spawns = this.spawns + 1;
             }
         }
     }

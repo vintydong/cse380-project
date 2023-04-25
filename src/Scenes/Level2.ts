@@ -140,6 +140,8 @@ export default class Level2 extends Level {
     }
 
     public spawnEnemy(pos: Vec2): void {
+        if(this.enemies.length >= 3) return;
+
         let enemy = this.factory.addAnimatedSprite(SlimeBossActor, Level2.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as SlimeBossActor;
         enemy.position.set(pos.x, pos.y);
         enemy.scale = new Vec2(1.5,1.5);
