@@ -162,4 +162,8 @@ export default class Level2 extends Level {
         enemy.animation.play("IDLE");
         this.enemies.push(enemy);
     }
+
+    public unloadScene(): void {
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: this.levelMusicKey})
+    }
 }
