@@ -21,12 +21,16 @@ export default class Melee extends Skill {
     public static readonly MELEE_SPRITE_KEY = "MELEE_SPRITE_KEY";
     public static readonly MELEE_SPRITE_PATH = "assets/sprites/attacks/melee.png";
 
-    public constructor(skill_manager: SkillManager) {
-        super(skill_manager);
+    public static readonly MELEE_ICON_KEY = "MELEE_ICON_KEY";
+    public static readonly MELEE_ICON_PATH = "assets/sprites/icons/melee_icon.png";
 
-        this.initialize();
-        this.damage = 20;
-        this.cooldown = new Timer(500);
+    public constructor(skill_manager: SkillManager) {
+        let damage = [20, 30, 40];
+        let cooldown = [new Timer(500), new Timer(400), new Timer(300)];
+        let cost = [0, 0, 0];
+        let description = ['Swings sword at enemy', 'Increase DMG and\nreduce CD', 'Greatly increase DMG'];
+
+        super(skill_manager, damage, cooldown, cost, description, Melee.MELEE_ICON_KEY);
     }
 
     public initialize(){
@@ -70,9 +74,9 @@ export default class Melee extends Skill {
         newPosition.x += (direction == "left") ? -1 * xOffset : xOffset;
         this.hitbox.position = newPosition;
 
-        this.cooldown.start();
+        this.cooldown[this.level].start();
 
-        this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
+        this.hitbox.setAIActive(true, {direction: direction, damage: this.damage[this.level]});
         this.hitbox.tweens.play("fadeout");
     }
 }

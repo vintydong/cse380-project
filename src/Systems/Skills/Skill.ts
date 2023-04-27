@@ -3,6 +3,14 @@ import Scene from "../../Wolfie2D/Scene/Scene";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import { SkillManager } from "../SkillManager";
 
+export interface SkillAttributes {
+    level: number,
+    damage: number,
+    cooldown: number,
+    cost: number,
+    description: string,
+}
+
 /** 
  * Abstract class representing a skill along with its upgrades and effects
  * @author vintydong
@@ -10,12 +18,24 @@ import { SkillManager } from "../SkillManager";
 export default abstract class Skill {
     protected skill_manager: SkillManager;
 
-    protected damage: number;
-    protected cost: number;
-    protected cooldown: Timer;
+    public spriteKey: string;
 
-    public constructor(skill_manager: SkillManager){
+    protected level: number;
+    protected damage: number[];
+    protected cooldown: Timer[];
+    protected cost: number[];
+    protected description: string[];
+
+    public constructor(skill_manager: SkillManager, damage, cooldown, cost, description, spriteKey){
         this.skill_manager = skill_manager;
+
+        this.level = 0;
+        this.damage = damage;
+        this.cooldown = cooldown;
+        this.cost = cost;
+        this.description = description;
+        this.spriteKey = spriteKey;
+        this.initialize();
     }
 
     /** Initialize necessary components of a skill */
@@ -28,6 +48,19 @@ export default abstract class Skill {
      * 
      * true if the skill can now be activated; false otherwise
      */
-    public getCooldown(): boolean { return this.cooldown.isStopped() }
+    public getCooldown(): boolean { return this.cooldown[this.level].isStopped() }
+
+    public getAttributes(): SkillAttributes {
+        let level = this.level;
+        let cd = this.cooldown[level] || this.cooldown[0];
+
+        return {
+            level: level + 1,
+            damage: this.damage[level] || this.damage[0],
+            cooldown: cd.length(),
+            cost: this.cost[level] || this.cost[0],
+            description: this.description[level] || this.description[0],
+        }
+    }
 
 }

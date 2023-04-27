@@ -28,13 +28,16 @@ export default class Slash extends Skill {
     public static readonly SLASH_SPRITE_KEY = "SLASH_SPRITE_KEY";
     public static readonly SLASH_SPRITE_PATH = "assets/sprites/attacks/ranged.png";
 
+    public static readonly SLASH_ICON_KEY = "SLASH_ICON_KEY";
+    public static readonly SLASH_ICON_PATH = "assets/sprites/icons/slash_icon.png";
+
     public constructor(skill_manager: SkillManager) {
-        super(skill_manager);
+        let damage = [15, 30, 45];
+        let cooldown = [new Timer(1000), new Timer(900), new Timer(800)];
+        let cost = [0, 0, 0];
+        let description = ['A sword swing that damages enemies in front', 'Increase damage and slightly reduce cooldown', 'Greatly increase damage'];
 
-        this.initialize();
-
-        this.damage = 15;
-        this.cooldown = new Timer(1000);
+        super(skill_manager, damage, cooldown, cost, description, Slash.SLASH_ICON_KEY);
     }
 
     public initialize() {
@@ -57,7 +60,7 @@ export default class Slash extends Skill {
                 {
                     property: "alpha",
                     start: 1,
-                    end: 0,
+                    end: 0.35,
                     ease: EaseFunctionType.IN_OUT_SINE
                 }
             ],
@@ -96,7 +99,7 @@ export default class Slash extends Skill {
             this.hitbox.alpha = 1;
             this.hitbox.position = this.skill_manager.getPlayer().position.clone();
 
-            this.cooldown.start();
+            this.cooldown[this.level].start();
             
             this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
             this.hitbox.tweens.play("fadeout");
