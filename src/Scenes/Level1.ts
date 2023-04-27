@@ -1,21 +1,22 @@
 import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
 import demoEnemyController from "../AI/demo_enemy/demoEnemyController";
+import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
+import { LayerManager } from "../Systems/LayerManager";
+import { SkillManager } from "../Systems/SkillManager";
+import Melee from "../Systems/Skills/Melee";
+import Slash from "../Systems/Skills/Slash";
+import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
+import { GameEventType } from "../Wolfie2D/Events/GameEventType";
+import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
-import Level, { LevelLayers } from "./Level";
-import ParticleShaderType from "../Shaders/ParticleShaderType";
-import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
-import { CustomGameEvents } from "../CustomGameEvents";
-import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
-import MainMenu from "./MenuScenes/MainMenu";
-import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Color from "../Wolfie2D/Utils/Color";
+import Level, { LevelLayers } from "./Level";
 import Level2 from "./Level2";
-import { GameEventType } from "../Wolfie2D/Events/GameEventType";
 
 export default class Level1 extends Level {
     public static readonly ENEMY_SPRITE_KEY = "LEVEL1_ENEMY_KEY";
@@ -56,29 +57,42 @@ export default class Level1 extends Level {
     public loadScene(): void {
         super.loadScene();
 
+        this.load.spritesheet(Level.PLAYER_SPRITE_KEY, Level.PLAYER_SPRITE_PATH);
+
+        this.load.image(LayerManager.PAUSE_SPRITE_KEY, LayerManager.PAUSE_SPRITE_PATH);
+        this.load.image(LayerManager.CONTROL_SPRITE_KEY, LayerManager.CONTROL_SPRITE_PATH);
+        this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
+        this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
+        this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
+
+        this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
+        this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
+
+        /* Audio and Sounds */
+        this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
+        this.load.audio(Level.DASH_AUDIO_KEY, Level.DASH_AUDIO_PATH);
+        this.load.audio(Level.ATTACK_AUDIO_KEY, Level.ATTACK_AUDIO_PATH);
+        this.load.audio(Level.HURT_AUDIO_KEY, Level.HURT_AUDIO_PATH);
+        this.load.audio(Level.DYING_AUDIO_KEY, Level.DYING_AUDIO_PATH);
+
         // Load in the tilemap
-        this.load.tilemap(this.tilemapKey, Level1.TILEMAP_PATH);
-        // Load in the player's sprite
-        this.load.spritesheet(this.playerSpriteKey, Level1.PLAYER_SPRITE_PATH);
-        // Load in ability icons
-        this.load.image(this.abilityIconsKey, Level1.ABILITY_ICONS_PATH);
+        this.load.tilemap(Level1.TILEMAP_KEY, Level1.TILEMAP_PATH);
         // Load in music
-        this.load.audio(this.levelMusicKey, Level1.LEVEL_MUSIC_PATH);
-        
+        this.load.audio(Level1.LEVEL_MUSIC_KEY, Level1.LEVEL_MUSIC_PATH);
+
         // Load in level 1 enemies
         this.load.spritesheet(Level1.ENEMY_SPRITE_KEY, Level1.ENEMY_SPRITE_PATH);
         this.load.object(Level1.ENEMY_POSITIONS_KEY, Level1.TILEMAP_PATH);
-
-        // Load UI layer sprites
-        // Audio and music
     }
 
     /**
      * Unload resources for level 1
      */
-    // public unloadScene(): void {
-    //     // TODO decide which resources to keep/cull 
-    // }
+    public unloadScene(): void {
+        super.unloadScene();
+        
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, { key: this.levelMusicKey });
+    }
 
     public startScene(): void {
         super.startScene();
@@ -113,7 +127,7 @@ export default class Level1 extends Level {
         this.viewport.setBounds(8 * 6, 0, 8 * 6 * 58, 8 * 6 * 30);
 
         this.nextLevel = Level2;
-        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
+        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, { key: this.levelMusicKey, loop: true, holdReference: true });
     }
 
     public updateScene(deltaT) {
@@ -146,9 +160,5 @@ export default class Level1 extends Level {
                 break;
             // throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
-    }
-
-    public unloadScene(): void {
-        this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: this.levelMusicKey})
     }
 }

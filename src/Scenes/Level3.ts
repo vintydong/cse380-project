@@ -1,21 +1,18 @@
-import { BasicEnemyController } from "../AI/BasicEnemyController";
-import { SlimeBossActor, SlimeBossController } from "../AI/Bosses/SlimeBoss";
 import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
 import demoEnemyController from "../AI/demo_enemy/demoEnemyController";
 import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
-import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import { GameEventType } from "../Wolfie2D/Events/GameEventType";
-import Rect from "../Wolfie2D/Nodes/Graphics/Rect";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Level, { LevelLayers } from "./Level";
+import MainMenu from "./MenuScenes/MainMenu";
 
-export default class Level3 extends Level {    
+export default class Level3 extends Level {
     public static readonly ENEMY_SPRITE_KEY = "LEVEL3_ENEMY_KEY";
     public static readonly ENEMY_SPRITE_PATH = "assets/spritesheets/Enemies/Enemy_Knight.json";
     public static readonly ENEMY_POSITIONS_KEY = "LEVEL3_ENEMY_POSITIONS";
@@ -36,9 +33,9 @@ export default class Level3 extends Level {
 
     // public static readonly TILE_DESTROYED_KEY = "TILE_DESTROYED";
     // public static readonly TILE_DESTROYED_PATH = "hw4_assets/sounds/switch.wav";
-    
+
     // The padding of the world
-	private worldPadding: Vec2;
+    private worldPadding: Vec2;
 
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);
@@ -61,27 +58,22 @@ export default class Level3 extends Level {
 
         // Load in the tilemap
         this.load.tilemap(this.tilemapKey, Level3.TILEMAP_PATH);
-        // Load in the player's sprite
-        this.load.spritesheet(this.playerSpriteKey, Level3.PLAYER_SPRITE_PATH);
-        // Load in ability icons
-        this.load.image(this.abilityIconsKey, Level3.ABILITY_ICONS_PATH);
-        
-        // Load in level 2 enemies
+
+        // Load in level 3 enemies
         this.load.spritesheet(Level3.ENEMY_SPRITE_KEY, Level3.ENEMY_SPRITE_PATH);
         this.load.object(Level3.ENEMY_POSITIONS_KEY, Level3.TILEMAP_PATH);
 
-        // Load UI layer sprites
-        // Audio and music
         this.load.audio(this.levelMusicKey, Level3.LEVEL_MUSIC_PATH)
-
     }
 
     /**
-     * Unload resources for level 2
+     * Unload resources for level 3
      */
-    // public unloadScene(): void {
-    //     // TODO decide which resources to keep/cull 
-    // }
+    public unloadScene(): void {
+        super.unloadScene();
+        // TODO decide which resources to keep/cull
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, { key: this.levelMusicKey })
+    }
 
     public startScene(): void {
         super.startScene();
@@ -109,8 +101,6 @@ export default class Level3 extends Level {
         // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
         // this.healthbars.set(npc.id, healthbar);
 
-
-        
         // Set level end
         // const levelEnd = new Vec2(20.5, 14).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
         // let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(3 * 8 * 6, 4 * 8 * 6));
@@ -120,7 +110,7 @@ export default class Level3 extends Level {
         // rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
         this.viewport.setBounds(8 * 6, 8 * 6, 8 * 6 * 54, 8 * 6 * 29);
-        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
+        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, { key: this.levelMusicKey, loop: true, holdReference: true });
     }
 
     public updateScene(deltaT) {
@@ -129,13 +119,13 @@ export default class Level3 extends Level {
         }
 
         let allEnemiesDefeated = true
-        for(let i = 0; i < this.enemies.length; i++){
-            if(this.enemies[i].visible) allEnemiesDefeated = false;
+        for (let i = 0; i < this.enemies.length; i++) {
+            if (this.enemies[i].visible) allEnemiesDefeated = false;
         }
 
         super.updateScene(deltaT);
 
-        if(allEnemiesDefeated)
+        if (allEnemiesDefeated)
             this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
     }
 
@@ -147,10 +137,15 @@ export default class Level3 extends Level {
      */
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
+            case CustomGameEvents.LEVEL_END:
+            case CustomGameEvents.LEVEL_NEXT: {
+                this.sceneManager.changeToScene(MainMenu);
+                break;
+            }
             default:
                 super.handleEvent(event);
                 break;
-                // throw new Error(`Event handler not implemented for event type ${event.type}`)
+            // throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
     }
 }

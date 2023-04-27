@@ -1,8 +1,6 @@
 import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
 import demoEnemyController from "../AI/demo_enemy/demoEnemyController";
 import { PhysicsGroups } from "../Physics";
-import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
-import ParticleShaderType from "../Shaders/ParticleShaderType";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
@@ -21,14 +19,8 @@ export default class Level5 extends Level {
     public static readonly TILEMAP_PATH = "assets/tilemaps/level5_tilemap.json";
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
-    // public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    // public static readonly LEVEL_MUSIC_PATH = "hw4_assets/music/hw5_level_music.wav";
-
-    // public static readonly JUMP_AUDIO_KEY = "PLAYER_JUMP";
-    // public static readonly JUMP_AUDIO_PATH = "hw4_assets/sounds/jump.wav";
-
-    // public static readonly TILE_DESTROYED_KEY = "TILE_DESTROYED";
-    // public static readonly TILE_DESTROYED_PATH = "hw4_assets/sounds/switch.wav";
+    public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
+    public static readonly LEVEL_MUSIC_PATH = "hw4_assets/music/hw5_level_music.wav";
     
     // The padding of the world
 	private worldPadding: Vec2;
@@ -40,8 +32,8 @@ export default class Level5 extends Level {
         this.tilemapKey = Level5.TILEMAP_KEY;
         this.tilemapScale = Level5.TILEMAP_SCALE;
 
-        this.playerSpawn = new Vec2(66.5 * 6, 40 * 6);
         // Set the player's spawn
+        this.playerSpawn = new Vec2(66.5 * 6, 40 * 6);
         // Music and sound
     }
 
@@ -51,34 +43,14 @@ export default class Level5 extends Level {
      */
     public loadScene(): void {
         super.loadScene();
-
         // Load in the tilemap
         this.load.tilemap(this.tilemapKey, Level5.TILEMAP_PATH);
-        // Load in the player's sprite
-        this.load.spritesheet(this.playerSpriteKey, Level5.PLAYER_SPRITE_PATH);
-        // Load in ability icons
-        this.load.image(this.abilityIconsKey, Level5.ABILITY_ICONS_PATH);
-        
-        // Load in the shader for basic attack.
-        this.load.shader(
-            BasicAttackShaderType.KEY,
-            BasicAttackShaderType.VSHADER,
-            BasicAttackShaderType.FSHADER
-        );
 
-        // Load in demo level enemies
+        // Load in level enemies
         this.load.spritesheet(Level5.ENEMY_SPRITE_KEY, Level5.ENEMY_SPRITE_PATH);
         this.load.object(Level5.ENEMY_POSITIONS_KEY, Level5.TILEMAP_PATH);
-        
-        // Load in the shader for bubble.
-        this.load.shader(
-            ParticleShaderType.KEY,
-            ParticleShaderType.VSHADER,
-            ParticleShaderType.FSHADER
-        );
 
-        // Load UI layer sprites
-        // Audio and music
+        this.load.audio(this.levelMusicKey, Level5.LEVEL_MUSIC_PATH)
     }
 
     /**

@@ -10,7 +10,7 @@ import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Level, { LevelLayers } from "./Level";
-import MainMenu from "./MenuScenes/MainMenu";
+import Level3 from "./Level3";
 
 export default class Level2 extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "LEVEL2_ENEMY_KEY";
@@ -49,27 +49,22 @@ export default class Level2 extends Level {
 
         // Load in the tilemap
         this.load.tilemap(this.tilemapKey, Level2.TILEMAP_PATH);
-        // Load in the player's sprite
-        this.load.spritesheet(this.playerSpriteKey, Level2.PLAYER_SPRITE_PATH);
-        // Load in ability icons
-        this.load.image(this.abilityIconsKey, Level2.ABILITY_ICONS_PATH);
         // Load in music
         this.load.audio(this.levelMusicKey, Level2.LEVEL_MUSIC_PATH)
         
         // Load in level 2 enemies
         this.load.spritesheet(Level2.ENEMY_SPRITE_KEY, Level2.ENEMY_SPRITE_PATH);
         this.load.object(Level2.ENEMY_POSITIONS_KEY, Level2.TILEMAP_PATH);
-
-        // Load UI layer sprites
-        // Audio and music
     }
 
     /**
      * Unload resources for level 2
      */
-    // public unloadScene(): void {
-    //     // TODO decide which resources to keep/cull 
-    // }
+    public unloadScene(): void {
+        super.unloadScene();
+
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, { key: this.levelMusicKey });
+    }
 
     public startScene(): void {
         super.startScene();
@@ -92,7 +87,6 @@ export default class Level2 extends Level {
         enemy.addAI(SlimeBossController, { tilemap: this.tilemapKey });
         enemy.animation.play("IDLE");
         this.enemies.push(enemy);
-
         
         // Set level end
         // const levelEnd = new Vec2(20.5, 14).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
@@ -104,7 +98,7 @@ export default class Level2 extends Level {
 
         this.viewport.setBounds(8 * 6, 0, 8 * 6 * 40, 8 * 6 * 25);
 
-        // this.nextLevel = MainMenu;
+        this.nextLevel = Level3;
         this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
     }
 
@@ -137,7 +131,7 @@ export default class Level2 extends Level {
                 break;
             }
             case CustomGameEvents.LEVEL_NEXT: {
-                this.sceneManager.changeToScene(MainMenu);
+                this.sceneManager.changeToScene(Level3);
                 break;
             }
             default:
@@ -164,9 +158,5 @@ export default class Level2 extends Level {
         enemy.addAI(SlimeBossController, { tilemap: this.tilemapKey });
         enemy.animation.play("IDLE");
         this.enemies.push(enemy);
-    }
-
-    public unloadScene(): void {
-        this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: this.levelMusicKey})
     }
 }

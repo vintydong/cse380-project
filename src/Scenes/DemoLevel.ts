@@ -12,6 +12,10 @@ import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import BasicAttackShaderType from "../Shaders/BasicAttackShaderType";
 import MainMenu from "./MenuScenes/MainMenu";
 import { CustomGameEvents } from "../CustomGameEvents";
+import { LayerManager } from "../Systems/LayerManager";
+import { SkillManager } from "../Systems/SkillManager";
+import Melee from "../Systems/Skills/Melee";
+import Slash from "../Systems/Skills/Slash";
 
 export default class DemoLevel extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "DEMO_ENEMY_KEY";
@@ -56,39 +60,29 @@ export default class DemoLevel extends Level {
 
         // Load in the tilemap
         this.load.tilemap(this.tilemapKey, DemoLevel.TILEMAP_PATH);
-        // // Load in the player's sprite
-        // this.load.spritesheet(this.playerSpriteKey, DemoLevel.PLAYER_SPRITE_PATH);
-        // Load in ability icons
-        // this.load.image(this.abilityIconsKey, DemoLevel.ABILITY_ICONS_PATH);
-        
-        // Load in the shader for basic attack.
-        this.load.shader(
-            BasicAttackShaderType.KEY,
-            BasicAttackShaderType.VSHADER,
-            BasicAttackShaderType.FSHADER
-        );
+
+        this.load.spritesheet(Level.PLAYER_SPRITE_KEY, Level.PLAYER_SPRITE_PATH);
+
+        this.load.image(LayerManager.PAUSE_SPRITE_KEY, LayerManager.PAUSE_SPRITE_PATH);
+        this.load.image(LayerManager.CONTROL_SPRITE_KEY, LayerManager.CONTROL_SPRITE_PATH);
+        this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
+        this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
+        this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
+
+        this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
+        this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
+
+        /* Audio and Sounds */
+        this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
+        this.load.audio(Level.DASH_AUDIO_KEY, Level.DASH_AUDIO_PATH);
+        this.load.audio(Level.ATTACK_AUDIO_KEY, Level.ATTACK_AUDIO_PATH);
+        this.load.audio(Level.HURT_AUDIO_KEY, Level.HURT_AUDIO_PATH);
+        this.load.audio(Level.DYING_AUDIO_KEY, Level.DYING_AUDIO_PATH);
 
         // Load in demo level enemies
         this.load.spritesheet(DemoLevel.ENEMY_SPRITE_KEY, DemoLevel.ENEMY_SPRITE_PATH);
         this.load.object(DemoLevel.ENEMY_POSITIONS_KEY, DemoLevel.ENEMY_POSIITIONS_PATH);
-        
-        // Load in the shader for bubble.
-        this.load.shader(
-            ParticleShaderType.KEY,
-            ParticleShaderType.VSHADER,
-            ParticleShaderType.FSHADER
-        );
-
-        // Load UI layer sprites
-        // Audio and music
     }
-
-    /**
-     * Unload resources for level 1
-     */
-    // public unloadScene(): void {
-    //     // TODO decide which resources to keep/cull 
-    // }
 
     public startScene(): void {
         super.startScene();
