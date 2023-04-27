@@ -66,7 +66,9 @@ export default class Level1 extends Level {
         this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
 
         this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
+        this.load.image(Melee.MELEE_ICON_KEY, Melee.MELEE_ICON_PATH);
         this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
+        this.load.image(Slash.SLASH_ICON_KEY, Slash.SLASH_ICON_PATH);
 
         /* Audio and Sounds */
         this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
