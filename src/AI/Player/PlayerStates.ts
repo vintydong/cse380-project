@@ -109,13 +109,13 @@ export class Ground extends PlayerState {
             this.parent.velocity.y = -700;
             this.finished(PlayerStates.AIR);
         }
+        else if (!this.owner.onGround && !this.fromGround){
+            this.finished(PlayerStates.AIR);
+        }
         else if (this.owner.animation.isPlaying(PlayerAnimations.ATTACKING)) { return; }
         else if (this.owner.onGround || this.fromGround) {
             let animation = (dir.x) ? PlayerAnimations.RUNNING : PlayerAnimations.IDLE;
             this.owner.animation.playIfNotAlready(animation, true);
-        }
-        else {
-            this.finished(PlayerStates.AIR);
         }
     }
 
