@@ -89,10 +89,6 @@
 				{
 					"index": 15,
 					"duration": 5
-				},
-				{
-					"index": 16,
-					"duration": 5
 				}
 			]
 		},
@@ -103,6 +99,18 @@
 				{
 					"index": 18,
 					"duration": 5
+				},
+				{
+					"index": 19,
+					"duration": 5
+				},
+				{
+					"index": 20,
+					"duration": 5
+				},
+				{
+					"index": 21,
+					"duration": 3
 				}
 			]
 		},
