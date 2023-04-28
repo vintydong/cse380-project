@@ -3,7 +3,6 @@ import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
 import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
-import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import { GameEventType } from "../Wolfie2D/Events/GameEventType";
@@ -25,15 +24,6 @@ export default class Level4 extends Level {
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
     public static readonly LEVEL_MUSIC_PATH = "assets/music/area2_music.wav";
 
-    // public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    // public static readonly LEVEL_MUSIC_PATH = "hw4_assets/music/hw5_level_music.wav";
-
-    // public static readonly JUMP_AUDIO_KEY = "PLAYER_JUMP";
-    // public static readonly JUMP_AUDIO_PATH = "hw4_assets/sounds/jump.wav";
-
-    // public static readonly TILE_DESTROYED_KEY = "TILE_DESTROYED";
-    // public static readonly TILE_DESTROYED_PATH = "hw4_assets/sounds/switch.wav";
-    
     // The padding of the world
 	private worldPadding: Vec2;
 
@@ -58,17 +48,11 @@ export default class Level4 extends Level {
 
         // Load in the tilemap
         this.load.tilemap(this.tilemapKey, Level4.TILEMAP_PATH);
-        // Load in the player's sprite
-        this.load.spritesheet(this.playerSpriteKey, Level4.PLAYER_SPRITE_PATH);
-        // Load in ability icons
-        this.load.image(this.abilityIconsKey, Level4.ABILITY_ICONS_PATH);
         
-        // Load in level 2 enemies
+        // Load in level 4 enemies
         this.load.spritesheet(Level4.ENEMY_SPRITE_KEY, Level4.ENEMY_SPRITE_PATH);
         this.load.object(Level4.ENEMY_POSITIONS_KEY, Level4.TILEMAP_PATH);
 
-        // Load UI layer sprites
-        // Audio and music
         this.load.audio(this.levelMusicKey, Level4.LEVEL_MUSIC_PATH)
     }
 

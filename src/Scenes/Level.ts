@@ -73,7 +73,7 @@ export default abstract class Level extends Scene {
 
     public static readonly DYING_AUDIO_KEY = "DYING_AUDIO_KEY";
     public static readonly DYING_AUDIO_PATH = "assets/sounds/dying.wav";
-    
+
     protected jumpAudioKey: string;
     protected dashAudioKey: string;
     protected attackAudioKey: string;
@@ -82,7 +82,7 @@ export default abstract class Level extends Scene {
 
     // Object pool for basic attacks and bubbles
     protected basicAttacks: Array<Graphic>;
-	protected bubbles: Array<Graphic>;
+    protected bubbles: Array<Graphic>;
     protected weaponParticles: PlayerParticleSystem;
 
     /** Attributes for the UI */
@@ -90,12 +90,12 @@ export default abstract class Level extends Scene {
     protected healthBarBg: Label;
 
     protected resourceBar: Label;
-    protected abilityBar: Label;    
+    protected abilityBar: Label;
 
     // Layers in each Level
     protected primary: Layer;
     protected ui: Layer;
-    
+
     protected enemies: AnimatedSprite[];
 
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
@@ -113,25 +113,30 @@ export default abstract class Level extends Scene {
         this.enemies = [];
     }
 
-    // /** Load common things for all levels */
+    /** Load common things for all levels */
     public loadScene(): void {
-        this.load.spritesheet(Level.PLAYER_SPRITE_KEY, Level.PLAYER_SPRITE_PATH);
+        //** Moved to Level1.ts to save on resources for future levels */
+    }
 
-        this.load.image(LayerManager.PAUSE_SPRITE_KEY, LayerManager.PAUSE_SPRITE_PATH);
-        this.load.image(LayerManager.CONTROL_SPRITE_KEY, LayerManager.CONTROL_SPRITE_PATH);
-        this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
-        this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
-        this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
+    /** Common resources that should be kept across all levels */
+    public unloadScene(): void {
+        this.load.keepSpritesheet(Level.PLAYER_SPRITE_KEY);
 
-        this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
-        this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
+        this.load.keepImage(LayerManager.PAUSE_SPRITE_KEY);
+        this.load.keepImage(LayerManager.CONTROL_SPRITE_KEY);
+        this.load.keepImage(LayerManager.HELP_SPRITE_KEY);
+        this.load.keepImage(SkillManager.SKILL_BOOK_SPRITE_KEY);
+        this.load.keepImage(Level.ABILITY_ICONS_KEY);
+
+        this.load.keepImage(Melee.MELEE_SPRITE_KEY);
+        this.load.keepImage(Slash.SLASH_SPRITE_KEY);
 
         /* Audio and Sounds */
-        this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
-        this.load.audio(Level.DASH_AUDIO_KEY, Level.DASH_AUDIO_PATH);
-        this.load.audio(Level.ATTACK_AUDIO_KEY, Level.ATTACK_AUDIO_PATH);
-        this.load.audio(Level.HURT_AUDIO_KEY, Level.HURT_AUDIO_PATH);
-        this.load.audio(Level.DYING_AUDIO_KEY, Level.DYING_AUDIO_PATH);
+        this.load.keepAudio(Level.JUMP_AUDIO_KEY);
+        this.load.keepAudio(Level.DASH_AUDIO_KEY);
+        this.load.keepAudio(Level.ATTACK_AUDIO_KEY);
+        this.load.keepAudio(Level.HURT_AUDIO_KEY);
+        this.load.keepAudio(Level.DYING_AUDIO_KEY);
     }
 
     /** Common initializations between all levels */
@@ -181,7 +186,7 @@ export default abstract class Level extends Scene {
         // Input.disableInput();
         // this.ui.disable();
     }
-    
+
     private subscribeEvents() {
         this.receiver.subscribe(CustomGameEvents.SKILL_1_FIRED);
         this.receiver.subscribe(CustomGameEvents.SKILL_2_FIRED);
@@ -210,11 +215,11 @@ export default abstract class Level extends Scene {
 
         let skillButton = Input.isKeyJustPressed("k");
 
-        if(skillButton)
+        if (skillButton)
             this.emitter.fireEvent(CustomGameEvents.TOGGLE_SKILL_BOOK);
 
-        if(escButton)
-            paused 
+        if (escButton)
+            paused
                 ? this.emitter.fireEvent(MenuEvents.RESUME)
                 : this.emitter.fireEvent(MenuEvents.PAUSE);
 
@@ -232,7 +237,7 @@ export default abstract class Level extends Scene {
         let type = event.type as MenuEvent | CustomGameEvent;
         console.log("Handling event type", type);
         switch (type) {
-             // Let Level.ts handle it by default
+            // Let Level.ts handle it by default
             case CustomGameEvents.UPDATE_HEALTH: {
                 let currentHealth = event.data.get('currentHealth');
                 let maxHealth = event.data.get('maxHealth');
@@ -241,11 +246,11 @@ export default abstract class Level extends Scene {
             }
 
             case CustomGameEvents.SKILL_1_FIRED: {
-                this.skill_manager.activateSkill(0, {direction: event.data.get("direction")})
+                this.skill_manager.activateSkill(0, { direction: event.data.get("direction") })
                 break;
             }
             case CustomGameEvents.SKILL_2_FIRED: {
-                this.skill_manager.activateSkill(1, {direction: event.data.get("direction")})
+                this.skill_manager.activateSkill(1, { direction: event.data.get("direction") })
                 break;
             }
 
@@ -278,9 +283,9 @@ export default abstract class Level extends Scene {
 
             case CustomGameEvents.UPDATE_HEALTH: {
                 let currentHealth = event.data.get('currentHealth');
-				let maxHealth = event.data.get('maxHealth');
-				this.handleHealthChange(currentHealth, maxHealth);
-				break;
+                let maxHealth = event.data.get('maxHealth');
+                this.handleHealthChange(currentHealth, maxHealth);
+                break;
             }
 
             case CustomGameEvents.TOGGLE_SKILL_BOOK: {
@@ -333,18 +338,18 @@ export default abstract class Level extends Scene {
 
         this.healthBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 60), "");
         this.healthBar.size = new Vec2(200, 25);
-		this.healthBar.backgroundColor = Color.GREEN;
+        this.healthBar.backgroundColor = Color.GREEN;
 
         // HealthBar Border
-		this.healthBarBg = <Label>this.add.uiElement(UIElementType.LABEL, LevelLayers.UI, {position: new Vec2(125, 60), text: ""});
-		this.healthBarBg.size = new Vec2(200, 25);
-		this.healthBarBg.borderColor = Color.BLACK;
+        this.healthBarBg = <Label>this.add.uiElement(UIElementType.LABEL, LevelLayers.UI, { position: new Vec2(125, 60), text: "" });
+        this.healthBarBg.size = new Vec2(200, 25);
+        this.healthBarBg.borderColor = Color.BLACK;
 
         // Resource Bar
-        this.resourceBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 105), "");
-        this.resourceBar.size = new Vec2(200, 25);
-        this.resourceBar.backgroundColor = Color.BLACK;
-        this.resourceBar.borderColor = Color.MAGENTA;
+        // this.resourceBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 105), "");
+        // this.resourceBar.size = new Vec2(200, 25);
+        // this.resourceBar.backgroundColor = Color.BLACK;
+        // this.resourceBar.borderColor = Color.MAGENTA;
 
         // Ability Bar
         const abilityBarCenter = new Vec2(150, 735);
@@ -359,10 +364,11 @@ export default abstract class Level extends Scene {
         const abilityBarStart = new Vec2(abilityBarCenter.x - abilityBarSize.x / 2, abilityBarCenter.y - abilityBarSize.y / 2);
 
         const abilityPositions = [new Vec2(0, 0), new Vec2(16, 0), new Vec2(0, 16), new Vec2(16, 16)]
+        const abilityLabel = ['', 'U', 'I', 'O', 'P'];
 
         for (let i = 1; i < 6; i++) {
             let squarePos = new Vec2(abilityBarStart.x + abilitySquareSize * i + abilityBarPadding * (i - 1), abilityBarCenter.y)
-            let square = this.factory.addLabel(LevelLayers.UI, squarePos, "")
+            let square = this.factory.addLabel(LevelLayers.UI, squarePos, '')
             square.size = new Vec2(abilitySquareSize, abilitySquareSize);
             square.backgroundColor = new Color(115, 115, 115);
 
@@ -371,6 +377,8 @@ export default abstract class Level extends Scene {
             ability.position = squarePos;
             ability.size = new Vec2(16, 16);
             ability.scale = new Vec2(2.5, 2.5);
+
+            let text = this.factory.addLabel(LevelLayers.UI, squarePos.clone().sub(new Vec2(0, 30)), abilityLabel[i - 1]) as Label;
         }
     }
 
@@ -393,15 +401,15 @@ export default abstract class Level extends Scene {
     }
 
     protected handleHealthChange(currentHealth: number, maxHealth: number): void {
-		let unit = this.healthBarBg.size.x / maxHealth;
+        let unit = this.healthBarBg.size.x / maxHealth;
 
-		this.healthBar.size.set(this.healthBarBg.size.x - unit * (maxHealth - currentHealth), this.healthBarBg.size.y);
-		this.healthBar.position.set(this.healthBarBg.position.x - (unit / 2) * (maxHealth - currentHealth), this.healthBarBg.position.y);
+        this.healthBar.size.set(this.healthBarBg.size.x - unit * (maxHealth - currentHealth), this.healthBarBg.size.y);
+        this.healthBar.position.set(this.healthBarBg.position.x - (unit / 2) * (maxHealth - currentHealth), this.healthBarBg.position.y);
 
-		this.healthBar.backgroundColor = currentHealth < maxHealth * 1/4 ? Color.RED: currentHealth < maxHealth * 3/4 ? Color.YELLOW : Color.GREEN;
-	}
+        this.healthBar.backgroundColor = currentHealth < maxHealth * 1 / 4 ? Color.RED : currentHealth < maxHealth * 3 / 4 ? Color.YELLOW : Color.GREEN;
+    }
 
-    public getPlayer() { 
+    public getPlayer() {
         return this.player;
     }
 
