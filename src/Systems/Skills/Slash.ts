@@ -35,7 +35,7 @@ export default class Slash extends Skill {
         let damage = [15, 30, 45];
         let cooldown = [new Timer(1000), new Timer(900), new Timer(800)];
         let cost = [0, 0, 0];
-        let description = ['A sword swing that damages enemies in front', 'Increase damage and slightly reduce cooldown', 'Greatly increase damage'];
+        let description = ['Sends a slash of dark energy', 'Increase damage and slightly reduce cooldown', 'Greatly increase damage'];
 
         super(skill_manager, damage, cooldown, cost, description, Slash.SLASH_ICON_KEY);
     }

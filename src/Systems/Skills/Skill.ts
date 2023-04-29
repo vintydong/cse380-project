@@ -63,4 +63,18 @@ export default abstract class Skill {
         }
     }
 
+    /**
+     * Updates the level of this skill if possible
+     * @returns true on success, false on failure
+     * @param level The amount to change the level of this skill by (usually -1 or +1)
+     */
+    public changeLevel(level: number): boolean {
+        let final = this.level + 1 + level;
+        if(final < 1 || final > 3)
+            return false;
+
+        this.level = final - 1;
+        return true;
+    }
+
 }

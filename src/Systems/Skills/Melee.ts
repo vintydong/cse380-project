@@ -26,9 +26,9 @@ export default class Melee extends Skill {
 
     public constructor(skill_manager: SkillManager) {
         let damage = [20, 30, 40];
-        let cooldown = [new Timer(500), new Timer(400), new Timer(300)];
+        let cooldown = [new Timer(800), new Timer(600), new Timer(400)];
         let cost = [0, 0, 0];
-        let description = ['Swings sword at enemy', 'Increase DMG and\nreduce CD', 'Greatly increase DMG'];
+        let description = ['Swings sword at enemy', 'Increase DMG and reduce CD', 'Greatly increase DMG'];
 
         super(skill_manager, damage, cooldown, cost, description, Melee.MELEE_ICON_KEY);
     }
