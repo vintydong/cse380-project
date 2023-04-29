@@ -111,7 +111,7 @@ export class MeleeBehavior implements AI {
     }
 
     public activate(options: Record<string, any>): void {
-        console.log(options);
+        // console.log(options);
         if (options) {
             this.damage = options.damage || 10;
             this.direction = options.direction;

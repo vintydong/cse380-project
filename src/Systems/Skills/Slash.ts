@@ -35,7 +35,7 @@ export default class Slash extends Skill {
         let damage = [15, 30, 45];
         let cooldown = [new Timer(1000), new Timer(900), new Timer(800)];
         let cost = [0, 0, 0];
-        let description = ['Sends a slash of dark energy', 'Increase damage and slightly reduce cooldown', 'Greatly increase damage'];
+        let description = ['Sends a slash of dark energy', 'Slash can pass through enemies', 'Increase DMG and reduce CD'];
 
         super(skill_manager, damage, cooldown, cost, description, Slash.SLASH_ICON_KEY);
     }
@@ -101,7 +101,7 @@ export default class Slash extends Skill {
 
             this.cooldown[this.level].start();
             
-            this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
+            this.hitbox.setAIActive(true, {direction: direction, damage: this.damage[this.level]});
             this.hitbox.tweens.play("fadeout");
         }
 

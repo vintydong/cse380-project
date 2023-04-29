@@ -67,11 +67,6 @@ export class SkillManager {
         this.scene = scene;
         this.player = player;
 
-        // TODO: Remove this unless we want default skills
-        this.activeSkills = [null, null, null, null];
-        this.activeSkills[0] = new Melee(this);
-        this.activeSkills[1] = new Slash(this);
-
         this.skillBookLayer = scene.addUILayer(SkillBookLayers.background);
         this.initSkillBook();
         this.skillBookLayer.disable();
@@ -81,6 +76,11 @@ export class SkillManager {
         // Initialize all the skills into the system
         this.loadAllSkills();
         this.drawSkillBook();
+
+        // TODO: Remove this unless we want default skills
+        this.activeSkills = [null, null, null, null];
+        this.activeSkills[0] = this.allSkills[0];
+        this.activeSkills[1] = this.allSkills[1];
 
         this.cheatManager = CheatManager.getInstance();
     }
@@ -206,7 +206,7 @@ export class SkillManager {
         if(skill) skill.changeLevel(1);
     }
 
-    private decreaseLevel(skill){
+    private decreaseLevel(skill: Skill){
         console.log("Decrease level for Melee");
         if(skill) skill.changeLevel(-1);
     }
