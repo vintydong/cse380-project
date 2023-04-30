@@ -103,17 +103,9 @@ export default class Slash extends Skill {
             
             this.hitbox.setAIActive(true, {direction: direction, damage: this.damage[this.level]});
             this.hitbox.tweens.play("fadeout");
-        }
 
-       // Find the first visible particle
-       // this.weaponParticles.startSystem(2000, 0, this.skill_manager.getPlayer().position.clone());
-    //    let particle: Particle = this.weaponParticles.getPool().find((bubble: Particle) => { return !bubble.visible });
-    //    if (particle) {
-    //        // Bring this bubble to life
-    //        particle.visible = true;
-    //        particle.position = this.skill_manager.getPlayer().position.clone();
-    //        particle.setAIActive(true, { direction: direction });
-    //    }
+        //    this.weaponParticles.startSystem(1000, 0, this.skill_manager.getPlayer().position.clone());
+        }
     }
 }
 
