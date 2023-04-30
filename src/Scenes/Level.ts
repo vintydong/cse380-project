@@ -24,6 +24,7 @@ import Color from "../Wolfie2D/Utils/Color";
 import MainMenu from "./MenuScenes/MainMenu";
 
 export const LevelLayers = {
+    // SKILLS: "SKILLS",
     PRIMARY: "PRIMARY",
     UI: "UI",
     SKILL_BOOK: "SKILL_BOOK",
@@ -190,7 +191,7 @@ export default abstract class Level extends Scene {
     private subscribeEvents() {
         this.receiver.subscribe(CustomGameEvents.SKILL_1_FIRED);
         this.receiver.subscribe(CustomGameEvents.SKILL_2_FIRED);
-        // this.receiver.subscribe(CustomGameEvents.SKILL_3_FIRED);
+        this.receiver.subscribe(CustomGameEvents.SKILL_3_FIRED);
         // this.receiver.subscribe(CustomGameEvents.SKILL_4_FIRED);
         this.receiver.subscribe(CustomGameEvents.UPDATE_HEALTH);
         this.receiver.subscribe(CustomGameEvents.TOGGLE_SKILL_BOOK);
@@ -251,6 +252,10 @@ export default abstract class Level extends Scene {
             }
             case CustomGameEvents.SKILL_2_FIRED: {
                 this.skill_manager.activateSkill(1, { direction: event.data.get("direction") })
+                break;
+            }
+            case CustomGameEvents.SKILL_3_FIRED: {
+                this.skill_manager.activateSkill(2, { direction: event.data.get("direction") })
                 break;
             }
 
