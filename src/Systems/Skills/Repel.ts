@@ -163,6 +163,8 @@ export class RepelBehavior implements AI {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
+
+        // Update bounding box as it expands
         if (this.owner.visible){
             this.owner.collisionShape = this.owner.boundary.clone()
         }

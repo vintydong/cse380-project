@@ -11,8 +11,7 @@ import demoEnemyActor from "./demoEnemyActor";
 
 export enum demoEnemyAnimations {
     IDLE = "IDLE",
-    RUNNING_LEFT = "RUNNING_LEFT",
-    RUNNING_RIGHT = "RUNNING_RIGHT",
+    RUNNING = "RUNNING",
     TAKING_DAMAGE = "TAKING_DAMAGE",
     DEAD = "DEAD",    
 }

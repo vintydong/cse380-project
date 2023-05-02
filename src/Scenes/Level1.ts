@@ -6,7 +6,7 @@ import { LayerManager } from "../Systems/LayerManager";
 import { SkillManager } from "../Systems/SkillManager";
 import Melee from "../Systems/Skills/Melee";
 import Slash from "../Systems/Skills/Slash";
-import Repel from "../Systems/Skills/Repel";
+// import Repel from "../Systems/Skills/Repel";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
@@ -61,7 +61,7 @@ export default class Level1 extends Level {
 
         this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
         this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
-        this.load.image(Repel.REPEL_SPRITE_KEY, Repel.REPEL_SPRITE_PATH);
+        // this.load.image(Repel.REPEL_SPRITE_KEY, Repel.REPEL_SPRITE_PATH);
 
         /* Audio and Sounds */
         this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);

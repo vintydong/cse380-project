@@ -48,7 +48,7 @@ export class SkillManager {
         this.activeSkills = [null, null, null, null];
         this.activeSkills[0] = new Melee(this);
         this.activeSkills[1] = new Slash(this);
-        this.activeSkills[2] = new Repel(this);
+        // this.activeSkills[2] = new Repel(this);
 
         this.skillBookLayer = scene.addUILayer(SkillBookLayers.background);
         this.initSkillBook();

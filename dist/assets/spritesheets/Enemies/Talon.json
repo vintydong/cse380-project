@@ -1,6 +1,6 @@
 {
-	"name": "Slime",
-	"spriteSheetImage": "Slime.png",
+	"name": "Talon",
+	"spriteSheetImage": "Talon.png",
 	"spriteWidth": 32,
 	"spriteHeight": 32,
 	"leftBuffer": 0,
@@ -82,19 +82,19 @@
 			"frames": [
 				{
 					"index": 12,
-					"duration": 20
+					"duration": 5
 				},
 				{
 					"index": 13,
-					"duration": 20
+					"duration": 5
 				},
 				{
 					"index": 14,
-					"duration": 20
+					"duration": 5
 				},
 				{
 					"index": 15,
-					"duration": 20
+					"duration": 5
 				}
 			]
 		}
