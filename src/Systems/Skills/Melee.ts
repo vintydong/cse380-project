@@ -77,7 +77,6 @@ export default class Melee extends Skill {
         this.hitbox.position = newPosition;
 
         this.cooldown[this.level].start();
-        console.log("Starting cooldown", this.cooldown[this.level], this.getCooldown())
 
         this.hitbox.setAIActive(true, {direction: direction, damage: this.damage[this.level]});
         this.hitbox.tweens.play("fadeout");

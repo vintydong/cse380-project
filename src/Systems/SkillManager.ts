@@ -1,22 +1,18 @@
-import PlayerController from "../AI/Player/PlayerController";
-import { CustomGameEvent, CustomGameEvents, MenuEvents } from "../CustomGameEvents";
+import { CustomGameEvents } from "../CustomGameEvents";
 import { uiElementProps } from "../Factory/CustomFactoryManager";
 import Level from "../Scenes/Level";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
-import { TweenableProperties } from "../Wolfie2D/Nodes/GameNode";
 import AnimatedSprite from "../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Sprite from "../Wolfie2D/Nodes/Sprites/Sprite";
 import Button from "../Wolfie2D/Nodes/UIElements/Button";
 import Label, { HAlign, VAlign } from "../Wolfie2D/Nodes/UIElements/Label";
-import Layer from "../Wolfie2D/Scene/Layer"
 import UILayer from "../Wolfie2D/Scene/Layers/UILayer";
 import Color from "../Wolfie2D/Utils/Color";
-import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
 import CheatManager from "./CheatManager";
-import Skill from "./Skills/Skill";
 import Melee from "./Skills/Melee";
-import Slash from "./Skills/Slash";
 import Repel from "./Skills/Repel";
+import Skill from "./Skills/Skill";
+import Slash from "./Skills/Slash";
 
 export const SkillBookLayers = {
     background: "SKILL_BOOK_BACKGROUND"
@@ -102,14 +98,9 @@ export class SkillManager {
 
         // TODO: Remove this unless we want default skills
         this.activeSkills = [null, null, null, null];
-
-        this.activeSkills[0] = new Melee(this);
-        this.activeSkills[1] = new Slash(this);
-        this.activeSkills[2] = new Repel(this);
-
-        this.skillBookLayer = scene.addUILayer(SkillBookLayers.background);
-        this.initSkillBook();
-        this.skillBookLayer.disable();
+        this.activeSkills[0] = this.allSkills[0];
+        this.activeSkills[1] = this.allSkills[1];
+        this.activeSkills[2] = this.allSkills[2];
 
         this.cheatManager = CheatManager.getInstance();
     }
@@ -117,7 +108,6 @@ export class SkillManager {
     /** Setups the layer and sprites */
     private initSkillBook() {
         this.skillBookLayer = this.scene.addUILayer(SkillBookLayers.background);
-
         this.skillBookLayer.disable();
 
         let bg = this.scene.add.sprite(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillBookLayers.background);
@@ -130,7 +120,7 @@ export class SkillManager {
     }
 
     private loadAllSkills() {
-        this.allSkills = [new Melee(this), new Slash(this), new Slash(this), null, null, null];
+        this.allSkills = [new Melee(this), new Slash(this), new Repel(this), null, null, null];
     }
 
     /** Called when the skillbook and all of its skills need to be drawn for the first time */
@@ -329,7 +319,7 @@ export class SkillManager {
 
     public activateSkill(index: number, options?: Record<string, any>) {
         console.log("Activating skill ", index, options);
-        console.log(this.activeSkills);
+        // console.log(this.activeSkills);
         this.activeSkills[index].activate(options);
     }
 

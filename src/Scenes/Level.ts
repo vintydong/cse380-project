@@ -6,6 +6,7 @@ import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
 import { LayerManager } from "../Systems/LayerManager";
 import { SkillBookEvent, SkillBookEvents, SkillManager } from "../Systems/SkillManager";
 import Melee from "../Systems/Skills/Melee";
+import Repel from "../Systems/Skills/Repel";
 import Slash from "../Systems/Skills/Slash";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
@@ -128,6 +129,9 @@ export default abstract class Level extends Scene {
         this.load.image(Melee.MELEE_ICON_KEY, Melee.MELEE_ICON_PATH);
         this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
         this.load.image(Slash.SLASH_ICON_KEY, Slash.SLASH_ICON_PATH);
+        this.load.image(Repel.REPEL_SPRITE_KEY, Repel.REPEL_SPRITE_PATH);
+        this.load.image(Repel.REPEL_ICON_KEY, Repel.REPEL_SPRITE_PATH);
+
 
         /* Audio and Sounds */
         this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
@@ -289,6 +293,7 @@ export default abstract class Level extends Scene {
                 this.skill_manager.activateSkill(3, { direction: event.data.get("direction") })
                 break;
             }
+            
             case CustomGameEvents.LEVEL_START: {
                 Input.enableInput();
                 this.ui.enable();
