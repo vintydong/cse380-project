@@ -170,7 +170,8 @@ export default abstract class Level extends Scene {
         this.player.setGroup(PhysicsGroups.PLAYER);
 
         // Initialize Skill Manager
-        this.skill_manager = new SkillManager(this, this.player);
+        console.log("Initializing skil manager");
+        this.skill_manager = SkillManager.getInstance(this, this.player);
 
         // Initialize viewport
         if (this.player === undefined) {
@@ -192,8 +193,8 @@ export default abstract class Level extends Scene {
     private subscribeEvents() {
         this.receiver.subscribe(CustomGameEvents.SKILL_1_FIRED);
         this.receiver.subscribe(CustomGameEvents.SKILL_2_FIRED);
-        // this.receiver.subscribe(CustomGameEvents.SKILL_3_FIRED);
-        // this.receiver.subscribe(CustomGameEvents.SKILL_4_FIRED);
+        this.receiver.subscribe(CustomGameEvents.SKILL_3_FIRED);
+        this.receiver.subscribe(CustomGameEvents.SKILL_4_FIRED);
         this.receiver.subscribe(CustomGameEvents.UPDATE_HEALTH);
         this.receiver.subscribe(CustomGameEvents.TOGGLE_SKILL_BOOK);
 
@@ -212,21 +213,36 @@ export default abstract class Level extends Scene {
         this.receiver.subscribe(MenuEvents.CONTROLS);
         this.receiver.subscribe(MenuEvents.HELP);
         this.receiver.subscribe(MenuEvents.EXIT);
+
+        /** Skill Binding Events */
+        for(let i = 2; i < 6; i++){
+            this.receiver.subscribe(`SET-Q-${i}`)
+            this.receiver.subscribe(`SET-E-${i}`)
+        }
     }
 
     public updateScene(deltaT: number) {
         let escButton = Input.isKeyJustPressed("escape");
         let paused = this.layer_manager.isPaused();
+        let skillbookOpen = this.skill_manager.isOpen();
 
         let skillButton = Input.isKeyJustPressed("k");
 
-        if (skillButton)
+        if (skillButton && !paused)
             this.emitter.fireEvent(CustomGameEvents.TOGGLE_SKILL_BOOK);
 
-        if (escButton)
-            paused
-                ? this.emitter.fireEvent(MenuEvents.RESUME)
-                : this.emitter.fireEvent(MenuEvents.PAUSE);
+        if (escButton) {
+            switch (skillbookOpen){
+                case true:
+                    this.emitter.fireEvent(CustomGameEvents.TOGGLE_SKILL_BOOK);
+                    break;
+                case false:
+                    paused
+                        ? this.emitter.fireEvent(MenuEvents.RESUME)
+                        : this.emitter.fireEvent(MenuEvents.PAUSE);
+                    break;
+            }
+        }
 
         // Handle all game events
         while (this.receiver.hasNextEvent()) {
@@ -241,6 +257,11 @@ export default abstract class Level extends Scene {
     protected handleEvent(event: GameEvent): void {
         let type = event.type as MenuEvent | CustomGameEvent | SkillBookEvent;
         console.log("Handling event type", type);
+
+        if(type.startsWith('SET-Q-') || type.startsWith('SET-E-')){
+            return this.skill_manager.handleSetSkill(type);
+        }
+
         switch (type) {
             // Let Level.ts handle it by default
             case CustomGameEvents.UPDATE_HEALTH: {
@@ -256,6 +277,14 @@ export default abstract class Level extends Scene {
             }
             case CustomGameEvents.SKILL_2_FIRED: {
                 this.skill_manager.activateSkill(1, { direction: event.data.get("direction") })
+                break;
+            }
+            case CustomGameEvents.SKILL_3_FIRED: {
+                this.skill_manager.activateSkill(2, { direction: event.data.get("direction") })
+                break;
+            }
+            case CustomGameEvents.SKILL_4_FIRED: {
+                this.skill_manager.activateSkill(3, { direction: event.data.get("direction") })
                 break;
             }
 
