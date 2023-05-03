@@ -6,6 +6,7 @@ import { LayerManager } from "../Systems/LayerManager";
 import { SkillManager } from "../Systems/SkillManager";
 import Melee from "../Systems/Skills/Melee";
 import Slash from "../Systems/Skills/Slash";
+import Repel from "../Systems/Skills/Repel";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
@@ -22,7 +23,6 @@ export default class Level1 extends Level {
     public static readonly ENEMY_SPRITE_KEY = "LEVEL1_ENEMY_KEY";
     public static readonly ENEMY_SPRITE_PATH = "assets/spritesheets/Enemies/Slime.json";
     public static readonly ENEMY_POSITIONS_KEY = "LEVEL1_ENEMY_POSITIONS";
-    // public static readonly ENEMY_POSIITIONS_PATH = "assets/data/demo_enemy.json";
 
     public static readonly TILEMAP_KEY = "Level1";
     public static readonly TILEMAP_PATH = "assets/tilemaps/level1_tilemap.json";
@@ -30,12 +30,6 @@ export default class Level1 extends Level {
 
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
     public static readonly LEVEL_MUSIC_PATH = "assets/music/area1_music.mp3";
-
-    // public static readonly TILE_DESTROYED_KEY = "TILE_DESTROYED";
-    // public static readonly TILE_DESTROYED_PATH = "hw4_assets/sounds/switch.wav";
-
-    // The padding of the world
-    private worldPadding: Vec2;
 
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);

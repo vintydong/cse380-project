@@ -13,9 +13,10 @@ import UILayer from "../Wolfie2D/Scene/Layers/UILayer";
 import Color from "../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
 import CheatManager from "./CheatManager";
-import Melee from "./Skills/Melee";
 import Skill from "./Skills/Skill";
+import Melee from "./Skills/Melee";
 import Slash from "./Skills/Slash";
+import Repel from "./Skills/Repel";
 
 export const SkillBookLayers = {
     background: "SKILL_BOOK_BACKGROUND"
@@ -101,8 +102,14 @@ export class SkillManager {
 
         // TODO: Remove this unless we want default skills
         this.activeSkills = [null, null, null, null];
-        this.activeSkills[0] = this.allSkills[0];
-        this.activeSkills[1] = this.allSkills[1];
+
+        this.activeSkills[0] = new Melee(this);
+        this.activeSkills[1] = new Slash(this);
+        this.activeSkills[2] = new Repel(this);
+
+        this.skillBookLayer = scene.addUILayer(SkillBookLayers.background);
+        this.initSkillBook();
+        this.skillBookLayer.disable();
 
         this.cheatManager = CheatManager.getInstance();
     }
