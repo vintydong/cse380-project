@@ -4,7 +4,7 @@ import { CustomGameEvent, CustomGameEvents, MenuEvent, MenuEvents } from "../Cus
 import CustomFactoryManager from "../Factory/CustomFactoryManager";
 import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
 import { LayerManager } from "../Systems/LayerManager";
-import { SkillManager } from "../Systems/SkillManager";
+import { SkillBookEvent, SkillBookEvents, SkillManager } from "../Systems/SkillManager";
 import Melee from "../Systems/Skills/Melee";
 import Slash from "../Systems/Skills/Slash";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
@@ -116,28 +116,30 @@ export default abstract class Level extends Scene {
 
     /** Load common things for all levels */
     public loadScene(): void {
-        //** Moved to Level1.ts to save on resources for future levels */
+        this.load.spritesheet(Level.PLAYER_SPRITE_KEY, Level.PLAYER_SPRITE_PATH);
+
+        this.load.image(LayerManager.PAUSE_SPRITE_KEY, LayerManager.PAUSE_SPRITE_PATH);
+        this.load.image(LayerManager.CONTROL_SPRITE_KEY, LayerManager.CONTROL_SPRITE_PATH);
+        this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
+        this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
+        this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
+
+        this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
+        this.load.image(Melee.MELEE_ICON_KEY, Melee.MELEE_ICON_PATH);
+        this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
+        this.load.image(Slash.SLASH_ICON_KEY, Slash.SLASH_ICON_PATH);
+
+        /* Audio and Sounds */
+        this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
+        this.load.audio(Level.DASH_AUDIO_KEY, Level.DASH_AUDIO_PATH);
+        this.load.audio(Level.ATTACK_AUDIO_KEY, Level.ATTACK_AUDIO_PATH);
+        this.load.audio(Level.HURT_AUDIO_KEY, Level.HURT_AUDIO_PATH);
+        this.load.audio(Level.DYING_AUDIO_KEY, Level.DYING_AUDIO_PATH);
     }
 
     /** Common resources that should be kept across all levels */
     public unloadScene(): void {
-        this.load.keepSpritesheet(Level.PLAYER_SPRITE_KEY);
-
-        this.load.keepImage(LayerManager.PAUSE_SPRITE_KEY);
-        this.load.keepImage(LayerManager.CONTROL_SPRITE_KEY);
-        this.load.keepImage(LayerManager.HELP_SPRITE_KEY);
-        this.load.keepImage(SkillManager.SKILL_BOOK_SPRITE_KEY);
-        this.load.keepImage(Level.ABILITY_ICONS_KEY);
-
-        this.load.keepImage(Melee.MELEE_SPRITE_KEY);
-        this.load.keepImage(Slash.SLASH_SPRITE_KEY);
-
-        /* Audio and Sounds */
-        this.load.keepAudio(Level.JUMP_AUDIO_KEY);
-        this.load.keepAudio(Level.DASH_AUDIO_KEY);
-        this.load.keepAudio(Level.ATTACK_AUDIO_KEY);
-        this.load.keepAudio(Level.HURT_AUDIO_KEY);
-        this.load.keepAudio(Level.DYING_AUDIO_KEY);
+        
     }
 
     /** Common initializations between all levels */
@@ -169,7 +171,8 @@ export default abstract class Level extends Scene {
         this.player.setGroup(PhysicsGroups.PLAYER);
 
         // Initialize Skill Manager
-        this.skill_manager = new SkillManager(this, this.player);
+        console.log("Initializing skil manager");
+        this.skill_manager = SkillManager.getInstance(this, this.player);
 
         // Initialize viewport
         if (this.player === undefined) {
@@ -192,7 +195,8 @@ export default abstract class Level extends Scene {
         this.receiver.subscribe(CustomGameEvents.SKILL_1_FIRED);
         this.receiver.subscribe(CustomGameEvents.SKILL_2_FIRED);
         this.receiver.subscribe(CustomGameEvents.SKILL_3_FIRED);
-        // this.receiver.subscribe(CustomGameEvents.SKILL_4_FIRED);
+        this.receiver.subscribe(CustomGameEvents.SKILL_4_FIRED);
+        
         this.receiver.subscribe(CustomGameEvents.UPDATE_HEALTH);
         this.receiver.subscribe(CustomGameEvents.TOGGLE_SKILL_BOOK);
 
@@ -202,27 +206,45 @@ export default abstract class Level extends Scene {
         this.receiver.subscribe(CustomGameEvents.LEVEL_END);
         this.receiver.subscribe(CustomGameEvents.LEVEL_FAILED);
 
+        this.receiver.subscribe(SkillBookEvents.LEVEL_DOWN_MELEE);
+        this.receiver.subscribe(SkillBookEvents.LEVEL_UP_MELEE);
+
         this.receiver.subscribe(MenuEvents.RESUME);
         this.receiver.subscribe(MenuEvents.PAUSE);
         this.receiver.subscribe(MenuEvents.RESTART);
         this.receiver.subscribe(MenuEvents.CONTROLS);
         this.receiver.subscribe(MenuEvents.HELP);
         this.receiver.subscribe(MenuEvents.EXIT);
+
+        /** Skill Binding Events */
+        for(let i = 2; i < 6; i++){
+            this.receiver.subscribe(`SET-Q-${i}`)
+            this.receiver.subscribe(`SET-E-${i}`)
+        }
     }
 
     public updateScene(deltaT: number) {
         let escButton = Input.isKeyJustPressed("escape");
         let paused = this.layer_manager.isPaused();
+        let skillbookOpen = this.skill_manager.isOpen();
 
         let skillButton = Input.isKeyJustPressed("k");
 
-        if (skillButton)
+        if (skillButton && !paused)
             this.emitter.fireEvent(CustomGameEvents.TOGGLE_SKILL_BOOK);
 
-        if (escButton)
-            paused
-                ? this.emitter.fireEvent(MenuEvents.RESUME)
-                : this.emitter.fireEvent(MenuEvents.PAUSE);
+        if (escButton) {
+            switch (skillbookOpen){
+                case true:
+                    this.emitter.fireEvent(CustomGameEvents.TOGGLE_SKILL_BOOK);
+                    break;
+                case false:
+                    paused
+                        ? this.emitter.fireEvent(MenuEvents.RESUME)
+                        : this.emitter.fireEvent(MenuEvents.PAUSE);
+                    break;
+            }
+        }
 
         // Handle all game events
         while (this.receiver.hasNextEvent()) {
@@ -235,8 +257,13 @@ export default abstract class Level extends Scene {
      * @param event the game event
      */
     protected handleEvent(event: GameEvent): void {
-        let type = event.type as MenuEvent | CustomGameEvent;
+        let type = event.type as MenuEvent | CustomGameEvent | SkillBookEvent;
         console.log("Handling event type", type);
+
+        if(type.startsWith('SET-Q-') || type.startsWith('SET-E-')){
+            return this.skill_manager.handleSetSkill(type);
+        }
+
         switch (type) {
             // Let Level.ts handle it by default
             case CustomGameEvents.UPDATE_HEALTH: {
@@ -258,7 +285,10 @@ export default abstract class Level extends Scene {
                 this.skill_manager.activateSkill(2, { direction: event.data.get("direction") })
                 break;
             }
-
+            case CustomGameEvents.SKILL_4_FIRED: {
+                this.skill_manager.activateSkill(3, { direction: event.data.get("direction") })
+                break;
+            }
             case CustomGameEvents.LEVEL_START: {
                 Input.enableInput();
                 this.ui.enable();
@@ -325,6 +355,11 @@ export default abstract class Level extends Scene {
 
             case MenuEvents.EXIT:
                 this.sceneManager.changeToScene(MainMenu);
+                break;
+
+            case SkillBookEvents.LEVEL_DOWN_MELEE:
+            case SkillBookEvents.LEVEL_UP_MELEE:
+                this.skill_manager.handleLevelEvent(event.type as SkillBookEvent);
                 break;
 
             // Default: Throw an error! No unhandled events allowed.

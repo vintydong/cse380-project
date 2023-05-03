@@ -24,8 +24,8 @@ export default class Label extends UIElement{
 		super(position);
 		this.text = text;
 		this.textColor = new Color(0, 0, 0, 1);
-		this.font = "Arial";
-		this.fontSize = 30;
+		this.font = "'Caveat', cursive";
+		this.fontSize = 35;
 		this.hAlign = "center";
 		this.vAlign = "center";
 

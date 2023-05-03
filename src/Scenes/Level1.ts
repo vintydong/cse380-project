@@ -50,26 +50,6 @@ export default class Level1 extends Level {
      */
     public loadScene(): void {
         super.loadScene();
-
-        this.load.spritesheet(Level.PLAYER_SPRITE_KEY, Level.PLAYER_SPRITE_PATH);
-
-        this.load.image(LayerManager.PAUSE_SPRITE_KEY, LayerManager.PAUSE_SPRITE_PATH);
-        this.load.image(LayerManager.CONTROL_SPRITE_KEY, LayerManager.CONTROL_SPRITE_PATH);
-        this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
-        this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
-        this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
-
-        this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
-        this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
-        this.load.image(Repel.REPEL_SPRITE_KEY, Repel.REPEL_SPRITE_PATH);
-
-        /* Audio and Sounds */
-        this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
-        this.load.audio(Level.DASH_AUDIO_KEY, Level.DASH_AUDIO_PATH);
-        this.load.audio(Level.ATTACK_AUDIO_KEY, Level.ATTACK_AUDIO_PATH);
-        this.load.audio(Level.HURT_AUDIO_KEY, Level.HURT_AUDIO_PATH);
-        this.load.audio(Level.DYING_AUDIO_KEY, Level.DYING_AUDIO_PATH);
-
         // Load in the tilemap
         this.load.tilemap(Level1.TILEMAP_KEY, Level1.TILEMAP_PATH);
         // Load in music

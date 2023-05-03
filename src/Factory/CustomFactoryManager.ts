@@ -16,8 +16,8 @@ import { CustomGameEvents, MenuEvent } from "../CustomGameEvents"
 import { LevelUILayer } from "../Systems/LayerManager";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 
-interface uiElementProps {
-    size?: Vec2;
+export interface uiElementProps {
+    size: Vec2;
     borderWidth?: number;
     borderColor?: Color;
     backgroundColor?: Color;
