@@ -43,6 +43,8 @@ export default class Slash extends Skill {
     public initialize() {
         let scene = this.skill_manager.getScene();
 
+        this.cooldown = [new Timer(1000), new Timer(900), new Timer(800)];
+
         this.hitbox = scene.add.sprite(Slash.SLASH_SPRITE_KEY, LevelLayers.PRIMARY)
         this.hitbox.scale = new Vec2(2,2);
         this.hitbox.visible = false;

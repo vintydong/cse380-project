@@ -35,6 +35,8 @@ export default class Melee extends Skill {
 
     public initialize(){
         let scene = this.skill_manager.getScene();
+
+        this.cooldown = [new Timer(800), new Timer(600), new Timer(400)];
         
         this.hitbox = scene.add.sprite(Melee.MELEE_SPRITE_KEY, LevelLayers.PRIMARY)
         this.hitbox.scale = new Vec2(3,3);
@@ -75,6 +77,7 @@ export default class Melee extends Skill {
         this.hitbox.position = newPosition;
 
         this.cooldown[this.level].start();
+        console.log("Starting cooldown", this.cooldown[this.level], this.getCooldown())
 
         this.hitbox.setAIActive(true, {direction: direction, damage: this.damage[this.level]});
         this.hitbox.tweens.play("fadeout");

@@ -62,15 +62,37 @@ export class SkillManager {
 
     private cheatManager: CheatManager;
 
-    // TODO: Change to singleton so it is preserved across levels
-    public constructor(scene: Level, player?: AnimatedSprite) {
+    /** Instance for the singleton */
+    private static instance: SkillManager;
+
+    /**
+     * Singleton
+     * 
+     * Returns the current instance of this class or a new instance if none exist
+     * @returns CheatManager
+     */
+    public static getInstance(scene?: Level, player?: AnimatedSprite): SkillManager {
+        if(!scene || !player) return null; 
+
+        if(!this.instance){
+            this.instance = new SkillManager(scene, player);
+        } else {
+            this.instance.setScene(scene);
+            this.instance.setPlayer(player);
+            this.instance.initSkillBook();
+            this.instance.drawSkillBook();
+        }
+
+        console.log("ACTIVE KSKILLS", this.instance.activeSkills);
+
+        return this.instance;
+    }
+
+    private constructor(scene: Level, player?: AnimatedSprite) {
         this.scene = scene;
         this.player = player;
 
-        this.skillBookLayer = scene.addUILayer(SkillBookLayers.background);
         this.initSkillBook();
-        this.skillBookLayer.disable();
-
         this.skillBookItems = [];
 
         // Initialize all the skills into the system
@@ -85,7 +107,12 @@ export class SkillManager {
         this.cheatManager = CheatManager.getInstance();
     }
 
+    /** Setups the layer and sprites */
     private initSkillBook() {
+        this.skillBookLayer = this.scene.addUILayer(SkillBookLayers.background);
+
+        this.skillBookLayer.disable();
+
         let bg = this.scene.add.sprite(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillBookLayers.background);
 
         let center = this.scene.getViewport().getCenter();
@@ -96,9 +123,10 @@ export class SkillManager {
     }
 
     private loadAllSkills() {
-        this.allSkills = [new Melee(this), new Slash(this), null, null, null, null];
+        this.allSkills = [new Melee(this), new Slash(this), new Slash(this), null, null, null];
     }
 
+    /** Called when the skillbook and all of its skills need to be drawn for the first time */
     private drawSkillBook(){
         let center = this.scene.getViewport().getCenter();
         let dy = -400;
@@ -112,6 +140,8 @@ export class SkillManager {
 
             if(!skill) continue;
 
+            skill.initialize();
+
             let rowLeft = center.x + dx;
             let rowCenterY = center.y + dy / 2;
 
@@ -119,12 +149,22 @@ export class SkillManager {
             skillIcon.position.set(rowLeft, rowCenterY);
             skillIcon.scale = new Vec2(3.5, 3.5);
 
+            let layer = SkillBookLayers.background as any
+
+            let miniButtonProps = {size: new Vec2(15,15), fontSize: 15, backgroundColor: new Color(100,100,100)}
+
+            if(i > 1){
+                let setQ = this.scene.factory.addButton(layer, new Vec2(rowLeft - 10, rowCenterY + 20), 'Q', miniButtonProps)
+                setQ.onClickEventId = 'SET-Q-' + i
+                let setE = this.scene.factory.addButton(layer, new Vec2(rowLeft + 10, rowCenterY + 20), 'E', miniButtonProps)
+                setE.onClickEventId = 'SET-E-' + i
+            }
+
             rowLeft = rowLeft + 65;
 
             let skillAttributes = skill.getAttributes();
             let { level, damage, description, cooldown } = skillAttributes;
 
-            let layer = SkillBookLayers.background as any
 
             let levelText = this.scene.factory.addLabel(layer, new Vec2(rowLeft, rowCenterY), `${level}/3`)
             levelText.size = new Vec2(50, rowHeight / 2);
@@ -143,8 +183,17 @@ export class SkillManager {
 
             let subButton = this.scene.factory.addButton(layer, new Vec2(rowLeft, rowCenterY), '-', buttonOptions)
             subButton.onClickEventId = 'LEVEL_DOWN_MELEE';
+            subButton.font = 'Arial';
+            subButton.fontSize = 25;
+            subButton.setHAlign(HAlign.CENTER);
+            subButton.setVAlign(VAlign.CENTER);
+
             let addButton = this.scene.factory.addButton(layer, new Vec2(rowLeft + 50, rowCenterY), '+', buttonOptions)
             addButton.onClickEventId = 'LEVEL_UP_MELEE';
+            addButton.font = 'Arial';
+            addButton.fontSize = 25;
+            addButton.setHAlign(HAlign.CENTER);
+            addButton.setVAlign(VAlign.CENTER);
 
             rowLeft = rowLeft + 180;
 
@@ -180,11 +229,15 @@ export class SkillManager {
     /** Update each row of the skill book with the current skill attributes */
     private updateSkillBook(){
         this.skillBookItems.forEach((row, index) => {
-            let skill = this.allSkills[index].getAttributes();
-            
-            row.levelLabel.text = `${skill.level}/3`
-            row.attributeLabel.text = `DMG: ${skill.damage}\tCD: ${(skill.cooldown / 1000).toFixed(1)}`
-            row.descLabel.text = skill.description;
+            let skill = this.allSkills[index];
+
+            if(!skill) return;
+
+            let skillAttr = skill.getAttributes();
+
+            row.levelLabel.text = `${skillAttr.level}/3`
+            row.attributeLabel.text = `DMG: ${skillAttr.damage}\tCD: ${(skillAttr.cooldown / 1000).toFixed(1)}`
+            row.descLabel.text = skillAttr.description;
         })
     }
 
@@ -201,13 +254,38 @@ export class SkillManager {
         this.updateSkillBook();
     }
 
+    /**
+     * Called to handle binding of active skills
+     * @param eventType Should be a string of the form 'SET-[Q|E]-#'
+     */
+    public handleSetSkill(eventType: string) {
+        let s = eventType.split('-')
+        let key = s[1]
+        let index = Number(s[2])
+
+        if(key != 'Q' && key != 'E') return;
+        if(index < 2 || index > 5) return;
+
+        let skillToSet = this.allSkills[index];
+
+        for(let skill of this.activeSkills){
+            if(skill == skillToSet)
+                return console.log("Skill already active");
+        }
+
+        if(key == 'Q')
+            this.activeSkills[2] = this.allSkills[index];
+        else if(key == 'E')
+            this.activeSkills[3] = this.allSkills[index];
+    }
+
     private increaseLevel(skill: Skill){
-        console.log("Increase level for Melee");
+        // console.log("Increase level");
         if(skill) skill.changeLevel(1);
     }
 
     private decreaseLevel(skill: Skill){
-        console.log("Decrease level for Melee");
+        // console.log("Decrease level");
         if(skill) skill.changeLevel(-1);
     }
 
@@ -244,8 +322,11 @@ export class SkillManager {
 
     public activateSkill(index: number, options?: Record<string, any>) {
         console.log("Activating skill ", index, options);
+        console.log(this.activeSkills);
         this.activeSkills[index].activate(options);
     }
+
+    public isOpen() { return !this.skillBookLayer.isHidden(); }
 
     public toggleSkillBook() {
         this.updateSkillBook();
@@ -257,4 +338,8 @@ export class SkillManager {
     public getScene() { return this.scene; }
 
     public getPlayer() { return this.player; }
+
+    public setScene(scene: Level) { this.scene = scene; }
+
+    public setPlayer(player: AnimatedSprite) { this.player = player; }
 }

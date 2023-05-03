@@ -35,7 +35,7 @@ export default abstract class Skill {
         this.cost = cost;
         this.description = description;
         this.spriteKey = spriteKey;
-        this.initialize();
+        // this.initialize();
     }
 
     /** Initialize necessary components of a skill */
