@@ -1,12 +1,6 @@
-import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
-import demoEnemyController from "../AI/demo_enemy/demoEnemyController";
+import { SlimeActor, SlimeController } from "../AI/Enemies/Slime";
 import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
-import { LayerManager } from "../Systems/LayerManager";
-import { SkillManager } from "../Systems/SkillManager";
-import Melee from "../Systems/Skills/Melee";
-import Slash from "../Systems/Skills/Slash";
-// import Repel from "../Systems/Skills/Repel";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
@@ -77,9 +71,10 @@ export default class Level1 extends Level {
         let enemies = tilemap_json.layers.find(layer => layer.name === "Enemy")
 
         for (let i = 0; i < enemies.objects.length; i++) {
-            let enemy = this.factory.addAnimatedSprite(demoEnemyActor, Level1.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as demoEnemyActor
+            let enemy = this.factory.addAnimatedSprite(SlimeActor, Level1.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as SlimeActor
             enemy.position.set(enemies.objects[i].x * 6, enemies.objects[i].y * 6);
-            enemy.addPhysics(new Circle(enemy.position, 16));
+            enemy.scale = new Vec2(1.5, 1.5);
+            enemy.addPhysics(new Circle(enemy.position, 16 * 1.5));
             enemy.setGroup(PhysicsGroups.NPC);
             enemy.setTrigger(PhysicsGroups.PLAYER, 'ENEMY_COLLISION', null);
             enemy.navkey = "navmesh";
@@ -87,7 +82,7 @@ export default class Level1 extends Level {
             // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
             // this.healthbars.set(npc.id, healthbar);
 
-            enemy.addAI(demoEnemyController, { tilemap: this.tilemapKey });
+            enemy.addAI(SlimeController, { tilemap: this.tilemapKey });
             enemy.animation.play("IDLE");
             this.enemies.push(enemy);
         }
@@ -120,6 +115,7 @@ export default class Level1 extends Level {
      * @param event the event to be handled
      * @see GameEvent
      */
+    
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
             case CustomGameEvents.PLAYER_ENTER_LEVEL_END: {
@@ -130,6 +126,7 @@ export default class Level1 extends Level {
 
                 if (allEnemiesDefeated)
                     this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
+                break;
             }
             default:
                 super.handleEvent(event);

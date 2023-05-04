@@ -45,7 +45,7 @@ export abstract class EnemyState extends State {
     }
 
     public update(deltaT: number): void {
-        this.owner.invertX = (this.parent.facing === 0)? true : false;
+        this.owner.invertX = (this.parent.facing === 0) ? true : false;
     }
 
     public abstract onExit(): Record<string, any>;

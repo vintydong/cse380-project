@@ -1,17 +1,14 @@
 import { CustomGameEvents } from "../../CustomGameEvents";
 import Level from "../../Scenes/Level";
 import Level2 from "../../Scenes/Level2";
-import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
 import Spritesheet from "../../Wolfie2D/DataTypes/Spritesheet";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
-import Input from "../../Wolfie2D/Input/Input";
 import { TweenableProperties } from "../../Wolfie2D/Nodes/GameNode";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
-import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import { BasicEnemyController } from "../BasicEnemyController";
-import { Air, Dead, EnemyState, Ground } from "../demo_enemy/EnemyStates";
+import { Air, EnemyState } from "../demo_enemy/EnemyStates";
 
 enum SlimeAnimations {
     IDLE = "IDLE",
@@ -20,7 +17,7 @@ enum SlimeAnimations {
     DEAD = "DEAD",
 }
 
-enum SlimeBossStates {
+enum SlimeStates {
     GROUND = "GROUND",
     AIR = "AIR",
     DEAD = "DEAD",
@@ -32,58 +29,34 @@ class SlimeGround extends EnemyState {
     private dir: number = null;
     private time: number = 0;
     private jumping: boolean = false;
-    private spawns: number = 0;
 
     public onEnter(options: Record<string, any>): void {
-        this.parent.speed = 750;
+        this.parent.speed = this.parent.MAX_SPEED;
         this.owner.animation.playIfNotAlready(SlimeAnimations.RUNNING);
     }
 
     public update(deltaT: number): void {
         super.update(deltaT);
+
+        // Move in other direction if slime hit a wall
+        if(this.owner.onWall){
+            this.parent.velocity.mult(new Vec2(-1, 1));
+            this.parent.facing = (this.parent.facing + 1) % 2
+        }
+
         this.owner.move(this.parent.velocity.scaled(deltaT));
 
-        if (this.time > 0 && !this.jumping) {
-            this.time -= 1;
-        }
-        
-        if (!this.owner.onGround && (this.owner.onCeiling || this.parent.velocity.y > 0)){
-            this.jumping = false;
-            return this.finished(SlimeBossStates.AIR);
-		} else if (this.parent.velocity.y < 0) {
-            this.parent.velocity.y += this.parent.gravity * deltaT;
-            this.owner.move(this.parent.velocity.scaled(deltaT));
+        this.time -= 1;
+
+        if(this.time < 0){
+            this.time = 100;
+            this.dir = (Math.random() - 0.5) * this.parent.speed;
+            this.parent.facing = this.dir > 0 ? 1 : 0
+            this.parent.velocity.x = this.dir;
+        } else if(this.time < 5){
+            this.parent.velocity.x = 0;
         }
 
-        if (!this.jumping && this.time <= 0) {
-            let r = Math.random();
-            if (r < .65){
-                this.time = 100;
-                this.dir = (Math.random() - 0.5) * this.parent.speed;
-                this.parent.velocity.x = this.dir;
-            }
-            else{
-                let scene = this.owner.getScene() as Level;
-                let player = scene.getPlayer().position.clone();
-                let dir = this.owner.position.dirTo(player);
-
-                // Jump away from player after half health
-                this.parent.velocity.x = dir.x;
-                if(this.parent.health < this.parent.maxHealth/2)
-                    this.parent.velocity.x = -dir.x;
-
-                this.parent.velocity.y = -2;
-                this.parent.velocity.scaleTo(this.parent.speed);
-                this.jumping = true;
-            }
-            // else if (this.spawns < 2){ // Add attack here: spawn a slime
-            //     let scene = this.owner.getScene() as Level;
-            //     let player = scene.getPlayer().position.clone();
-            //     player.y = player.y - 200;
-            //     (scene as Level2).spawnEnemy(player);
-            //     this.spawns = this.spawns + 1;
-            // }
-        }
     }
 
     public onExit(): Record<string, any> {
@@ -99,7 +72,7 @@ class SlimeDamage extends EnemyState {
     
     public update(deltaT: number): void {
         if(!this.owner.animation.isPlaying(SlimeAnimations.TAKING_DAMAGE))
-            this.finished(SlimeBossStates.AIR);
+            this.finished(SlimeStates.AIR);
     }
 
     public onExit(): Record<string, any> {
@@ -111,11 +84,6 @@ class SlimeDead extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         this.owner.animation.playIfNotAlready(SlimeAnimations.DEAD, false);
         this.owner.tweens.play('DEAD');
-        
-        let scene = this.owner.getScene() as Level;
-        let player = scene.getPlayer().position.clone();
-        player.y = player.y - 300;
-        (scene as Level2).spawnEnemy(player);
     }
 
     public update(deltaT: number): void {
@@ -125,9 +93,7 @@ class SlimeDead extends EnemyState {
         }
     }
 
-    public onExit(): Record<string, any> {
-        return {}
-    }
+    public onExit(): Record<string, any> { return {}; }
 }
 
 class SlimeKnockback extends EnemyState {
@@ -136,8 +102,10 @@ class SlimeKnockback extends EnemyState {
 
     public onEnter(options: Record<string, any>): void {
         this.parent.speed = this.parent.MAX_SPEED;
-        this.dir = (this.parent as SlimeBossController).knockback;
+        this.dir = (this.parent as SlimeController).knockback;
         this.timer = 10;
+        console.log("KNOCKBACK")
+
     }
 
     public update(deltaT: number): void {
@@ -148,39 +116,37 @@ class SlimeKnockback extends EnemyState {
 
         if(this.timer < 0){
             if (!this.owner.onGround && (this.owner.onCeiling || this.parent.velocity.y > 0)){
-                return this.finished(SlimeBossStates.AIR);
+                return this.finished(SlimeStates.AIR);
             }
             else
-                this.finished(SlimeBossStates.GROUND);
+                this.finished(SlimeStates.GROUND);
         }
     }
 
-    public onExit(): Record<string, any> {
-        return {};
-    }
+    public onExit(): Record<string, any> { return {}; }
 }
 
-export class SlimeBossController extends BasicEnemyController {
-    protected override owner: SlimeBossActor;
+export class SlimeController extends BasicEnemyController {
+    protected override owner: SlimeActor;
     public knockback: Vec2 = Vec2.ZERO;
 
-    public initializeAI(owner: SlimeBossActor, options: Record<string, any>): void {
+    public initializeAI(owner: SlimeActor, options: Record<string, any>): void {
         super.initializeAI(owner, options);
 
         this.velocity = Vec2.ZERO;
-        this.MAX_SPEED = 1000;
-        this.MIN_SPEED = 500;
+        this.MAX_SPEED = 400;
+        this.MIN_SPEED = 400;
         this._health = 100;
         this.speed = this.MIN_SPEED
 
-        this.addState(SlimeBossStates.AIR, new Air(this, this.owner));
-        this.addState(SlimeBossStates.GROUND, new SlimeGround(this, this.owner));
-        this.addState(SlimeBossStates.DEAD, new SlimeDead(this, this.owner));
-        this.addState(SlimeBossStates.KNOCKBACK, new SlimeKnockback(this, this.owner));
-        this.addState(SlimeBossStates.DAMAGED, new SlimeDamage(this, this.owner));
+        this.addState(SlimeStates.AIR, new Air(this, this.owner));
+        this.addState(SlimeStates.GROUND, new SlimeGround(this, this.owner));
+        this.addState(SlimeStates.DEAD, new SlimeDead(this, this.owner));
+        this.addState(SlimeStates.KNOCKBACK, new SlimeKnockback(this, this.owner));
+        this.addState(SlimeStates.DAMAGED, new SlimeDamage(this, this.owner));
 
         this.receiver.subscribe(CustomGameEvents.ENEMY_DAMAGE);
-        this.initialize(SlimeBossStates.AIR);
+        this.initialize(SlimeStates.AIR);
         // console.log(this);
     }
 
@@ -202,12 +168,11 @@ export class SlimeBossController extends BasicEnemyController {
                 let center = event.data.get('center') as Vec2;
                 // console.log("SLIMEBOSS: ENEMY HIT", id, dmg, this.owner.id);
                 if (id === this.owner.id) {
-                    // this.owner.position = new Vec2(3000, 3000);
-                    // this.owner.visible = false;
                     if(knockback && center){
+                        console.log(knockback, center, "lKNOCKBACK");
                         let a = center.dirTo(this.owner.position.clone()).scaleTo(knockback)
                         this.knockback = a;
-                        this.changeState(SlimeBossStates.KNOCKBACK);
+                        this.changeState(SlimeStates.KNOCKBACK);
                         this.owner.animation.playIfNotAlready(SlimeAnimations.TAKING_DAMAGE);
                     }
                     else
@@ -226,14 +191,14 @@ export class SlimeBossController extends BasicEnemyController {
         if(this.health <= 0){
             // this.owner.position = new Vec2(3000, 3000);
             // this.owner.visible = false;
-            this.changeState(SlimeBossStates.DEAD);
+            this.changeState(SlimeStates.DEAD);
         }
         else
-            this.changeState(SlimeBossStates.DAMAGED);
+            this.changeState(SlimeStates.DAMAGED);
     }
 }
 
-export class SlimeBossActor extends AnimatedSprite {
+export class SlimeActor extends AnimatedSprite {
     protected scene: Level
 
     // Key for the navmesh to use to build paths
