@@ -7,9 +7,11 @@ import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import { GameEventType } from "../Wolfie2D/Events/GameEventType";
+import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
+import Color from "../Wolfie2D/Utils/Color";
 import Level, { LevelLayers } from "./Level";
 import Level3 from "./Level3";
 
@@ -28,6 +30,8 @@ export default class Level2 extends Level {
     
     // The padding of the world
 	private worldPadding: Vec2;
+
+    private spawnedSlimes: boolean = false;
 
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);
@@ -74,7 +78,7 @@ export default class Level2 extends Level {
         let enemies = tilemap_json.layers.find(layer => layer.name === "Enemy")
 
         // Level 2 is boss level -- only one enemy
-        let enemy = this.factory.addAnimatedSprite(SlimeBossActor, Level2.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as demoEnemyActor
+        let enemy = this.factory.addAnimatedSprite(SlimeBossActor, Level2.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as SlimeBossActor
         enemy.position.set(enemies.objects[0].x * this.tilemapScale.x, enemies.objects[0].y * this.tilemapScale.y);
         enemy.scale = new Vec2(2,2);
         enemy.addPhysics(new Circle(enemy.position, 16 * 2));
@@ -82,22 +86,27 @@ export default class Level2 extends Level {
         enemy.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENEMY_COLLISION, null);
         enemy.navkey = "navmesh";
 
-        // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
-        // this.healthbars.set(npc.id, healthbar);
+        let bossHP = new BossHUD(this, enemy, LevelLayers.UI);
 
         enemy.addAI(SlimeBossController, { tilemap: this.tilemapKey });
         enemy.animation.play("IDLE");
         this.enemies.push(enemy);
 
-        let bossHP = new BossHUD(this, enemy, LevelLayers.UI);
-        
+        // Add in two more slimes that will spawn when the boss dies
+        for(let i = 0; i < 2; i++){
+            let enemy = this.factory.addAnimatedSprite(SlimeBossActor, Level2.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as SlimeBossActor;
+            enemy.position.set(3000, 3000);
+            enemy.visible = false;
+            this.enemies.push(enemy);
+        }
+
         // Set level end
-        // const levelEnd = new Vec2(20.5, 14).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
-        // let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(3 * 8 * 6, 4 * 8 * 6));
-        // rect.color = Color.RED;
-        // rect.addPhysics();
-        // rect.setGroup(PhysicsGroups.LEVEL_END);
-        // rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
+        const levelEnd = new Vec2(20.5, 14).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
+        let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(3 * 8 * 6, 4 * 8 * 6));
+        rect.color = Color.RED;
+        rect.addPhysics();
+        rect.setGroup(PhysicsGroups.LEVEL_END);
+        rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
         this.viewport.setBounds(8 * 6, 0, 8 * 6 * 40, 8 * 6 * 25);
 
@@ -110,15 +119,7 @@ export default class Level2 extends Level {
             this.handleEvent(this.receiver.getNextEvent());
         }
 
-        let allEnemiesDefeated = true
-        for(let i = 0; i < this.enemies.length; i++){
-            if(this.enemies[i].visible) allEnemiesDefeated = false;
-        }
-
         super.updateScene(deltaT);
-
-        if(allEnemiesDefeated)
-            this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
     }
 
     /**
@@ -131,6 +132,11 @@ export default class Level2 extends Level {
         switch (event.type) {
             // TODO: Remove temporarily change to main menu
             case CustomGameEvents.PLAYER_ENTER_LEVEL_END: {
+                let allEnemiesDefeated = true
+                for(let i = 0; i < this.enemies.length; i++)
+                    if(this.enemies[i].visible) allEnemiesDefeated = false;
+
+                if(allEnemiesDefeated) this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
                 break;
             }
             case CustomGameEvents.LEVEL_NEXT: {
@@ -145,21 +151,25 @@ export default class Level2 extends Level {
     }
 
     public spawnEnemy(pos: Vec2): void {
-        if(this.enemies.length >= 3) return;
+        if(this.spawnedSlimes) return;
+        for(let i = 1; i < this.enemies.length; i++){
+            let enemy = this.enemies[i] as demoEnemyActor;
+            enemy.position = pos.clone()
+            if(i > 1)
+                enemy.position.x = enemy.position.x + (Math.random() * 20) - 10
+            
+            enemy.scale = new Vec2(1.5,1.5);
+            enemy.addPhysics(new Circle(enemy.position, 16 * 1.5));
+            enemy.setGroup(PhysicsGroups.NPC);
+            enemy.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENEMY_COLLISION, null);
+            enemy.navkey = "navmesh";
 
-        let enemy = this.factory.addAnimatedSprite(SlimeBossActor, Level2.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as SlimeBossActor;
-        enemy.position.set(pos.x, pos.y);
-        enemy.scale = new Vec2(1.5,1.5);
-        enemy.addPhysics(new Circle(enemy.position, 16 * 1.5));
-        enemy.setGroup(PhysicsGroups.NPC);
-        enemy.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENEMY_COLLISION, null);
-        enemy.navkey = "navmesh";
+            // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
+            // this.healthbars.set(npc.id, healthbar);
+            enemy.addAI(SlimeBossController, { tilemap: this.tilemapKey });
 
-        // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
-        // this.healthbars.set(npc.id, healthbar);
-
-        enemy.addAI(SlimeBossController, { tilemap: this.tilemapKey });
-        enemy.animation.play("IDLE");
-        this.enemies.push(enemy);
+            enemy.visible = true;
+        }
+        this.spawnedSlimes = true;
     }
 }

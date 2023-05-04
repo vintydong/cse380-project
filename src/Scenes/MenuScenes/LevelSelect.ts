@@ -15,6 +15,7 @@ import Level2 from "../Level2";
 import Level3 from "../Level3";
 import Level4 from "../Level4";
 import Level5 from "../Level5";
+import Level6 from "../Level6";
 import MainMenu from "./MainMenu";
 
 export default class LevelSelect extends Scene{
@@ -141,7 +142,7 @@ export default class LevelSelect extends Scene{
                 break;
             
             case "levelSix":
-                this.sceneManager.changeToScene(DemoLevel);
+                this.sceneManager.changeToScene(Level6);
                 break;
 
             case "goBack":
