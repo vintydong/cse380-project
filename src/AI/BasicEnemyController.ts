@@ -20,6 +20,7 @@ export abstract class BasicEnemyController extends StateMachineAI {
     protected _speed: number = 100;
     protected _velocity: Vec2;
     protected _gravity: number = 1000;
+    protected _facing: number = Math.round(Math.random());
 
     public get maxHealth(): number { return this._maxHealth }
     public set maxHealth(maxHealth: number) { this._maxHealth = maxHealth; }
@@ -35,6 +36,9 @@ export abstract class BasicEnemyController extends StateMachineAI {
 
     public get gravity(): number { return this._gravity; }
     public set gravity(gravity: number) { this._gravity = gravity; }
+
+    public get facing(): number { return this._facing; }
+    public set facing(facing: number) { this._facing = facing; }
 
     public initializeAI(owner: AnimatedSprite, options: Record<string, any>): void {
         this.owner = owner;

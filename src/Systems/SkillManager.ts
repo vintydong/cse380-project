@@ -98,6 +98,7 @@ export class SkillManager {
 
         // TODO: Remove this unless we want default skills
         this.activeSkills = [null, null, null, null];
+
         this.activeSkills[0] = this.allSkills[0];
         this.activeSkills[1] = this.allSkills[1];
         this.activeSkills[2] = this.allSkills[2];

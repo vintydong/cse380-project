@@ -6,7 +6,7 @@ import { LayerManager } from "../Systems/LayerManager";
 import { SkillManager } from "../Systems/SkillManager";
 import Melee from "../Systems/Skills/Melee";
 import Slash from "../Systems/Skills/Slash";
-import Repel from "../Systems/Skills/Repel";
+// import Repel from "../Systems/Skills/Repel";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
@@ -50,6 +50,7 @@ export default class Level1 extends Level {
      */
     public loadScene(): void {
         super.loadScene();
+
         // Load in the tilemap
         this.load.tilemap(Level1.TILEMAP_KEY, Level1.TILEMAP_PATH);
         // Load in music
