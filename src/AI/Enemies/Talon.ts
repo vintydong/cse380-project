@@ -44,7 +44,8 @@ class TalonAir extends EnemyState {
 
         if (this.parent.cooldown.isStopped()) {
             this.shouldIAttack = (Math.round(Math.random()) === 0) ? false : true;
-            if (this.shouldIAttack) { this.finished(TalonStates.ATTACKING) }
+            if (this.shouldIAttack) this.finished(TalonStates.ATTACKING)
+            else this.parent.cooldown.start()
         }
 
         if (this.owner.getScene().getViewport().includes(this.owner)) {
@@ -302,7 +303,6 @@ export class TalonProjectileAI implements AI {
         this.emitter = new Emitter();
         this.receiver = new Receiver();
         this.receiver.subscribe("TALON_PROJECTILE_HIT");
-        this.receiver.subscribe("TALON_PROJECTILE_MISS");
 
         this.currentXSpeed = 50;
         this.currentYSpeed = 50;
