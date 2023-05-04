@@ -58,7 +58,7 @@ export default class Help extends Scene{
         goBack.backgroundColor = Color.TRANSPARENT;
         goBack.onClickEventId = "goBack";
 
-        const cheatHealth = this.add.uiElement(UIElementType.BUTTON, "helpMenu", {position: new Vec2(center.x - 300, center.y + 200), text: "Infinite Health"});
+        const cheatHealth = this.add.uiElement(UIElementType.BUTTON, "helpMenu", {position: new Vec2(center.x - 300, center.y + 200), text: "No Damage"});
         cheatHealth.size.set(200, 50);
         cheatHealth.borderWidth = 2;
         cheatHealth.borderColor = cheatManager.getInfiniteHP() ? Color.BLACK: Color.WHITE;

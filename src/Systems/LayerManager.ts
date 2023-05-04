@@ -265,15 +265,16 @@ export class LayerManager {
         this.transitionLabel.textColor = Color.WHITE;
         this.transitionLabel.tweens.add("slideIn", {
             startDelay: 0,
-            duration: 1000,
+            duration: 1500,
             effects: [
                 {
                     property: TweenableProperties.posX,
-                    start: viewportTopRight.x,
+                    start: viewportTopRight.x + 250,
                     end: viewportTopRight.x - 250,
                     ease: EaseFunctionType.OUT_SINE
                 }
-            ]
+            ],
+            reverseOnComplete: true,
         })
         this.transitionLabel.visible = false;
 
@@ -281,7 +282,7 @@ export class LayerManager {
     }
 
     public startLevel(){
-        this.transitionLabel.visible = false;
+        // this.transitionLabel.visible = false;
         this.transitionScreen.tweens.play("fadeOut");
     }
 
@@ -290,9 +291,9 @@ export class LayerManager {
             console.log("Starting end level timer");
             this.transitionScreen.scale.x = 1;
             this.transitionScreen.scale.y = 1;
-            this.endLevelTimer.start();
             this.transitionLabel.visible = true;
             this.transitionLabel.tweens.play('slideIn')
+            this.endLevelTimer.start();
         }
     }
 

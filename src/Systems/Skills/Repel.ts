@@ -21,19 +21,24 @@ export default class Repel extends Skill {
     public static readonly REPEL_SPRITE_KEY = "REPEL_SPRITE_KEY";
     public static readonly REPEL_SPRITE_PATH = "assets/sprites/attacks/repel.png";
 
-    public constructor(skill_manager: SkillManager) {
-        super(skill_manager);
+    public static readonly REPEL_ICON_KEY = "REPEL_ICON_KEY";
+    public static readonly REPEL_ICON_PATH = "assets/sprites/icons/repel_icon.png";
 
-        this.initialize();
-        this.damage = 10;
-        this.cooldown = new Timer(500);
+    public constructor(skill_manager: SkillManager) {
+        let damage = [10, 15, 20];
+        let cooldown = [new Timer(5000), new Timer(5000), new Timer(2500)];
+        let cost = [0, 0, 0];
+        let description = ['Repel nearby enemies', 'Increase DMG', 'Decrease CD'];
+
+        super(skill_manager, damage, cooldown, cost, description, Repel.REPEL_ICON_KEY);
     }
 
     public initialize(){
         let scene = this.skill_manager.getScene();
-        
+
+        this.cooldown = [new Timer(5000), new Timer(5000), new Timer(2500)];
+
         this.hitbox = scene.add.sprite(Repel.REPEL_SPRITE_KEY, LevelLayers.PRIMARY)
-        console.log("PRIMARY")
         this.hitbox.scale = new Vec2(3,3);
         this.hitbox.visible = false;
 
@@ -51,7 +56,7 @@ export default class Repel extends Skill {
                 {
                     property: "alpha",
                     start: 1,
-                    end: 0.5,
+                    end: 0.7,
                     ease: EaseFunctionType.OUT_CIRC
                 },
                 {
@@ -74,7 +79,7 @@ export default class Repel extends Skill {
             effects: [
                 {
                     property: "alpha",
-                    start: 0.5,
+                    start: 0.7,
                     end: 0,
                     ease: EaseFunctionType.IN_OUT_SINE
                 },
@@ -92,10 +97,10 @@ export default class Repel extends Skill {
         this.hitbox.scale = new Vec2(3,3);
         this.hitbox.collisionShape.halfSize.copy(new Vec2(32, 32))
 
-        this.cooldown.start();
+        this.cooldown[this.level].start();
 
-        this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
-        console.log(this.hitbox.collisionShape)
+        this.hitbox.setAIActive(true, {direction: direction, damage: this.damage[this.level]});
+        // console.log(this.hitbox.collisionShape)
         this.hitbox.tweens.play("expand");
         this.hitbox.tweens.play("fadeout");
     }
@@ -114,6 +119,9 @@ export class RepelBehavior implements AI {
     // The direction to fire the bubble
     private direction: string;
     private damage: number;
+
+    // Register enemies that have been hit
+    private damagedEnemies: {[key: number]: number};
 
     public initializeAI(owner: Sprite, options: Record<string, any>): void {
         this.owner = owner;
@@ -136,6 +144,7 @@ export class RepelBehavior implements AI {
             this.damage = options.damage || 10;
             this.direction = options.direction;
         }
+        this.damagedEnemies = {};
         // this.owner.invertX = (this.direction == "left") ? true : false;
     }
 
@@ -148,9 +157,22 @@ export class RepelBehavior implements AI {
                 break;
             case CustomGameEvents.ENEMY_HIT:
                 let id = event.data.get('other');
-                if(id === this.owner.id){
+                let enemyId = event.data.get('node');
+
+                let alreadyHit = this.damagedEnemies[enemyId]
+
+                if(id === this.owner.id && !alreadyHit){
                     console.log("Hit an enemy with Repel", event.data);
-                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: this.damage, knockback: 2000});
+                    
+                    this.damagedEnemies[enemyId] = 1
+
+                    let center = this.owner.position.clone();
+                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {
+                        node: event.data.get('node'), 
+                        damage: this.damage, 
+                        knockback: 1000,
+                        center
+                    });
                 }
                 break;
             default: {

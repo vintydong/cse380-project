@@ -13,16 +13,16 @@ import { SkillManager } from "../SkillManager";
 import Skill from "./Skill";
 
 /**
- * A class that represents a melee attack that can be used by the player
+ * A class that represents a spin attack that can be used by the player
  * @author vintydong
  */
-export default class Melee extends Skill {
+export default class Spin extends Skill {
     private hitbox: Sprite;
-    public static readonly MELEE_SPRITE_KEY = "MELEE_SPRITE_KEY";
-    public static readonly MELEE_SPRITE_PATH = "assets/sprites/attacks/melee.png";
+    public static readonly SPIN_SPRITE_KEY = "SPIN_SPRITE_KEY";
+    public static readonly SPIN_SPRITE_PATH = "assets/sprites/attacks/spin.png";
 
-    public static readonly MELEE_ICON_KEY = "MELEE_ICON_KEY";
-    public static readonly MELEE_ICON_PATH = "assets/sprites/icons/melee_icon.png";
+    public static readonly SPIN_ICON_KEY = "SPIN_ICON_KEY";
+    public static readonly SPIN_ICON_PATH = "assets/sprites/icons/spin_icon.png";
 
     public constructor(skill_manager: SkillManager) {
         let damage = [20, 30, 40];
@@ -30,19 +30,17 @@ export default class Melee extends Skill {
         let cost = [0, 0, 0];
         let description = ['Swings sword at enemy', 'Increase DMG and reduce CD', 'Greatly increase DMG'];
 
-        super(skill_manager, damage, cooldown, cost, description, Melee.MELEE_ICON_KEY);
+        super(skill_manager, damage, cooldown, cost, description, Spin.SPIN_ICON_KEY);
     }
 
     public initialize(){
         let scene = this.skill_manager.getScene();
-
-        this.cooldown = [new Timer(800), new Timer(600), new Timer(400)];
         
-        this.hitbox = scene.add.sprite(Melee.MELEE_SPRITE_KEY, LevelLayers.PRIMARY)
+        this.hitbox = scene.add.sprite(Spin.SPIN_SPRITE_KEY, LevelLayers.PRIMARY)
         this.hitbox.scale = new Vec2(3,3);
         this.hitbox.visible = false;
 
-        this.hitbox.addAI(MeleeBehavior);
+        this.hitbox.addAI(SpinBehavior);
 
         this.hitbox.addPhysics();
         this.hitbox.setGroup(PhysicsGroups.WEAPON);
@@ -60,7 +58,7 @@ export default class Melee extends Skill {
                     ease: EaseFunctionType.IN_OUT_SINE
                 }
             ],
-            onEnd: 'MELEE_ATTACK_END',
+            onEnd: 'SPIN_ATTACK_END',
         });
     }
 
@@ -87,7 +85,7 @@ export default class Melee extends Skill {
  * A class that represents the behavior of the melee attack in the HW2Scene
  * @author HenryLam
  */
-export class MeleeBehavior implements AI {
+export class SpinBehavior implements AI {
     // The GameNode that owns this behavior
     private owner: Sprite;
     private receiver: Receiver;
@@ -103,7 +101,7 @@ export class MeleeBehavior implements AI {
         this.emitter = new Emitter();
         this.receiver = new Receiver();
         this.receiver.subscribe(CustomGameEvents.ENEMY_HIT);
-        this.receiver.subscribe('MELEE_ATTACK_END');
+        this.receiver.subscribe('SPIN_ATTACK_END');
 
         this.activate(options);
     }
@@ -123,7 +121,7 @@ export class MeleeBehavior implements AI {
 
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
-            case 'MELEE_ATTACK_END':
+            case 'SPIN_ATTACK_END':
                 this.owner.position.copy(Vec2.ZERO);
                 this.owner._velocity.copy(Vec2.ZERO);
                 this.owner.visible = false;

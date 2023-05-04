@@ -21,6 +21,7 @@ enum SlimeBossStates {
     GROUND = "GROUND",
     AIR = "AIR",
     DEAD = "DEAD",
+    KNOCKBACK = "KNOCKBACK",
 }
 
 class SlimeGround extends EnemyState {
@@ -86,8 +87,39 @@ class SlimeGround extends EnemyState {
     }
 }
 
+class SlimeKnockback extends EnemyState {
+    private dir: Vec2;
+    private timer: number = 10;
+
+    public onEnter(options: Record<string, any>): void {
+        this.parent.speed = this.parent.MAX_SPEED;
+        this.dir = (this.parent as SlimeBossController).knockback;
+        this.timer = 10;
+    }
+
+    public update(deltaT: number): void {
+        super.update(deltaT);
+        this.owner.move(this.dir.scaled(deltaT));
+
+        this.timer = this.timer - 1;
+
+        if(this.timer < 0){
+            if (!this.owner.onGround && (this.owner.onCeiling || this.parent.velocity.y > 0)){
+                return this.finished(SlimeBossStates.AIR);
+            }
+            else
+                this.finished(SlimeBossStates.GROUND);
+        }
+    }
+
+    public onExit(): Record<string, any> {
+        return {};
+    }
+}
+
 export class SlimeBossController extends BasicEnemyController {
     protected override owner: SlimeBossActor;
+    public knockback: Vec2 = Vec2.ZERO;
 
     public initializeAI(owner: SlimeBossActor, options: Record<string, any>): void {
         super.initializeAI(owner, options);
@@ -101,10 +133,11 @@ export class SlimeBossController extends BasicEnemyController {
         this.addState(SlimeBossStates.AIR, new Air(this, this.owner));
         this.addState(SlimeBossStates.GROUND, new SlimeGround(this, this.owner));
         this.addState(SlimeBossStates.DEAD, new Dead(this, this.owner));
+        this.addState(SlimeBossStates.KNOCKBACK, new SlimeKnockback(this, this.owner));
 
         this.receiver.subscribe(CustomGameEvents.ENEMY_DAMAGE);
         this.initialize(SlimeBossStates.AIR);
-        console.log(this);
+        // console.log(this);
     }
 
     public activate(options: Record<string, any>): void { }
@@ -121,11 +154,18 @@ export class SlimeBossController extends BasicEnemyController {
             case CustomGameEvents.ENEMY_DAMAGE:
                 let id = event.data.get('node');
                 let dmg = event.data.get('damage')
+                let knockback = event.data.get('knockback');
+                let center = event.data.get('center') as Vec2;
                 // console.log("SLIMEBOSS: ENEMY HIT", id, dmg, this.owner.id);
                 if (id === this.owner.id) {
                     // this.owner.position = new Vec2(3000, 3000);
                     // this.owner.visible = false;
                     this.takeDamage(dmg);
+                    if(knockback && center){
+                        let a = center.dirTo(this.owner.position.clone()).scaleTo(knockback)
+                        this.knockback = a;
+                        this.changeState(SlimeBossStates.KNOCKBACK);
+                    }
                 }
                 break;
             default: {

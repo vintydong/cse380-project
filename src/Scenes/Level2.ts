@@ -2,6 +2,7 @@ import { SlimeBossActor, SlimeBossController } from "../AI/Bosses/SlimeBoss";
 import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
 import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
+import BossHUD from "../Systems/HUD/BossHUD";
 import Circle from "../Wolfie2D/DataTypes/Shapes/Circle";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
@@ -87,6 +88,8 @@ export default class Level2 extends Level {
         enemy.addAI(SlimeBossController, { tilemap: this.tilemapKey });
         enemy.animation.play("IDLE");
         this.enemies.push(enemy);
+
+        let bossHP = new BossHUD(this, enemy, LevelLayers.UI);
         
         // Set level end
         // const levelEnd = new Vec2(20.5, 14).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);

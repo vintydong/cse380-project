@@ -28,17 +28,22 @@ export default class Slash extends Skill {
     public static readonly SLASH_SPRITE_KEY = "SLASH_SPRITE_KEY";
     public static readonly SLASH_SPRITE_PATH = "assets/sprites/attacks/ranged.png";
 
+    public static readonly SLASH_ICON_KEY = "SLASH_ICON_KEY";
+    public static readonly SLASH_ICON_PATH = "assets/sprites/icons/slash_icon.png";
+
     public constructor(skill_manager: SkillManager) {
-        super(skill_manager);
+        let damage = [15, 30, 45];
+        let cooldown = [new Timer(1000), new Timer(900), new Timer(800)];
+        let cost = [0, 0, 0];
+        let description = ['Sends a slash of dark energy', 'Slash can pass through enemies', 'Increase DMG and reduce CD'];
 
-        this.initialize();
-
-        this.damage = 15;
-        this.cooldown = new Timer(1000);
+        super(skill_manager, damage, cooldown, cost, description, Slash.SLASH_ICON_KEY);
     }
 
     public initialize() {
         let scene = this.skill_manager.getScene();
+
+        this.cooldown = [new Timer(1000), new Timer(900), new Timer(800)];
 
         this.hitbox = scene.add.sprite(Slash.SLASH_SPRITE_KEY, LevelLayers.PRIMARY)
         this.hitbox.scale = new Vec2(2,2);
@@ -57,7 +62,7 @@ export default class Slash extends Skill {
                 {
                     property: "alpha",
                     start: 1,
-                    end: 0,
+                    end: 0.35,
                     ease: EaseFunctionType.IN_OUT_SINE
                 }
             ],
@@ -96,21 +101,13 @@ export default class Slash extends Skill {
             this.hitbox.alpha = 1;
             this.hitbox.position = this.skill_manager.getPlayer().position.clone();
 
-            this.cooldown.start();
+            this.cooldown[this.level].start();
             
-            this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
+            this.hitbox.setAIActive(true, {direction: direction, damage: this.damage[this.level]});
             this.hitbox.tweens.play("fadeout");
-        }
 
-       // Find the first visible particle
-       // this.weaponParticles.startSystem(2000, 0, this.skill_manager.getPlayer().position.clone());
-    //    let particle: Particle = this.weaponParticles.getPool().find((bubble: Particle) => { return !bubble.visible });
-    //    if (particle) {
-    //        // Bring this bubble to life
-    //        particle.visible = true;
-    //        particle.position = this.skill_manager.getPlayer().position.clone();
-    //        particle.setAIActive(true, { direction: direction });
-    //    }
+        //    this.weaponParticles.startSystem(1000, 0, this.skill_manager.getPlayer().position.clone());
+        }
     }
 }
 
