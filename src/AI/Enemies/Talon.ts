@@ -41,7 +41,9 @@ class TalonAir extends EnemyState {
 
     public update(deltaT: number): void {
         super.update(deltaT);
+        if (this.owner.frozen) { return; }
 
+        // Don't fire on cooldown / game paused
         if (this.parent.cooldown.isStopped()) {
             this.shouldIAttack = (Math.round(Math.random()) === 0) ? false : true;
             if (this.shouldIAttack) this.finished(TalonStates.ATTACKING)
@@ -50,7 +52,6 @@ class TalonAir extends EnemyState {
 
         if (this.owner.getScene().getViewport().includes(this.owner)) {
             let player = this.parent.target.position
-            // console.log(this.owner.id, this.owner.position.x, this.owner.position.y)
 
             // Update x velocities
             let xdir = (player.x < this.owner.position.x) ? "left" : "right"
@@ -153,7 +154,7 @@ export class TalonController extends BasicEnemyController {
         
         this.health = 50;
         this.MIN_SPEED = 50;
-        this.MAX_SPEED = 100;
+        this.MAX_SPEED = 50;
         this.velocity = Vec2.ZERO;
         this.speed = this.MIN_SPEED;
 
@@ -173,6 +174,16 @@ export class TalonController extends BasicEnemyController {
 
     public update(deltaT: number): void {
         super.update(deltaT);
+
+        // Freeze projectiles if paused
+        if (this.owner.frozen) { 
+            this._projectile.getHitbox().freeze(); 
+            this._projectile.getHitbox().animation.pause();
+        }
+        else { 
+            this._projectile.getHitbox().unfreeze(); 
+            this._projectile.getHitbox().animation.resume();
+        }
     }
 
     /**
@@ -272,6 +283,10 @@ export class TalonProjectile {
             this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
         }
     }
+
+    /** Getters and Setters */
+    public getHitbox(): AnimatedSprite { return this.hitbox; }
+    
 }
 export class TalonProjectileAI implements AI {
     // The GameNode that owns this behavior
@@ -308,9 +323,9 @@ export class TalonProjectileAI implements AI {
         this.currentYSpeed = 50;
         this.speedIncrement = 100;
         this.minXSpeed = 100;
-        this.maxXSpeed = 500;
+        this.maxXSpeed = 300;
         this.minYSpeed = 100;
-        this.maxYSpeed = 500;
+        this.maxYSpeed = 300;
 
         this.activate(options);
     }
@@ -324,6 +339,8 @@ export class TalonProjectileAI implements AI {
         if (options) {
             this.damage = options.damage;
             this.direction = options.direction;
+            this.currentXSpeed = 50;
+            this.currentYSpeed = 50;
         }
         this.owner.animation.play("ACTIVE");
     }
@@ -336,7 +353,7 @@ export class TalonProjectileAI implements AI {
                 if(id === this.owner.id){
                     console.log("Player hit with Talon projectile", event.data);
                     this.emitter.fireEvent(CustomGameEvents.PLAYER_ENEMY_PROJECTILE_COLLISION, {node: event.data.get('node'), damage: this.damage});
-                    this.owner.position.copy(Vec2.ZERO);
+                    this.owner.position.copy(new Vec2(500, 0));
                     this.owner._velocity.copy(Vec2.ZERO);
                     this.owner.visible = false;
                 }
@@ -356,7 +373,7 @@ export class TalonProjectileAI implements AI {
         if (this.owner.visible) {
             // Despawn if collided with environment
             if (this.owner.onWall || this.owner.onCeiling || this.owner.onGround) {
-                this.owner.position.copy(Vec2.ZERO);
+                this.owner.position.copy(new Vec2(500, 0));
                 this.owner._velocity.copy(Vec2.ZERO);
                 this.owner.visible = false;
             }

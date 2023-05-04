@@ -1,5 +1,5 @@
 import { TalonActor, TalonController, TalonProjectile, TalonProjectileAI } from "../AI/Enemies/Talon";
-import { CustomGameEvents } from "../CustomGameEvents";
+import { CustomGameEvents, MenuEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
 import { LayerManager } from "../Systems/LayerManager";
 import { SkillManager } from "../Systems/SkillManager";
@@ -105,9 +105,6 @@ export default class Level5 extends Level {
 
     public startScene(): void {
         super.startScene();
-
-        // Initialize layer physics
-        // this.initializeTilemap()
 
         // Initialize enemies
         let tilemap_json = this.load.getObject(Level5.ENEMY_POSITIONS_KEY);
