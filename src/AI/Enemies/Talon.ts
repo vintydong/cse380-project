@@ -120,6 +120,8 @@ class TalonTakingDamage extends EnemyState {
 
 class TalonDead extends EnemyState {
     public onEnter(options: Record<string, any>): void {
+        // Non collidable dead body
+        this.owner.disablePhysics();
         this.owner.animation.play(TalonAnimations.DEAD);
     }
 
