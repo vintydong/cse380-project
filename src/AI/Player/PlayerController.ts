@@ -97,14 +97,16 @@ export default class PlayerController extends StateMachineAI {
         this.addState(PlayerStates.DEAD, new Dead(this, this.owner));
         this.addState(PlayerStates.KNOCKBACK, new Knockback(this, this.owner));
 
-        this.receiver.subscribe('ENEMY_COLLISION');
+        this.receiver.subscribe(CustomGameEvents.PLAYER_ENEMY_COLLISION);
+        this.receiver.subscribe(CustomGameEvents.PLAYER_ENEMY_PROJECTILE_COLLISION);
 
         this.initialize(PlayerStates.GROUND);
     }
 
     public handleEvent(event: GameEvent): void{
         switch (event.type){
-            case 'ENEMY_COLLISION': {
+            case CustomGameEvents.PLAYER_ENEMY_COLLISION: 
+            case CustomGameEvents.PLAYER_ENEMY_PROJECTILE_COLLISION: {
                 if (!this._hit){
                     this.handlePlayerCollision(event);
                     if (this.health <= 0){

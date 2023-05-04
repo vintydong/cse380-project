@@ -45,10 +45,7 @@ export abstract class EnemyState extends State {
     }
 
     public update(deltaT: number): void {
-        // This updates the direction the player sprite is facing (left or right)
-        // if (direction.x !== 0) {
-        //     this.owner.invertX = MathUtils.sign(direction.x) < 0;
-        // }
+        this.owner.invertX = (this.parent.facing === 0)? true : false;
     }
 
     public abstract onExit(): Record<string, any>;
