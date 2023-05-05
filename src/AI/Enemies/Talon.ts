@@ -1,13 +1,14 @@
 import { CustomGameEvents } from "../../CustomGameEvents";
 import { PhysicsGroups } from "../../Physics";
 import Level, { LevelLayers } from "../../Scenes/Level";
+import Level5 from "../../Scenes/Level5";
 import AI from "../../Wolfie2D/DataTypes/Interfaces/AI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Emitter from "../../Wolfie2D/Events/Emitter";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
+import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Receiver from "../../Wolfie2D/Events/Receiver";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
-import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 import { BasicEnemyController } from "../BasicEnemyController";
@@ -123,6 +124,8 @@ class TalonDead extends EnemyState {
         // Non collidable dead body
         this.owner.disablePhysics();
         this.owner.animation.play(TalonAnimations.DEAD);
+        let dashAudio = (this.owner.getScene() as Level5).getTalonDyingAudioKey()
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: dashAudio, loop: false, holdReference: false});
     }
 
     public update(deltaT: number): void { 
@@ -249,7 +252,7 @@ export class TalonProjectile {
     private damage: number;
     
     public static readonly TALON_PROJECTILE_KEY = "TALON_PROJECTILE_KEY"
-    public static readonly TALON_PROJECTILE_PATH = "assets/spritesheets/Enemies/Talon_Projectile.json"
+    public static readonly TALON_PROJECTILE_PATH = "assets/spritesheets/Enemies/Talon/Talon_Projectile.json"
 
     public constructor(controller: TalonController, actor: TalonActor) {
         this.actor = actor;

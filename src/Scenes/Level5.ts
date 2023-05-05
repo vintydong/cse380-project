@@ -22,11 +22,14 @@ import Level6 from "./Level6";
 
 export default class Level5 extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "LEVEL5_ENEMY_KEY";
-    public static readonly ENEMY_SPRITE_PATH = "assets/spritesheets/Enemies/Talon.json";
+    public static readonly ENEMY_SPRITE_PATH = "assets/spritesheets/Enemies/Talon/Talon.json";
     public static readonly ENEMY_POSITIONS_KEY = "LEVEL5_ENEMY_POSITIONS";
 
     public static readonly TALON_PROJECTILE_KEY = "TALON_PROJECTILE_KEY"
-    public static readonly TALON_PROJECTILE_PATH = "assets/spritesheets/Enemies/Talon_Projectile.json";
+    public static readonly TALON_PROJECTILE_PATH = "assets/spritesheets/Enemies/Talon/Talon_Projectile.json";
+
+    public static readonly TALON_DYING_AUDIO_KEY = "TALON_DYING_AUDIO_KEY";
+    public static readonly TALON_DYING_AUDIO_PATH = "assets/sounds/talon_dying.wav";
 
     public static readonly TILEMAP_KEY = "Level5";
     public static readonly TILEMAP_PATH = "assets/tilemaps/level5_tilemap.json";
@@ -37,6 +40,8 @@ export default class Level5 extends Level {
 
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
     public static readonly LEVEL_MUSIC_PATH = "assets/music/hw5_level_music.wav";
+
+    protected talonDyingAudioKey: string;
     
     /** The destrubtable layer of the tilemap */
     protected ground: OrthogonalTilemap;
@@ -53,7 +58,9 @@ export default class Level5 extends Level {
 
         // Set the player's spawn
         this.playerSpawn = new Vec2(66.5 * 6, 40 * 6);
+
         // Music and sound
+        this.talonDyingAudioKey = Level5.TALON_DYING_AUDIO_KEY;
     }
 
     /**
@@ -79,6 +86,8 @@ export default class Level5 extends Level {
         this.load.audio(Level.ATTACK_AUDIO_KEY, Level.ATTACK_AUDIO_PATH);
         this.load.audio(Level.HURT_AUDIO_KEY, Level.HURT_AUDIO_PATH);
         this.load.audio(Level.DYING_AUDIO_KEY, Level.DYING_AUDIO_PATH);
+
+        this.load.audio(Level5.TALON_DYING_AUDIO_KEY, Level5.TALON_DYING_AUDIO_PATH);
         // this.load.audio(this.levelMusicKey, Level5.LEVEL_MUSIC_PATH)
 
         /* AI */
@@ -188,5 +197,10 @@ export default class Level5 extends Level {
         // Add physicss to the wall layer
         this.walls.addPhysics();
         this.walls.setGroup(PhysicsGroups.GROUND);
+    }
+
+    /* Getters */
+    public getTalonDyingAudioKey(): string {
+        return this.talonDyingAudioKey
     }
 }
