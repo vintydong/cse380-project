@@ -45,7 +45,7 @@ export abstract class PlayerState extends State {
 
     public update(deltaT: number): void {
         // Update dash timer
-        this.parent.dashTimer.update(deltaT);
+        // this.parent.dashTimer.update(deltaT);
 
         // Do not update the direction the sprite is facing if DASHING
         if (this instanceof Dash) { return; }
@@ -205,7 +205,6 @@ export class Dash extends PlayerState {
     public onExit(): Record<string, any> {
         this.owner.animation.stop();
         this.parent.dashTimer.start();
-        this.parent.hit = false;
         return {fromGround: this.fromGround};
     }
 }
@@ -229,26 +228,38 @@ export class Dead extends PlayerState {
 
 export class Knockback extends PlayerState {
     private direction: string;
+    private knocked: boolean;
 
     public onEnter(options: Record<string, any>): void {
+        this.direction = this.parent.facing
         this.parent.speed = this.parent.MAX_SPEED;
         this.parent.velocity.y = 0;
-        this.direction = this.parent.facing;
+        this.knocked = false;
+        
+        this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
+        let hurtAudio = (this.owner.getScene() as Level).getHurtAudioKey();
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: hurtAudio, loop: false, holdReference: false});
     }
 
     public handleInput(event: GameEvent): void { }
 
     public update(deltaT: number): void {
-        super.update(deltaT);
-        let dx = (this.direction == "left") ? 1 : -1
-
-        this.parent.velocity.x = dx * 2000
-        this.parent.velocity.y = -750;
-        this.owner.move(this.parent.velocity.scale(deltaT));
-        this.finished(PlayerStates.GROUND);
+        // super.update(deltaT);
+        if (!this.knocked) {
+            let dx = (this.direction == "left") ? 1 : -1
+    
+            this.parent.velocity.x = dx * 2000
+            this.parent.velocity.y = -750;
+            this.owner.move(this.parent.velocity.scale(deltaT));
+            this.knocked = true;
+        }
+        if (!this.owner.animation.isPlaying(PlayerAnimations.TAKING_DAMAGE)) {
+            this.finished(PlayerStates.AIR);
+        }
     }
 
     public onExit(): Record<string, any> { 
+        this.owner.animation.stop();
         return {}; 
     }
 }

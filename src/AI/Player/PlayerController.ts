@@ -182,15 +182,14 @@ export default class PlayerController extends StateMachineAI {
 
     public handlePlayerCollision(event): void{
         let cheatManager = CheatManager.getInstance();
-        if (this._iFrameTimer.isStopped && !cheatManager.getInfiniteHP()){
+        
+        if (this._iFrameTimer.isStopped() && !cheatManager.getInfiniteHP()){
 			this.health -= 10;
-			this.owner.animation.playIfNotAlready(PlayerAnimations.TAKING_DAMAGE, false);
             this.emitter.fireEvent(CustomGameEvents.UPDATE_HEALTH, {
 				currentHealth: this.health,
 				maxHealth: this.maxHealth
 			});
-            let hurtAudio = (this.owner.getScene() as Level).getHurtAudioKey()
-            this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: hurtAudio, loop: false, holdReference: false});
+        
 			this._iFrameTimer.start();
 			this._hit = true;
 		}
