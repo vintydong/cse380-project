@@ -35,7 +35,7 @@ export default class Level5 extends Level {
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    public static readonly LEVEL_MUSIC_PATH = "assets/music/hw5_level_music.wav";
+    public static readonly LEVEL_MUSIC_PATH = "assets/music/level5_music.wav";
 
     protected talonDyingAudioKey: string;
 

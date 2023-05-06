@@ -11,7 +11,7 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
-import { Ground, Air, Dash, Dead, Knockback } from './PlayerStates';
+import { Ground, Air, Dash, Dead, Knockback, PlayerState } from './PlayerStates';
 
 /**
  * Specify any keybindings needed for the player
@@ -62,21 +62,19 @@ export default class PlayerController extends StateMachineAI {
     protected _velocity: Vec2;
     protected _speed: number;
 
-    // protected weapon: PlayerParticleSystem;
     protected _facing: string;
     protected _dashTimer: Timer;
     protected _airDash: boolean;
 
     protected _iFrameTimer: Timer;
     protected _hit: boolean;
+    protected _knockback: Vec2;
+    protected _lastHit: number;
 
-    // protected weapon: PlayerWeapon;
     protected tilemap: OrthogonalTilemap;
 
     public initializeAI(owner: AnimatedSprite, options: Record<string, any>) {
         this.owner = owner;
-
-        // this.weapon = options.weapon;
 
         this.tilemap = this.owner.getScene().getTilemap(options.tilemap) as OrthogonalTilemap;
         this.speed = 200;
@@ -86,9 +84,11 @@ export default class PlayerController extends StateMachineAI {
         this.maxHealth = 100;
 
         this.dashTimer = new Timer(600);
-        this._airDash = true;
+        this.airDash = true;
 
         this._iFrameTimer = new Timer(1000, this.handleIFrameTimerEnd, false);
+        this.knockback = new Vec2(200, -200);
+        this.lastHit = null;
 
         // Add the different states the player can be in to the PlayerController 
         this.addState(PlayerStates.GROUND, new Ground(this, this.owner));
@@ -99,6 +99,7 @@ export default class PlayerController extends StateMachineAI {
 
         this.receiver.subscribe(CustomGameEvents.PLAYER_ENEMY_COLLISION);
         this.receiver.subscribe(CustomGameEvents.PLAYER_ENEMY_PROJECTILE_COLLISION);
+        this.receiver.subscribe(CustomGameEvents.MELEE_KNOCKBACK);
 
         this.initialize(PlayerStates.GROUND);
     }
@@ -113,11 +114,20 @@ export default class PlayerController extends StateMachineAI {
                         this.changeState(PlayerStates.DEAD);
                     }
                     else {
+                        this.resetKnockback();
                         this.changeState(PlayerStates.KNOCKBACK);
                     }
                 }
                 break;
             }
+            // case CustomGameEvents.MELEE_KNOCKBACK: {
+            //     this.knockback = event.data.get("knockback");
+            //     // this.lastHit = event.data.get("node");
+            //     // console.log(this.knockback)
+            //     // console.log(this.lastHit)
+            //     this.changeState(PlayerStates.KNOCKBACK);
+            //     break;
+            // }
             default:
                 throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
@@ -180,6 +190,12 @@ export default class PlayerController extends StateMachineAI {
     public get hit(): boolean { return this._hit; }
     public set hit(flag: boolean) { this._hit = flag; }
 
+    public get knockback(): Vec2 { return this._knockback; }
+    public set knockback(knockback: Vec2) { this._knockback = knockback; }
+
+    public get lastHit(): number {return this._lastHit; }
+    public set lastHit(lastHit: number) { this._lastHit = lastHit; }
+
     public handlePlayerCollision(event): void{
         let cheatManager = CheatManager.getInstance();
         
@@ -198,4 +214,8 @@ export default class PlayerController extends StateMachineAI {
     protected handleIFrameTimerEnd = () => {
 		this._hit = false;
 	}
+
+    public resetKnockback(): void{
+        this.knockback = new Vec2(200, -200);
+    }
 }

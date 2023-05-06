@@ -21,6 +21,7 @@ export const CustomGameEvents = {
   SKILL_3_FIRED: "SKILL_3_FIRED",
   SKILL_4_FIRED: "SKILL_4_FIRED",
   UPDATE_HEALTH: "UPDATE_HEALTH",
+  MELEE_KNOCKBACK: "MELEE_KNOCKBACK",
   TOGGLE_SKILL_BOOK: "TOGGLE_SKILL_BOOK",
 
   /** Event emitted when level should start */

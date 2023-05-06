@@ -34,7 +34,7 @@ export default class Level6 extends Level {
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    public static readonly LEVEL_MUSIC_PATH = "assets/music/hw5_level_music.wav";
+    public static readonly LEVEL_MUSIC_PATH = "assets/music/level6_music.wav";
 
     protected platFormPositions: Array<Vec2>;
     protected talonDyingAudioKey: string;
@@ -94,21 +94,19 @@ export default class Level6 extends Level {
         let tilemap_json = this.load.getObject(Level6.ENEMY_POSITIONS_KEY);
         let enemies = tilemap_json.layers.find(layer => layer.name === "Enemy")
 
-        for (let i = 0; i < enemies.objects.length; i++) {
-            // Initialize Enemy
-            let enemy = this.factory.addAnimatedSprite(TalonActor, Level6.TALON_SPRITE_KEY, LevelLayers.PRIMARY) as TalonActor
-            enemy.scale.set(2, 2);
-            enemy.position.set(enemies.objects[i].x * this.tilemapScale.x, enemies.objects[i].y * this.tilemapScale.y);
-            
-            enemy.addPhysics(new AABB(enemy.position.clone(), enemy.boundary.getHalfSize().clone()));
-            enemy.setGroup(PhysicsGroups.NPC);
-            enemy.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENEMY_COLLISION, null);
-            enemy.navkey = "navmesh";
+        // Initialize Enemy
+        let enemy = this.factory.addAnimatedSprite(TalonActor, Level6.TALON_SPRITE_KEY, LevelLayers.PRIMARY) as TalonActor
+        enemy.scale.set(2, 2);
+        enemy.position.set(enemies.objects[0].x * this.tilemapScale.x, enemies.objects[0].y * this.tilemapScale.y);
+        
+        enemy.addPhysics(new AABB(enemy.position.clone(), enemy.boundary.getHalfSize().clone()));
+        enemy.setGroup(PhysicsGroups.NPC);
+        enemy.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENEMY_COLLISION, null);
+        enemy.navkey = "navmesh";
 
-            enemy.addAI(TalonController, { tilemap: this.tilemapKey });
-            enemy.animation.play("IDLE");
-            this.enemies.push(enemy);
-        }
+        enemy.addAI(TalonController, { tilemap: this.tilemapKey });
+        enemy.animation.play("IDLE");
+        this.enemies.push(enemy);
 
         // Initialize Viewport
         this.viewport.setBounds(0, 0, 8 * 6 * 30, 8 * 6 * 19);

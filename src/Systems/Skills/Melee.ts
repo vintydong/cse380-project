@@ -134,6 +134,7 @@ export class MeleeBehavior implements AI {
                 if(id === this.owner.id){
                     console.log("Hit an enemy with Melee", event.data);
                     this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: this.damage});
+                    // this.emitter.fireEvent(CustomGameEvents.MELEE_KNOCKBACK, {node: event.data.get('node'), knockback: new Vec2(200, 0)});
                     this.owner.position.copy(Vec2.ZERO);
                     this.owner._velocity.copy(Vec2.ZERO);
                     this.owner.visible = false;

@@ -131,7 +131,7 @@ export class Air extends PlayerState {
         // First onGround is inaccurate, we care about subsequent ones
         let animation = (options.fromGround) ? PlayerAnimations.JUMPING : PlayerAnimations.FALLING  
         this.owner.animation.playIfNotAlready(animation)
-        if (animation == PlayerAnimations.JUMPING) {
+        if (animation == PlayerAnimations.JUMPING && !this.owner.onGround) {
             let jumpAudio = (this.owner.getScene() as Level).getJumpAudioKey()
             this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: jumpAudio, loop: false, holdReference: false});
         }
@@ -227,32 +227,39 @@ export class Dead extends PlayerState {
 }
 
 export class Knockback extends PlayerState {
-    private direction: string;
-    private knocked: boolean;
+    private knockback: Vec2;
+    private direction: number;
 
     public onEnter(options: Record<string, any>): void {
-        this.direction = this.parent.facing
+        this.knockback = this.parent.knockback;
         this.parent.speed = this.parent.MAX_SPEED;
-        this.parent.velocity.y = 0;
-        this.knocked = false;
+
+        // Calculate knockback direction based on current user input / last facing direction
+        if(this.parent.moveDir.x) {
+            this.direction = -1 * this.parent.moveDir.x;
+        }
+        else {
+            this.direction = (this.parent.facing === "left")? 1 : -1
+        }
+
+        this.parent.velocity.x = this.direction * this.knockback.x;
+        this.parent.velocity.y += this.knockback.y;
         
-        this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
-        let hurtAudio = (this.owner.getScene() as Level).getHurtAudioKey();
-        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: hurtAudio, loop: false, holdReference: false});
+        // Play sound if hit
+        if (this.parent.hit){
+            this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
+            let hurtAudio = (this.owner.getScene() as Level).getHurtAudioKey();
+            this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: hurtAudio, loop: false, holdReference: false});
+        }
     }
 
     public handleInput(event: GameEvent): void { }
 
     public update(deltaT: number): void {
-        // super.update(deltaT);
-        if (!this.knocked) {
-            let dx = (this.direction == "left") ? 1 : -1
-    
-            this.parent.velocity.x = dx * 2000
-            this.parent.velocity.y = -750;
-            this.owner.move(this.parent.velocity.scale(deltaT));
-            this.knocked = true;
-        }
+        // Apply gravity after knockback
+        this.parent.velocity.y += this.gravity * deltaT;
+        this.owner.move(this.parent.velocity.scaled(deltaT));
+        
         if (!this.owner.animation.isPlaying(PlayerAnimations.TAKING_DAMAGE)) {
             this.finished(PlayerStates.AIR);
         }
@@ -260,6 +267,8 @@ export class Knockback extends PlayerState {
 
     public onExit(): Record<string, any> { 
         this.owner.animation.stop();
+        this.parent.resetKnockback();
+        this.parent.lastHit = null;
         return {}; 
     }
 }

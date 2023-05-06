@@ -124,8 +124,8 @@ class TalonDead extends EnemyState {
         // Non collidable dead body
         this.owner.disablePhysics();
         this.owner.animation.play(TalonAnimations.DEAD);
-        let dashAudio = (this.owner.getScene() as Level5).getTalonDyingAudioKey()
-        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: dashAudio, loop: false, holdReference: false});
+        let dyingAudio = (this.owner.getScene() as Level5).getTalonDyingAudioKey()
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: dyingAudio, loop: false, holdReference: false});
     }
 
     public update(deltaT: number): void { 
