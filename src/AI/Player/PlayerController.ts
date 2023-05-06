@@ -35,8 +35,8 @@ export enum PlayerStates {
     GROUND = "GROUND",
     AIR = "AIR",
     DASH = "DASH",
+    KNOCKBACK = "KNOCKBACK",
     DEAD = "DEAD",
-    KNOCKBACK = "KNOCKBACK"
 }
 
 export enum PlayerAnimations {
@@ -94,12 +94,12 @@ export default class PlayerController extends StateMachineAI {
         this.addState(PlayerStates.GROUND, new Ground(this, this.owner));
         this.addState(PlayerStates.AIR, new Air(this, this.owner));
         this.addState(PlayerStates.DASH, new Dash(this, this.owner));
-        this.addState(PlayerStates.DEAD, new Dead(this, this.owner));
         this.addState(PlayerStates.KNOCKBACK, new Knockback(this, this.owner));
+        this.addState(PlayerStates.DEAD, new Dead(this, this.owner));
 
         this.receiver.subscribe(CustomGameEvents.PLAYER_ENEMY_COLLISION);
         this.receiver.subscribe(CustomGameEvents.PLAYER_ENEMY_PROJECTILE_COLLISION);
-        this.receiver.subscribe(CustomGameEvents.MELEE_KNOCKBACK);
+        this.receiver.subscribe(CustomGameEvents.SKILL_KNOCKBACK);
 
         this.initialize(PlayerStates.GROUND);
     }
@@ -114,20 +114,11 @@ export default class PlayerController extends StateMachineAI {
                         this.changeState(PlayerStates.DEAD);
                     }
                     else {
-                        this.resetKnockback();
                         this.changeState(PlayerStates.KNOCKBACK);
                     }
                 }
                 break;
             }
-            // case CustomGameEvents.MELEE_KNOCKBACK: {
-            //     this.knockback = event.data.get("knockback");
-            //     // this.lastHit = event.data.get("node");
-            //     // console.log(this.knockback)
-            //     // console.log(this.lastHit)
-            //     this.changeState(PlayerStates.KNOCKBACK);
-            //     break;
-            // }
             default:
                 throw new Error(`Event handler not implemented for event type ${event.type}`)
         }
@@ -215,7 +206,7 @@ export default class PlayerController extends StateMachineAI {
 		this._hit = false;
 	}
 
-    public resetKnockback(): void{
-        this.knockback = new Vec2(200, -200);
-    }
+    // public resetKnockback(): void{
+    //     this.knockback = new Vec2(200, -200);
+    // }
 }

@@ -44,13 +44,20 @@ export abstract class PlayerState extends State {
     }
 
     public update(deltaT: number): void {
-        // Update dash timer
-        // this.parent.dashTimer.update(deltaT);
 
         // Do not update the direction the sprite is facing if DASHING
         if (this instanceof Dash) { return; }
 
-        // This updates player facing
+        // This updates player movement
+        this.updateMovement(deltaT);
+
+        // Handle attacks
+        this.handleAttacks();
+    }
+
+    public abstract onExit(): Record<string, any>;
+
+    public updateMovement(deltaT: number): void {
         let dir = this.parent.moveDir;
         if (dir.x !== 0) {
             this.owner.invertX = MathUtils.sign(dir.x) < 0;
@@ -61,7 +68,9 @@ export abstract class PlayerState extends State {
         this.parent.velocity.x = dir.x * this.parent.speed
         this.parent.velocity.y += this.gravity * deltaT;
         this.owner.move(this.parent.velocity.scaled(deltaT));
+    }
 
+    public handleAttacks(): void {
         let scene = this.owner.getScene() as Level;
         let skill_manager = scene.getSkillManager();
 
@@ -83,8 +92,6 @@ export abstract class PlayerState extends State {
         }
         this.skillFired = null
     }
-
-    public abstract onExit(): Record<string, any>;
 }
 
 export class Ground extends PlayerState {
@@ -231,6 +238,7 @@ export class Knockback extends PlayerState {
     private direction: number;
 
     public onEnter(options: Record<string, any>): void {
+        this.parent.velocity.y = 0;
         this.knockback = this.parent.knockback;
         this.parent.speed = this.parent.MAX_SPEED;
 
@@ -241,16 +249,12 @@ export class Knockback extends PlayerState {
         else {
             this.direction = (this.parent.facing === "left")? 1 : -1
         }
-
         this.parent.velocity.x = this.direction * this.knockback.x;
         this.parent.velocity.y += this.knockback.y;
-        
-        // Play sound if hit
-        if (this.parent.hit){
-            this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
-            let hurtAudio = (this.owner.getScene() as Level).getHurtAudioKey();
-            this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: hurtAudio, loop: false, holdReference: false});
-        }
+
+        this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
+        let hurtAudio = (this.owner.getScene() as Level).getHurtAudioKey();
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: hurtAudio, loop: false, holdReference: false});
     }
 
     public handleInput(event: GameEvent): void { }
@@ -267,8 +271,6 @@ export class Knockback extends PlayerState {
 
     public onExit(): Record<string, any> { 
         this.owner.animation.stop();
-        this.parent.resetKnockback();
-        this.parent.lastHit = null;
         return {}; 
     }
 }
