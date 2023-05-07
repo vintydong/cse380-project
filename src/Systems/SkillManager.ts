@@ -85,6 +85,10 @@ export class SkillManager {
         return this.instance;
     }
 
+    public static resetSkills(): void {
+        this.instance = null;
+    }
+
     private constructor(scene: Level, player?: AnimatedSprite) {
         this.scene = scene;
         this.player = player;
