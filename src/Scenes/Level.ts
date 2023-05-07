@@ -492,6 +492,7 @@ export default abstract class Level extends Scene {
     public getSkillManager() {
         return this.skill_manager;
     }
+    
     public getJumpAudioKey(): string {
         return this.jumpAudioKey
     }

@@ -75,9 +75,9 @@ export abstract class PlayerState extends State {
         let skill_manager = scene.getSkillManager();
 
         // Attacking animations
-        if (Input.isJustPressed(PlayerControls.SKILL_ONE))
+        if (Input.isJustPressed(PlayerControls.SKILL_ONE) || Input.isMouseJustPressed(0) )
             this.skillFired = CustomGameEvents.SKILL_1_FIRED
-        else if (Input.isJustPressed(PlayerControls.SKILL_TWO))
+        else if (Input.isJustPressed(PlayerControls.SKILL_TWO) || Input.isMouseJustPressed(2))
             this.skillFired = CustomGameEvents.SKILL_2_FIRED
         else if (Input.isJustPressed(PlayerControls.SKILL_THREE))
             this.skillFired = CustomGameEvents.SKILL_3_FIRED
@@ -138,7 +138,7 @@ export class Air extends PlayerState {
         // First onGround is inaccurate, we care about subsequent ones
         let animation = (options.fromGround) ? PlayerAnimations.JUMPING : PlayerAnimations.FALLING  
         this.owner.animation.playIfNotAlready(animation)
-        if (animation == PlayerAnimations.JUMPING && !this.owner.onGround) {
+        if (animation == PlayerAnimations.JUMPING) {
             let jumpAudio = (this.owner.getScene() as Level).getJumpAudioKey()
             this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: jumpAudio, loop: false, holdReference: false});
         }

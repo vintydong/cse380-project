@@ -1,17 +1,12 @@
-import { TalonActor, TalonController, TalonProjectile, TalonProjectileAI } from "../AI/Enemies/Talon";
-import { CustomGameEvents, MenuEvents } from "../CustomGameEvents";
+import { TalonActor, TalonController } from "../AI/Enemies/Talon";
+import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
-import { LayerManager } from "../Systems/LayerManager";
-import { SkillManager } from "../Systems/SkillManager";
-import Melee from "../Systems/Skills/Melee";
 import Repel from "../Systems/Skills/Repel";
-import Slash from "../Systems/Skills/Slash";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import { GameEventType } from "../Wolfie2D/Events/GameEventType";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
-import OrthogonalTilemap from "../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
@@ -35,7 +30,7 @@ export default class Level5 extends Level {
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    public static readonly LEVEL_MUSIC_PATH = "assets/music/level5_music.wav";
+    public static readonly LEVEL_MUSIC_PATH = "assets/music/level5_music.mp3"; // Royalty free music from https://www.chosic.com/free-music/dark/
 
     protected talonDyingAudioKey: string;
 
@@ -66,7 +61,7 @@ export default class Level5 extends Level {
                 
         /* Audio and Sounds */
         this.load.audio(Level5.TALON_DYING_AUDIO_KEY, Level5.TALON_DYING_AUDIO_PATH);
-        // this.load.audio(this.levelMusicKey, Level5.LEVEL_MUSIC_PATH)
+        this.load.audio(this.levelMusicKey, Level5.LEVEL_MUSIC_PATH);
 
         /* AI */
         this.load.spritesheet(Level5.TALON_SPRITE_KEY, Level5.TALON_SPRITE_PATH);

@@ -1,11 +1,8 @@
-import { TalonActor, TalonController, TalonProjectile, TalonProjectileAI } from "../AI/Enemies/Talon";
-import { CustomGameEvents, MenuEvents } from "../CustomGameEvents";
+import { LichActor, LichController } from "../AI/Bosses/Lich";
+import { TalonActor, TalonController } from "../AI/Enemies/Talon";
+import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
-import { LayerManager } from "../Systems/LayerManager";
-import { SkillManager } from "../Systems/SkillManager";
-import Melee from "../Systems/Skills/Melee";
 import Repel from "../Systems/Skills/Repel";
-import Slash from "../Systems/Skills/Slash";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
@@ -18,10 +15,29 @@ import Color from "../Wolfie2D/Utils/Color";
 import Level, { LevelLayers } from "./Level";
 import MainMenu from "./MenuScenes/MainMenu";
 
-export default class Level6 extends Level {    
-    public static readonly TALON_SPRITE_KEY = "LEVEL6_ENEMY_KEY";
+export default class Level6 extends Level {   
+    // Level Keys
+    public static readonly TILEMAP_KEY = "Level6";
+    public static readonly TILEMAP_PATH = "assets/tilemaps/Level6_tilemap.json";
+    public static readonly TILEMAP_SCALE = new Vec2(6, 6);
+
+    public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
+    public static readonly LEVEL_MUSIC_PATH = "assets/music/level6_music.mp3";  // Royalty free music from https://www.chosic.com/free-music/dark/
+
+    // Lich Keys 
+    public static readonly LICH_SPRITE_KEY = "LICH_SPRITE_KEY";
+    public static readonly LICH_SPRITE_PATH = "assets/spritesheets/Bosses/Lich/Lich.json";
+    public static readonly LICH_POSITION_KEY = "LICH_POSITION_KEY";
+
+    public static readonly LICH_PROJECTILE_KEY = "LICH_PROJECTILE_KEY"  // Replace
+    public static readonly LICH_PROJECTILE_PATH = "assets/spritesheets/Bosses/Lich/Lich_Projectile.json";   // Replace
+
+    public static readonly LICH_DYING_AUDIO_KEY = "LICH_DYING_AUDIO_KEY";
+    public static readonly LICH_DYING_AUDIO_PATH = "assets/sounds/lich_dying.wav";  // Replace
+
+    // Talon Keys
+    public static readonly TALON_SPRITE_KEY = "TALON_SPRITE_KEY";
     public static readonly TALON_SPRITE_PATH = "assets/spritesheets/Enemies/Talon/Talon.json";
-    public static readonly ENEMY_POSITIONS_KEY = "LEVEL6_ENEMY_POSITIONS";
 
     public static readonly TALON_PROJECTILE_KEY = "TALON_PROJECTILE_KEY"
     public static readonly TALON_PROJECTILE_PATH = "assets/spritesheets/Enemies/Talon/Talon_Projectile.json";
@@ -29,14 +45,8 @@ export default class Level6 extends Level {
     public static readonly TALON_DYING_AUDIO_KEY = "TALON_DYING_AUDIO_KEY";
     public static readonly TALON_DYING_AUDIO_PATH = "assets/sounds/talon_dying.wav";
 
-    public static readonly TILEMAP_KEY = "Level6";
-    public static readonly TILEMAP_PATH = "assets/tilemaps/Level6_tilemap.json";
-    public static readonly TILEMAP_SCALE = new Vec2(6, 6);
-
-    public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    public static readonly LEVEL_MUSIC_PATH = "assets/music/level6_music.wav";
-
     protected platFormPositions: Array<Vec2>;
+    protected lichDyingAudioKey: string;
     protected talonDyingAudioKey: string;
     
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
@@ -51,6 +61,7 @@ export default class Level6 extends Level {
         this.playerSpawn = new Vec2(8 * 6 * 7, 8 * 6 * 8);
 
         // Music and sound
+        this.lichDyingAudioKey = Level6.LICH_DYING_AUDIO_KEY;
         this.talonDyingAudioKey = Level6.TALON_DYING_AUDIO_KEY;
 
         //Extras
@@ -68,12 +79,14 @@ export default class Level6 extends Level {
         this.load.tilemap(this.tilemapKey, Level6.TILEMAP_PATH);
                 
         /* Audio and Sounds */
-        // this.load.audio(this.levelMusicKey, Level6.LEVEL_MUSIC_PATH)
+        this.load.audio(this.levelMusicKey, Level6.LEVEL_MUSIC_PATH)
 
         /* AI */
+        this.load.spritesheet(Level6.LICH_SPRITE_KEY, Level6.LICH_SPRITE_PATH);
+        this.load.spritesheet(Level6.LICH_PROJECTILE_KEY, Level6.LICH_PROJECTILE_PATH);
         this.load.spritesheet(Level6.TALON_SPRITE_KEY, Level6.TALON_SPRITE_PATH);
         this.load.spritesheet(Level6.TALON_PROJECTILE_KEY, Level6.TALON_PROJECTILE_PATH);
-        this.load.object(Level6.ENEMY_POSITIONS_KEY, Level6.TILEMAP_PATH);
+        this.load.object(Level6.LICH_POSITION_KEY, Level6.TILEMAP_PATH);
 
         /* Abilities */
         this.load.image(Repel.REPEL_SPRITE_KEY, Repel.REPEL_SPRITE_PATH);
@@ -84,38 +97,39 @@ export default class Level6 extends Level {
      */
     public unloadScene(): void {
         // Unload all resources
-        // this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: this.levelMusicKey});
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: this.levelMusicKey});
     }
 
     public startScene(): void {
         super.startScene();
 
         // Initialize enemies
-        let tilemap_json = this.load.getObject(Level6.ENEMY_POSITIONS_KEY);
+        let tilemap_json = this.load.getObject(Level6.LICH_POSITION_KEY);
         let enemies = tilemap_json.layers.find(layer => layer.name === "Enemy")
 
         // Initialize Enemy
-        let enemy = this.factory.addAnimatedSprite(TalonActor, Level6.TALON_SPRITE_KEY, LevelLayers.PRIMARY) as TalonActor
-        enemy.scale.set(2, 2);
-        enemy.position.set(enemies.objects[0].x * this.tilemapScale.x, enemies.objects[0].y * this.tilemapScale.y);
+        let lich = this.factory.addAnimatedSprite(LichActor, Level6.LICH_SPRITE_KEY, LevelLayers.PRIMARY) as LichActor
+        lich.scale.set(2, 2);
+        lich.position.set(enemies.objects[0].x * this.tilemapScale.x, enemies.objects[0].y * this.tilemapScale.y);
         
-        enemy.addPhysics(new AABB(enemy.position.clone(), enemy.boundary.getHalfSize().clone()));
-        enemy.setGroup(PhysicsGroups.NPC);
-        enemy.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENEMY_COLLISION, null);
-        enemy.navkey = "navmesh";
+        lich.addPhysics(new AABB(lich.position.clone(), lich.boundary.getHalfSize().clone()));
+        lich.setGroup(PhysicsGroups.NPC);
+        lich.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENEMY_COLLISION, null);
+        lich.navkey = "navmesh";
 
-        enemy.addAI(TalonController, { tilemap: this.tilemapKey });
-        enemy.animation.play("IDLE");
-        this.enemies.push(enemy);
+        lich.addAI(LichController, { tilemap: this.tilemapKey });
+        lich.animation.play("IDLE");
+        this.enemies.push(lich);
 
         // Initialize Viewport
-        this.viewport.setBounds(0, 0, 8 * 6 * 30, 8 * 6 * 19);
-        // Set Level End
-        this.initializeLevelEnd();
+        this.viewport.setBounds(0, 0, 8 * 6 * 30, 8 * 6 * 18);
+
+        // Play music
+        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
     }
 
     public updateScene(deltaT) {
-        console.log(this.player.position.x, this.player.position.y)
+        // console.log(this.player.position.x, this.player.position.y)
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
@@ -148,35 +162,29 @@ export default class Level6 extends Level {
         }
     }
 
-    private initializeLevelEnd(): void {
-        const levelEnd = new Vec2(23, 55.5).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
-        let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(2 * 8 * 6, 3 * 8 * 6));
-        rect.color = Color.TRANSPARENT;
-        rect.addPhysics();
-        rect.setGroup(PhysicsGroups.LEVEL_END);
-        rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
-
-        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, { key: this.levelMusicKey, loop: true, holdReference: true });
-    }
-
     /* Getters */
-    public getNewRandomPlatform(curPos: Vec2): Vec2 {
+    public getNewRandomPlatform(curPos: Vec2): Record<string, any> {
+        /* *
+         * Platform Positions 
+         * Top - (720, 256)
+         * Bottom - (720, 544)
+         * Left - (336, 400) 
+         * Right - (1104, 400) 
+         * */  
         var newIndex: number
         let prevIndex = this.platFormPositions.indexOf(curPos)
-        while (!newIndex || newIndex === prevIndex) { 
-            newIndex = Math.round(Math.random() * 3)
+        while (newIndex == null || newIndex === prevIndex) { 
+            newIndex = Math.floor(Math.random() * this.platFormPositions.length)
         }
-        return this.platFormPositions[newIndex]
+        return {index: newIndex, position: this.platFormPositions[newIndex]}
+    }
+
+    public getLichDyingAudioKey(): string {
+        return this.lichDyingAudioKey
     }
 
     public getTalonDyingAudioKey(): string {
         return this.talonDyingAudioKey
     }
 
-    /*  Platform Positions 
-        Top - (720, 256)
-        Bottom - (720, 544)
-        Left - (336, 400) 
-        Right - (1104, 400)
-    */
 }

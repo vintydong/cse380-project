@@ -69,7 +69,6 @@ export default class PlayerController extends StateMachineAI {
     protected _iFrameTimer: Timer;
     protected _hit: boolean;
     protected _knockback: Vec2;
-    protected _lastHit: number;
 
     protected tilemap: OrthogonalTilemap;
 
@@ -88,7 +87,6 @@ export default class PlayerController extends StateMachineAI {
 
         this._iFrameTimer = new Timer(1000, this.handleIFrameTimerEnd, false);
         this.knockback = new Vec2(200, -200);
-        this.lastHit = null;
 
         // Add the different states the player can be in to the PlayerController 
         this.addState(PlayerStates.GROUND, new Ground(this, this.owner));
@@ -183,9 +181,6 @@ export default class PlayerController extends StateMachineAI {
 
     public get knockback(): Vec2 { return this._knockback; }
     public set knockback(knockback: Vec2) { this._knockback = knockback; }
-
-    public get lastHit(): number {return this._lastHit; }
-    public set lastHit(lastHit: number) { this._lastHit = lastHit; }
 
     public handlePlayerCollision(event): void{
         let cheatManager = CheatManager.getInstance();

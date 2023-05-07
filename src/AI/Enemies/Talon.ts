@@ -152,18 +152,20 @@ export class TalonController extends BasicEnemyController {
     protected _cooldown: Timer;
 
     public initializeAI(owner: TalonActor, options: Record<string, any>): void {
+        // Initialize Talon
         super.initializeAI(owner, options);
-        this._projectile = new TalonProjectile(this, this.owner);
-        this._target = this.owner.getScene().getPlayer();
-        this._cooldown = new Timer(2000);
+        this.projectile = new TalonProjectile(this, this.owner);
+        this.target = this.owner.getScene().getPlayer();
+        this.cooldown = new Timer(2000);
         
+        //Initialize Stats
         this.health = 50;
         this.MIN_SPEED = 50;
         this.MAX_SPEED = 50;
         this.velocity = Vec2.ZERO;
         this.speed = this.MIN_SPEED;
 
-
+        //Initialize States
         this.addState(TalonStates.AIR, new TalonAir(this, this.owner));
         this.addState(TalonStates.ATTACKING, new TalonAttacking(this, this.owner));
         this.addState(TalonStates.TAKING_DAMAGE, new TalonTakingDamage(this, this.owner));
