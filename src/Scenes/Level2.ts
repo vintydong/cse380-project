@@ -1,3 +1,4 @@
+import { BasicEnemyController } from "../AI/BasicEnemyController";
 import { SlimeBossActor, SlimeBossController } from "../AI/Bosses/SlimeBoss";
 import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
 import { CustomGameEvents } from "../CustomGameEvents";
@@ -32,6 +33,7 @@ export default class Level2 extends Level {
 	private worldPadding: Vec2;
 
     private spawnedSlimes: boolean = false;
+    private bossHP: BossHUD;
 
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);
@@ -86,9 +88,10 @@ export default class Level2 extends Level {
         enemy.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENEMY_COLLISION, null);
         enemy.navkey = "navmesh";
 
-        let bossHP = new BossHUD(this, enemy, LevelLayers.UI);
-
         enemy.addAI(SlimeBossController, { tilemap: this.tilemapKey });
+
+        this.bossHP = new BossHUD(this, enemy._ai as BasicEnemyController, LevelLayers.UI);
+
         enemy.animation.play("IDLE");
         this.enemies.push(enemy);
 
@@ -119,6 +122,8 @@ export default class Level2 extends Level {
             this.handleEvent(this.receiver.getNextEvent());
         }
 
+        // if(this.enemies[0].visible)
+            this.bossHP.update(deltaT);
         super.updateScene(deltaT);
     }
 
