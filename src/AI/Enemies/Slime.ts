@@ -84,6 +84,7 @@ class SlimeDead extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         this.owner.animation.playIfNotAlready(SlimeAnimations.DEAD, false);
         this.owner.tweens.play('DEAD');
+        this.owner.disablePhysics();
     }
 
     public update(deltaT: number): void {
