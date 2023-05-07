@@ -2,6 +2,7 @@ import { CustomGameEvents } from "../../CustomGameEvents";
 import { PhysicsGroups } from "../../Physics";
 import Level, { LevelLayers } from "../../Scenes/Level";
 import Level5 from "../../Scenes/Level5";
+import Level6 from "../../Scenes/Level6";
 import AI from "../../Wolfie2D/DataTypes/Interfaces/AI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Emitter from "../../Wolfie2D/Events/Emitter";
@@ -131,12 +132,15 @@ class TalonDead extends EnemyState {
     public update(deltaT: number): void { 
         if (!this.owner.animation.isPlaying(TalonAnimations.DEAD)){
             this.deathCleanup()
+            this.finished(TalonStates.AIR)
         }
     }
     
     public deathCleanup(): void {
         this.owner.position = new Vec2(3000, 3000);
         this.owner.visible = false;
+        (this.parent as TalonController).resetStats();
+        this.owner.enablePhysics();
     }
 
     public onExit(): Record<string, any> {
@@ -159,7 +163,7 @@ export class TalonController extends BasicEnemyController {
         this.cooldown = new Timer(2000);
         
         //Initialize Stats
-        this.health = 50;
+        this.health = 40;
         this.MIN_SPEED = 50;
         this.MAX_SPEED = 50;
         this.velocity = Vec2.ZERO;
@@ -221,6 +225,14 @@ export class TalonController extends BasicEnemyController {
         else {
             this.changeState(TalonStates.TAKING_DAMAGE)
         }
+    }
+
+    public resetStats(): void {
+        this.health = 40;
+        this.MIN_SPEED = 50;
+        this.MAX_SPEED = 50;
+        this.velocity = Vec2.ZERO;
+        this.speed = this.MIN_SPEED;
     }
 
     /** Getters and Setters to enable access in PlayerStates */

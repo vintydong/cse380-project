@@ -60,8 +60,8 @@ export default class Level5 extends Level {
         this.load.tilemap(this.tilemapKey, Level5.TILEMAP_PATH);
                 
         /* Audio and Sounds */
-        this.load.audio(Level5.TALON_DYING_AUDIO_KEY, Level5.TALON_DYING_AUDIO_PATH);
         this.load.audio(this.levelMusicKey, Level5.LEVEL_MUSIC_PATH);
+        this.load.audio(Level5.TALON_DYING_AUDIO_KEY, Level5.TALON_DYING_AUDIO_PATH);
 
         /* AI */
         this.load.spritesheet(Level5.TALON_SPRITE_KEY, Level5.TALON_SPRITE_PATH);

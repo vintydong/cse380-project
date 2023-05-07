@@ -80,6 +80,7 @@ export default class Level6 extends Level {
                 
         /* Audio and Sounds */
         this.load.audio(this.levelMusicKey, Level6.LEVEL_MUSIC_PATH)
+        this.load.audio(Level6.TALON_DYING_AUDIO_KEY, Level6.TALON_DYING_AUDIO_PATH);
 
         /* AI */
         this.load.spritesheet(Level6.LICH_SPRITE_KEY, Level6.LICH_SPRITE_PATH);

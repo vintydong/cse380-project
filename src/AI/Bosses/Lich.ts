@@ -3,6 +3,7 @@ import { PhysicsGroups } from "../../Physics";
 import Level, { LevelLayers } from "../../Scenes/Level";
 import Level6 from "../../Scenes/Level6";
 import AI from "../../Wolfie2D/DataTypes/Interfaces/AI";
+import AABB from "../../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Emitter from "../../Wolfie2D/Events/Emitter";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
@@ -12,6 +13,7 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 import { BasicEnemyController } from "../BasicEnemyController";
+import { TalonActor, TalonController } from "../Enemies/Talon";
 import { EnemyState } from "../demo_enemy/EnemyStates";
 
 /**
@@ -111,40 +113,48 @@ class LichIdle extends EnemyState {
 
 class LichAttacking extends EnemyState {
     protected override parent: LichController
+    private player: Vec2
+    private curPos: Vec2
 
     public onEnter(options: Record<string, any>): void {
         this.owner.animation.playIfNotAlready(LichAnimations.IDLE); // Replace this
+        this.player = this.parent.target.position
+        this.curPos = this.owner.position.clone()
     }
 
     public update(deltaT: number): void {
         super.update(deltaT);
 
-        let player = this.parent.target.position
-        let curPos = this.owner.position.clone()
+        this.parent.currentAttack = LichAttacks.PENTACLES;
         switch(this.parent.currentAttack){
             case LichAttacks.WANDS:
                 console.log("lich firing WANDS")
                 for (let i = 0; i < this.parent.wandProjectiles.length; i++) {
-                    this.parent.wandProjectiles[i].activate({spawn: curPos, direction: curPos.dirTo(player)})
+                    this.parent.wandProjectiles[i].activate({spawn: this.curPos, direction: this.curPos.dirTo(this.player)})
                 }
                 break;
 
-            case LichAttacks.PENTACLES:
+            case LichAttacks.PENTACLES: // Bug where hitboxes leave enemy. USE POSITION.SET
                 console.log("lich firing PENTACLES")
-                for (let i = 0; i < this.parent.wandProjectiles.length; i++) {
-                    this.parent.wandProjectiles[i].activate({spawn: curPos, direction: curPos.dirTo(player)})
+                for (let i = 0; i < this.parent.pentacleProjectiles.length; i++) {
+                    console.log(this.parent.pentacleProjectiles[i]);
+                    if (!this.parent.pentacleProjectiles[i].visible){
+                        let offset = (8 * 6) * (Math.random() * 6 - 3)
+                        this.parent.pentacleProjectiles[i].position.set(this.curPos.x + offset, this.curPos.y)
+                        this.parent.pentacleProjectiles[i].visible = true;
+                    }
                 }
                 break;
             case LichAttacks.CUPS:
                 console.log("lich firing CUPS")
-                for (let i = 0; i < this.parent.wandProjectiles.length; i++) {
-                    this.parent.wandProjectiles[i].activate({spawn: curPos, direction: curPos.dirTo(player)})
+                for (let i = 0; i < this.parent.cupProjectiles.length; i++) {
+                    this.parent.cupProjectiles[i].activate({spawn: this.curPos, direction: this.curPos.dirTo(this.player)})
                 }
                 break;
             case LichAttacks.SWORDS:
                 console.log("lich firing SWORDS")
-                for (let i = 0; i < this.parent.wandProjectiles.length; i++) {
-                    this.parent.wandProjectiles[i].activate({spawn: curPos, direction: curPos.dirTo(player)})
+                for (let i = 0; i < this.parent.swordProjectiles.length; i++) {
+                    this.parent.swordProjectiles[i].activate({spawn: this.curPos, direction: this.curPos.dirTo(this.player)})
                 }
                 break;
             default:
@@ -212,6 +222,9 @@ export class LichController extends BasicEnemyController {
     protected _cooldown: Timer;
     protected _maxProjectiles: number;
     protected _wandProjectiles : Array<WandProjectile>
+    protected _pentacleProjectiles : Array<AnimatedSprite>
+    protected _cupProjectiles : Array<CupProjectile>
+    protected _swordProjectiles : Array<SwordProjectile>
 
     public initializeAI(owner: LichActor, options: Record<string, any>): void {
         // Initialize Lich
@@ -228,9 +241,39 @@ export class LichController extends BasicEnemyController {
         
         // Initialize Projectiles
         this.maxProjectiles = 8;
+        // Wands
         this.wandProjectiles = new Array(this.maxProjectiles);
         for (let i = 0; i < this.wandProjectiles.length; i++){
             this._wandProjectiles[i] = new WandProjectile(this, this.owner);
+        }
+        // Pentacles (Talons)
+        this.pentacleProjectiles = new Array(3);
+        let factory = (this.owner.getScene().factory);
+        for (let i = 0; i < 3; i++) {
+            let enemy = factory.addAnimatedSprite(TalonActor, Level6.TALON_SPRITE_KEY, LevelLayers.PRIMARY) as TalonActor
+            enemy.scale.set(2, 2);
+            enemy.position.set(3000,3000);
+            enemy.visible = false;
+            
+            enemy.addPhysics(new AABB(enemy.position.clone(), enemy.boundary.getHalfSize().clone()));
+            enemy.setGroup(PhysicsGroups.NPC);
+            enemy.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENEMY_COLLISION, null);
+            enemy.navkey = "navmesh";
+
+            enemy.addAI(TalonController, { tilemap: Level6.TILEMAP_KEY });
+            enemy.animation.play("IDLE");
+            this._pentacleProjectiles[i] = enemy;
+        }
+        // Cups
+        this.cupProjectiles = new Array(this.maxProjectiles);
+        for (let i = 0; i < this.cupProjectiles.length; i++){
+            this._cupProjectiles[i] = new CupProjectile(this, this.owner);
+        }
+
+        // Swords
+        this.swordProjectiles = new Array(this.maxProjectiles);
+        for (let i = 0; i < this.swordProjectiles.length; i++){
+            this.swordProjectiles[i] = new SwordProjectile(this, this.owner);
         }
 
         // Add States
@@ -307,12 +350,22 @@ export class LichController extends BasicEnemyController {
     
     public get cooldown(): Timer { return this._cooldown; }
     public set cooldown(cooldown: Timer) { this._cooldown = cooldown; }
+    
+    public get maxProjectiles(): number { return this._maxProjectiles; }
+    public set maxProjectiles(maxProjetiles: number) { this._maxProjectiles = maxProjetiles; }
 
     public get wandProjectiles(): Array<LichProjectile> { return this._wandProjectiles; }
     public set wandProjectiles(wandProjectiles: Array<LichProjectile>) { this._wandProjectiles = wandProjectiles; }
 
-    public get maxProjectiles(): number { return this._maxProjectiles; }
-    public set maxProjectiles(maxProjetiles: number) { this._maxProjectiles = maxProjetiles; }
+    public get pentacleProjectiles(): Array<AnimatedSprite> { return this._pentacleProjectiles; }
+    public set pentacleProjectiles(pentacleProjectiles: Array<AnimatedSprite>) { this._pentacleProjectiles = pentacleProjectiles; }
+
+    public get cupProjectiles(): Array<LichProjectile> { return this._cupProjectiles; }
+    public set cupProjectiles(cupProjectiles: Array<LichProjectile>) { this._cupProjectiles = cupProjectiles; }
+
+    public get swordProjectiles(): Array<LichProjectile> { return this._swordProjectiles; }
+    public set swordProjectiles(swordProjectiles: Array<LichProjectile>) { this._swordProjectiles = swordProjectiles; }
+
 
 }
 
@@ -346,6 +399,8 @@ export abstract class LichProjectile {
 
     public activate(options?: Record<string, any>) {
         const { spawn, direction } = options;
+        this.hitbox.invertX = (direction.x < 0) ? true : false;
+        this.hitbox.invertY = (direction.y < 0) ? true : false;
         
         // Bring this projectile to life
         if (!this.hitbox.visible){
@@ -452,7 +507,7 @@ export class WandProjectile extends LichProjectile {
         let scene = this.actor.getScene();
         
         // Add projectile to scene
-        this.hitbox = scene.add.animatedSprite("TALON_PROJECTILE_KEY", LevelLayers.PRIMARY)
+        this.hitbox = scene.add.animatedSprite("TALON_PROJECTILE_KEY", LevelLayers.PRIMARY) // Replace this
         this.hitbox.scale = new Vec2(1, 1);
         this.hitbox.visible = false;
 
@@ -510,6 +565,158 @@ export class WandProjectileAI extends LichProjectileAI {
             default: {
                 super.handleEvent(event)
                 throw new Error("Unhandled event caught in WandsAI! Event type: " + event.type);
+            }
+        }
+    }
+
+    public update(deltaT: number): void {
+        super.update(deltaT);
+    }
+}
+
+export class CupProjectile extends LichProjectile {
+    public constructor(controller: LichController, actor: LichActor) {
+        super(controller, actor);
+    }
+    
+    public initialize() {
+        let scene = this.actor.getScene();
+        
+        // Add projectile to scene
+        this.hitbox = scene.add.animatedSprite("TALON_PROJECTILE_KEY", LevelLayers.PRIMARY) // Replace this
+        this.hitbox.scale = new Vec2(1, 1);
+        this.hitbox.visible = false;
+
+        // Add physics
+        this.hitbox.addPhysics();
+        this.hitbox.setGroup(PhysicsGroups.NPC);
+
+        // Customize AI and Events
+        this.getHitbox().addAI(CupProjectileAI)
+        this.hitbox.setTrigger(PhysicsGroups.PLAYER, "CUP_HIT", null);
+    }
+
+    public activate(options?: Record<string, any>) {
+        super.activate(options);
+    }
+}
+
+export class CupProjectileAI extends LichProjectileAI {
+    public initializeAI(owner: AnimatedSprite, options: Record<string, any>): void {
+        super.initializeAI(owner, options);
+
+        this.receiver.subscribe("CUP_HIT");
+
+        // Modify values here
+        this.currentXSpeed = 50;
+        this.currentYSpeed = 50;
+        this.speedIncrement = 100;
+        this.minXSpeed = 100;
+        this.maxXSpeed = 300;
+        this.minYSpeed = 100;
+        this.maxYSpeed = 300;
+    }
+
+    public activate(options: Record<string, any>): void {
+        super.activate(options);
+
+        // Reset speed
+        this.currentXSpeed = 50;
+        this.currentYSpeed = 50;
+    }
+
+    public handleEvent(event: GameEvent): void {
+        switch(event.type) {
+            case "CUP_HIT":
+                // console.log(event.data);
+                let id = event.data.get('other');
+                if(id === this.owner.id){
+                    console.log("Player hit with CUP", event.data);
+                    this.emitter.fireEvent(CustomGameEvents.PLAYER_ENEMY_PROJECTILE_COLLISION, {node: event.data.get('node'), damage: this.damage});
+                    this.owner.position.copy(new Vec2(600, 0));
+                    this.owner._velocity.copy(Vec2.ZERO);
+                    this.owner.visible = false;
+                }
+                break;
+            default: {
+                super.handleEvent(event)
+                throw new Error("Unhandled event caught in CupsAI! Event type: " + event.type);
+            }
+        }
+    }
+
+    public update(deltaT: number): void {
+        super.update(deltaT);
+    }
+}
+
+export class SwordProjectile extends LichProjectile {
+    public constructor(controller: LichController, actor: LichActor) {
+        super(controller, actor);
+    }
+    
+    public initialize() {
+        let scene = this.actor.getScene();
+        
+        // Add projectile to scene
+        this.hitbox = scene.add.animatedSprite("TALON_PROJECTILE_KEY", LevelLayers.PRIMARY) // Replace this
+        this.hitbox.scale = new Vec2(1, 1);
+        this.hitbox.visible = false;
+
+        // Add physics
+        this.hitbox.addPhysics();
+        this.hitbox.setGroup(PhysicsGroups.NPC);
+
+        // Customize AI and Events
+        this.getHitbox().addAI(SwordProjectileAI)
+        this.hitbox.setTrigger(PhysicsGroups.PLAYER, "SWORD_HIT", null);
+    }
+
+    public activate(options?: Record<string, any>) {
+        super.activate(options);
+    }
+}
+
+export class SwordProjectileAI extends LichProjectileAI {
+    public initializeAI(owner: AnimatedSprite, options: Record<string, any>): void {
+        super.initializeAI(owner, options);
+
+        this.receiver.subscribe("SWORD_HIT");
+
+        // Modify values here
+        this.currentXSpeed = 50;
+        this.currentYSpeed = 50;
+        this.speedIncrement = 100;
+        this.minXSpeed = 100;
+        this.maxXSpeed = 300;
+        this.minYSpeed = 100;
+        this.maxYSpeed = 300;
+    }
+
+    public activate(options: Record<string, any>): void {
+        super.activate(options);
+
+        // Reset speed
+        this.currentXSpeed = 50;
+        this.currentYSpeed = 50;
+    }
+
+    public handleEvent(event: GameEvent): void {
+        switch(event.type) {
+            case "SWORD_HIT":
+                // console.log(event.data);
+                let id = event.data.get('other');
+                if(id === this.owner.id){
+                    console.log("Player hit with SWORD", event.data);
+                    this.emitter.fireEvent(CustomGameEvents.PLAYER_ENEMY_PROJECTILE_COLLISION, {node: event.data.get('node'), damage: this.damage});
+                    this.owner.position.copy(new Vec2(600, 0));
+                    this.owner._velocity.copy(Vec2.ZERO);
+                    this.owner.visible = false;
+                }
+                break;
+            default: {
+                super.handleEvent(event)
+                throw new Error("Unhandled event caught in SwordsAI! Event type: " + event.type);
             }
         }
     }
