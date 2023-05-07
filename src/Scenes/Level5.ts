@@ -103,7 +103,7 @@ export default class Level5 extends Level {
             // Initialize Enemy
             let enemy = this.factory.addAnimatedSprite(TalonActor, Level5.TALON_SPRITE_KEY, LevelLayers.PRIMARY) as TalonActor
             enemy.scale.set(2, 2);
-            enemy.position.set(enemies.objects[i].x * this.tilemapScale.x, enemies.objects[i].y * this.tilemapScale.y);
+            // enemy.position.set(enemies.objects[i].x * this.tilemapScale.x, enemies.objects[i].y * this.tilemapScale.y);
             
             enemy.addPhysics(new AABB(enemy.position.clone(), enemy.boundary.getHalfSize().clone()));
             enemy.setGroup(PhysicsGroups.NPC);
@@ -111,6 +111,7 @@ export default class Level5 extends Level {
             enemy.navkey = "navmesh";
 
             enemy.addAI(TalonController, { tilemap: this.tilemapKey });
+            enemy.ai.activate({spawn: new Vec2(enemies.objects[i].x * this.tilemapScale.x, enemies.objects[i].y * this.tilemapScale.y)})
             enemy.animation.play("IDLE");
             this.enemies.push(enemy);
         }

@@ -181,7 +181,15 @@ export class TalonController extends BasicEnemyController {
         console.log(this);
     }
 
-    public activate(options: Record<string, any>): void { }
+    public activate(options: Record<string, any>): void { 
+        if (options.delay) { 
+            let owner = this.owner
+            var spawnDelay = function() { owner.position.set(options.spawn.x, options.spawn.y); }
+            let timer = new Timer(options.delay, spawnDelay)
+            timer.start();
+        }
+        else this.owner.position.set(options.spawn.x, options.spawn.y)
+    }
 
     public update(deltaT: number): void {
         super.update(deltaT);

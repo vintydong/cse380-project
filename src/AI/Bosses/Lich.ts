@@ -125,23 +125,34 @@ class LichAttacking extends EnemyState {
     public update(deltaT: number): void {
         super.update(deltaT);
 
+        let delay = 0;
         this.parent.currentAttack = LichAttacks.PENTACLES;
         switch(this.parent.currentAttack){
             case LichAttacks.WANDS:
                 console.log("lich firing WANDS")
                 for (let i = 0; i < this.parent.wandProjectiles.length; i++) {
-                    this.parent.wandProjectiles[i].activate({spawn: this.curPos, direction: this.curPos.dirTo(this.player)})
+                    this.parent.wandProjectiles[i].activate({
+                        spawn: this.curPos, 
+                        delay: delay,
+                        direction: this.curPos.dirTo(this.player)
+                    })
+                    delay += 250;
                 }
                 break;
 
             case LichAttacks.PENTACLES: // Bug where hitboxes leave enemy. USE POSITION.SET
                 console.log("lich firing PENTACLES")
                 for (let i = 0; i < this.parent.pentacleProjectiles.length; i++) {
-                    console.log(this.parent.pentacleProjectiles[i]);
-                    if (!this.parent.pentacleProjectiles[i].visible){
-                        let offset = (8 * 6) * (Math.random() * 6 - 3)
-                        this.parent.pentacleProjectiles[i].position.set(this.curPos.x + offset, this.curPos.y)
-                        this.parent.pentacleProjectiles[i].visible = true;
+                    let talon = this.parent.pentacleProjectiles[i]
+                    if (!talon.visible)
+                    {
+                        (talon.ai as TalonController).activate({
+                            spawn: this.curPos, 
+                            delay: delay, 
+                            direction: this.curPos.dirTo(this.player)
+                        })
+                        talon.visible = true;
+                        delay += 1000;
                     }
                 }
                 break;
