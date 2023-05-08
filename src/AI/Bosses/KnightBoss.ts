@@ -1,16 +1,23 @@
 import { CustomGameEvents } from "../../CustomGameEvents";
+import { PhysicsGroups } from "../../Physics";
 import Level, { LevelLayers } from "../../Scenes/Level";
 import Level2 from "../../Scenes/Level2";
+import Melee, { MeleeBehavior } from "../../Systems/Skills/Melee";
 import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
+import AI from "../../Wolfie2D/DataTypes/Interfaces/AI";
 import Spritesheet from "../../Wolfie2D/DataTypes/Spritesheet";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
+import Emitter from "../../Wolfie2D/Events/Emitter";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
+import Receiver from "../../Wolfie2D/Events/Receiver";
 import Input from "../../Wolfie2D/Input/Input";
 import { TweenableProperties } from "../../Wolfie2D/Nodes/GameNode";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
+import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
+import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 import { BasicEnemyController } from "../BasicEnemyController";
 import { Air, Dead, EnemyState, Ground } from "../demo_enemy/EnemyStates";
 
@@ -27,6 +34,7 @@ enum KnightBossStates {
     DEAD = "DEAD",
     KNOCKBACK = "KNOCKBACK",
     DAMAGED = "DAMAGED",
+    ATTACKING = "ATTACKING"
 }
 
 class KnightGround extends EnemyState {
@@ -131,14 +139,40 @@ class KnightKnockback extends EnemyState {
     }
 }
 
+class KnightAttack extends EnemyState {
+    protected override parent: KnightBossController
+
+    public onEnter(options: Record<string, any>): void {
+        this.owner.animation.playIfNotAlready(KnightAnimations.RUNNING);
+    }
+
+    public update(deltaT: number): void {
+        super.update(deltaT);
+
+        if (this.owner.getScene().getViewport().includes(this.owner)) {
+            console.log("knight firing slash")
+            let player = this.parent.target.position
+            let curPos = this.owner.position.clone()
+            this.parent.slash.activate({spawn: curPos, direction: curPos.dirTo(player)})
+        }
+
+        this.finished(KnightBossStates.AIR)
+    }
+
+    public onExit(): Record<string, any> {
+        this.parent.cooldown.start();
+        this.owner.animation.stop();
+        return {};
+    }
+}
+
 export class KnightSlash{
     private actor: KnightBossActor
     private controller: KnightBossController
-    private hitbox: AnimatedSprite
+    private hitbox: Sprite
     private damage: number;
 
-    public static readonly KNIGHT_SLASH_KEY = "KNIGHT_SLASH_KEY"
-    public static readonly TALON_PROJECTILE_PATH = "assets/spritesheets/Enemies/Talon/Talon_Projectile.json"
+    // public static readonly KNIGHT_SLASH_KEY = "KNIGHT_SLASH_KEY"
 
     public constructor(controller: KnightBossController, actor: KnightBossActor) {
         this.actor = actor;
@@ -149,9 +183,28 @@ export class KnightSlash{
 
     private initialize(){
         let scene = this.actor.getScene();
-
-        
+        this.hitbox = scene.add.sprite(Melee.MELEE_SPRITE_KEY, LevelLayers.PRIMARY)
+        this.hitbox.addAI(KnightProjectileAI);
+        this.hitbox.addPhysics();
+        this.hitbox.setGroup(PhysicsGroups.NPC);
+        this.hitbox.setTrigger(PhysicsGroups.PLAYER, "KNIGHT_SLASH_HIT", null);
     }
+
+    public activate(options?: Record<string, any>) {
+        console.log("goes here");
+        const { spawn, direction } = options;
+        
+        // Bring this projectile to life
+        if (!this.hitbox.visible){
+            console.log("goes here again");
+            this.hitbox.visible = true;
+            this.hitbox.position = spawn;
+            this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
+        }
+    }
+
+    /** Getters and Setters */
+    public getHitbox(): Sprite { return this.hitbox; }
 }
 
 export class KnightProjectile{
@@ -195,9 +248,10 @@ export class KnightBossController extends BasicEnemyController {
         this.addState(KnightBossStates.DEAD, new KnightDead(this, this.owner));
         this.addState(KnightBossStates.KNOCKBACK, new KnightKnockback(this, this.owner));
         this.addState(KnightBossStates.DAMAGED, new KnightDamage(this, this.owner));
+        this.addState(KnightBossStates.ATTACKING, new KnightAttack(this, this.owner));
 
         this.receiver.subscribe(CustomGameEvents.ENEMY_DAMAGE);
-        this.initialize(KnightBossStates.AIR);
+        this.initialize(KnightBossStates.ATTACKING);
     }
 
     public activate(options: Record<string, any>): void { }
@@ -287,4 +341,108 @@ export class KnightBossActor extends AnimatedSprite {
 
     public get navkey(): string { return this._navkey; }
     public set navkey(navkey: string) { this._navkey = navkey; }
+}
+
+export class KnightProjectileAI implements AI {
+    // The GameNode that owns this behavior
+    private owner: AnimatedSprite;
+    private receiver: Receiver;
+    private emitter: Emitter;
+
+    // The direction to fire the projectile
+    private direction: Vec2;
+
+    // The current horizontal and vertical speed of the projectile
+    private currentXSpeed: number;
+    private currentYSpeed: number;
+
+    // How much to increase the speed of the projectile by each frame
+    private speedIncrement: number;
+
+    // Upper and lower bounds on the speeds of the projectile
+    private minXSpeed: number;
+    private maxXSpeed: number;
+    private minYSpeed: number;
+    private maxYSpeed: number;
+
+    private damage: number;
+
+    public initializeAI(owner: AnimatedSprite, options: Record<string, any>): void {
+        this.owner = owner;
+
+        this.emitter = new Emitter();
+        this.receiver = new Receiver();
+        this.receiver.subscribe("KNIGHT_PROJECTILE_HIT");
+
+        this.currentXSpeed = 50;
+        this.currentYSpeed = 50;
+        this.speedIncrement = 100;
+        this.minXSpeed = 100;
+        this.maxXSpeed = 300;
+        this.minYSpeed = 100;
+        this.maxYSpeed = 300;
+
+        this.activate(options);
+    }
+
+    public destroy(): void {
+        
+    }
+
+    public activate(options: Record<string, any>): void {
+        console.log(options);
+        if (options) {
+            this.damage = options.damage;
+            this.direction = options.direction;
+            this.currentXSpeed = 50;
+            this.currentYSpeed = 50;
+        }
+    }
+
+    public handleEvent(event: GameEvent): void {
+        switch(event.type) {
+            case "KNIGHT_PROJECTILE_HIT":
+                // console.log(event.data);
+                let id = event.data.get('other');
+                if(id === this.owner.id){
+                    console.log("Player hit with Knight projectile", event.data);
+                    this.emitter.fireEvent(CustomGameEvents.PLAYER_ENEMY_PROJECTILE_COLLISION, {node: event.data.get('node'), damage: this.damage});
+                    this.owner.position.copy(new Vec2(500, 0));
+                    this.owner._velocity.copy(Vec2.ZERO);
+                    this.owner.visible = false;
+                }
+                break;
+            default: {
+                throw new Error("Unhandled event caught in MeleeBehavior! Event type: " + event.type);
+            }
+        }
+    }
+
+    public update(deltaT: number): void {
+        while (this.receiver.hasNextEvent()) {
+            this.handleEvent(this.receiver.getNextEvent());
+        }
+
+        // Update projectile behavior if visible
+        if (this.owner.visible) {
+            // Despawn if collided with environment
+            if (this.owner.onWall || this.owner.onCeiling || this.owner.onGround) {
+                this.owner.position.copy(new Vec2(500, 0));
+                this.owner._velocity.copy(Vec2.ZERO);
+                this.owner.visible = false;
+            }
+
+            // Increment the speeds
+            this.currentXSpeed += this.speedIncrement * deltaT;
+            this.currentYSpeed += this.speedIncrement * deltaT;
+
+            // Clamp the speeds if need be
+            this.currentXSpeed = MathUtils.clamp(this.currentXSpeed, this.minXSpeed, this.maxXSpeed);
+            this.currentYSpeed = MathUtils.clamp(this.currentYSpeed, this.minYSpeed, this.maxYSpeed);
+
+            // Move projectile towards target
+            let value = new Vec2(this.currentXSpeed * 30, this.currentYSpeed * 30);
+            this.owner.move(value.scaled(deltaT));
+        }
+    }    
 }
