@@ -106,6 +106,8 @@ class LichIdle extends EnemyState {
             this.finished(LichStates.ATTACKING);
         }
 
+        this.owner.move(this.parent.velocity.scaled(deltaT));
+
     }
 
     public onExit(): Record<string, any> {
@@ -121,7 +123,7 @@ class LichAttacking extends EnemyState {
     private offSet: number;
 
     public onEnter(options: Record<string, any>): void {
-        this.owner.animation.playIfNotAlready(LichAnimations.IDLE); // Replace this
+        this.owner.animation.playIfNotAlready(LichAnimations.ATTACKING);
         this.player = this.parent.target.position
         this.curPos = this.owner.position.clone()
         this.offSet = (8 * 6 * 3);  // Tile pixels * scale * # tiles
@@ -184,11 +186,18 @@ class LichAttacking extends EnemyState {
                 var up = 0 + this.offSet;
                 var right = (8 * 6 * 30) -  this.offSet;
                 var down = (8 * 6 * 18) -  this.offSet;
-                let corners = [new Vec2(up, left), new Vec2(right, up), new Vec2(left, down), new Vec2(right, down)]
+                var xMid = (left + right) / 2;
+                var yMid = (up + down) / 2;
+                let perpendiculars = [
+                    // CORNERS
+                    new Vec2(up, left), new Vec2(right, up), new Vec2(left, down), new Vec2(right, down),
+                    // CROSS
+                    new Vec2(xMid,up), new Vec2(xMid, down), new Vec2(left, yMid), new Vec2(right, yMid)
+                ]
                 for (let i = 0; i < this.parent.maxProjectiles; i++) {
                     this.parent.swordProjectiles[i].activate({
-                        spawn: corners[i],
-                        direction: corners[i].dirTo(this.player)
+                        spawn: perpendiculars[i],
+                        direction: perpendiculars[i].dirTo(this.player)
                     });
                 }
                 break;

@@ -46,7 +46,7 @@ export abstract class PlayerState extends State {
     public update(deltaT: number): void {
 
         // Do not update the direction the sprite is facing if DASHING
-        if (this instanceof Dash) { return; }
+        if (this instanceof Dash || this.owner.frozen) { return; }
 
         // This updates player movement
         this.updateMovement(deltaT);

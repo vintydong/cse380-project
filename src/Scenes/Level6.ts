@@ -26,7 +26,7 @@ export default class Level6 extends Level {
 
     // Lich Keys 
     public static readonly LICH_SPRITE_KEY = "LICH_SPRITE_KEY";
-    public static readonly LICH_SPRITE_PATH = "assets/spritesheets/Bosses/Lich/Lich.json";
+    public static readonly LICH_SPRITE_PATH = "assets/spritesheets/Player/Shadow_Knight.json";  // Replace
     public static readonly LICH_POSITION_KEY = "LICH_POSITION_KEY";
 
     public static readonly LICH_WAND_KEY = "LICH_WAND_KEY"
@@ -133,6 +133,9 @@ export default class Level6 extends Level {
         // Initialize Viewport
         this.viewport.setBounds(0, 0, 8 * 6 * 30, 8 * 6 * 18);
 
+        // Set Level End
+        this.initializeLevelEnd();
+
         // Play music
         this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
     }
@@ -169,6 +172,18 @@ export default class Level6 extends Level {
                 super.handleEvent(event);
                 break;
         }
+    }
+
+    private initializeLevelEnd() {
+        const levelEnd = new Vec2(15, 4.5).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
+        let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(2 * 8 * 6, 3 * 8 * 6));
+        rect.color = Color.GRAY;
+        rect.addPhysics();
+        rect.setGroup(PhysicsGroups.LEVEL_END);
+        rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
+
+        this.nextLevel = Level6;
+        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, { key: this.levelMusicKey, loop: true, holdReference: true });
     }
 
     /* Getters */
