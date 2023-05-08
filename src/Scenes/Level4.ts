@@ -1,4 +1,4 @@
-import { SlimeBossActor, SlimeBossController } from "../AI/Bosses/SlimeBoss";
+import { KnightBossActor, KnightBossController } from "../AI/Bosses/KnightBoss";
 import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
 import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
@@ -10,6 +10,7 @@ import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Level, { LevelLayers } from "./Level";
+import Level5 from "./Level5";
 
 export default class Level4 extends Level {    
     public static readonly ENEMY_SPRITE_KEY = "LEVEL4_ENEMY_KEY";
@@ -56,13 +57,6 @@ export default class Level4 extends Level {
         this.load.audio(this.levelMusicKey, Level4.LEVEL_MUSIC_PATH)
     }
 
-    /**
-     * Unload resources for level 2
-     */
-    // public unloadScene(): void {
-    //     // TODO decide which resources to keep/cull 
-    // }
-
     public startScene(): void {
         super.startScene();
         // Initialize demo_level enemies
@@ -70,7 +64,7 @@ export default class Level4 extends Level {
         let enemies = tilemap_json.layers.find(layer => layer.name === "Enemy")
 
         // Level 2 is boss level -- only one enemy
-        let enemy = this.factory.addAnimatedSprite(SlimeBossActor, Level4.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as demoEnemyActor
+        let enemy = this.factory.addAnimatedSprite(KnightBossActor, Level4.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as KnightBossActor
         enemy.position.set(enemies.objects[0].x * this.tilemapScale.x, enemies.objects[0].y * this.tilemapScale.y);
         enemy.scale = new Vec2(2.5,2.5);
         enemy.addPhysics(new AABB(enemy.position, new Vec2(16 * 2.5, 16 * 2.5)));
@@ -81,7 +75,7 @@ export default class Level4 extends Level {
         // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
         // this.healthbars.set(npc.id, healthbar);
 
-        enemy.addAI(SlimeBossController, { tilemap: this.tilemapKey });
+        enemy.addAI(KnightBossController, { tilemap: this.tilemapKey });
         enemy.animation.play("IDLE");
         this.enemies.push(enemy);
 
@@ -95,6 +89,9 @@ export default class Level4 extends Level {
         // rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
         this.viewport.setBounds(8 * 6, 8 * 6, 8 * 6 * 36, 8 * 6 * 19);
+
+        this.nextLevel = Level5;
+
         this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
     }
 
