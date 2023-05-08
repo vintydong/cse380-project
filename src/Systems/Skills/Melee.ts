@@ -32,12 +32,12 @@ export default class Melee extends Skill {
         let description = ['Swings sword at enemy', 'Increase DMG and reduce CD', 'Greatly increase DMG'];
 
         super(skill_manager, damage, cooldown, cost, description, Melee.MELEE_ICON_KEY);
+        this.level = 0;
     }
 
     public initialize(){
         let scene = this.skill_manager.getScene();
 
-        this.level = 0;
         this.cooldown = [new Timer(800), new Timer(600), new Timer(400)];
         
         this.hitbox = scene.add.sprite(Melee.MELEE_SPRITE_KEY, LevelLayers.PRIMARY)

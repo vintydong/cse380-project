@@ -205,6 +205,7 @@ export default class AudioManager {
                     AudioManager.setVolume(channel, 0.2);
                 } else if(GameEventType.PLAY_SFX){
                     channel = AudioChannelType.SFX;
+                    AudioManager.setVolume(channel, 0.5);
                 } else if(event.data.has("channel")){
                     channel = event.data.get("channel");
                 }

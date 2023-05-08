@@ -32,6 +32,7 @@ export default class Repel extends Skill {
         let description = ['Repel nearby enemies', 'Increase DMG', 'Decrease CD'];
 
         super(skill_manager, damage, cooldown, cost, description, Repel.REPEL_ICON_KEY);
+        this.level = -1;
     }
 
     public initialize(){

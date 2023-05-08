@@ -7,6 +7,7 @@ import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import { GameEventType } from "../Wolfie2D/Events/GameEventType";
+import Input from "../Wolfie2D/Input/Input";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
@@ -172,6 +173,13 @@ export default class Level6 extends Level {
                 break;
             }
             case CustomGameEvents.LEVEL_END: {
+                // super.handleEvent(event);
+                Input.disableInput();
+                this.ui.disable();
+                this.layer_manager.endGame();
+                break;
+            }
+            case CustomGameEvents.LEVEL_NEXT: {
                 this.sceneManager.changeToScene(MainMenu);
                 break;
             }

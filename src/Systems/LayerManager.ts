@@ -323,6 +323,19 @@ export class LayerManager {
             ],
             reverseOnComplete: true,
         })
+        this.transitionLabel.tweens.add("fadeInFinal", {
+            startDelay: 0,
+            duration: 3000,
+            effects: [
+                {
+                    property: TweenableProperties.alpha,
+                    start: 0,
+                    end: 1,
+                    ease: EaseFunctionType.OUT_SINE
+                }
+            ],
+            reverseOnComplete: false,
+        })
         this.transitionLabel.visible = false;
 
         this.endLevelTimer = new Timer(3000, () => { this.transitionScreen.tweens.play("fadeIn"); })
@@ -340,6 +353,21 @@ export class LayerManager {
             this.transitionScreen.scale.y = 1;
             this.transitionLabel.visible = true;
             this.transitionLabel.tweens.play('slideIn')
+            this.endLevelTimer.start();
+        }
+    }
+
+    public endGame() {
+        if(!this.endLevelTimer.hasRun() && this.endLevelTimer.isStopped()){
+            this.transitionLabel.visible = true;
+            this.transitionLabel.size = this.scene.getViewport().getHalfSize().clone().scale(2);
+            this.transitionLabel.position = this.scene.getViewport().getCenter();
+            this.transitionLabel.backgroundColor = Color.TRANSPARENT;
+            this.transitionLabel.setVAlign(VAlign.CENTER);
+            this.transitionLabel.setHAlign(HAlign.CENTER);
+            this.transitionLabel.text = "Congratulations! You have defeated the Lich!"
+            this.transitionLabel.tweens.play('fadeInFinal')
+            
             this.endLevelTimer.start();
         }
     }

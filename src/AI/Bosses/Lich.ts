@@ -9,6 +9,7 @@ import Emitter from "../../Wolfie2D/Events/Emitter";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Receiver from "../../Wolfie2D/Events/Receiver";
+import Input from "../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
@@ -254,6 +255,7 @@ class LichDead extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         // Non collidable dead body
         this.owner.disablePhysics();
+        Input.disableInput();
         this.owner.animation.play(LichAnimations.DEAD);
         let deathAudio = (this.owner.getScene() as Level6).getLichDyingAudioKey();
         this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: deathAudio, loop: false, holdReference: false});

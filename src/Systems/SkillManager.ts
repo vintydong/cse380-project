@@ -153,6 +153,7 @@ export class SkillManager {
 
     /** Called when the skillbook and all of its skills need to be drawn for the first time */
     private drawSkillBook(){
+        this.skillBookItems = []
         let center = this.scene.getViewport().getCenter();
         let dy = -400;
         let dx = -325;

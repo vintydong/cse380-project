@@ -22,6 +22,7 @@ export default class Level1 extends Level {
     public static readonly TILEMAP_PATH = "assets/tilemaps/level1_tilemap.json";
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
+    //https://ansimuz.itch.io/adventure-music-collection-pack-1
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
     public static readonly LEVEL_MUSIC_PATH = "assets/music/exploration.mp3";
 
