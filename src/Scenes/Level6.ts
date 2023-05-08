@@ -115,6 +115,7 @@ export default class Level6 extends Level {
      */
     public unloadScene(): void {
         // Unload all resources
+        super.unloadScene();
         this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: this.levelMusicKey});
     }
 

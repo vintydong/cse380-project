@@ -6,9 +6,11 @@ import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import { GameEventType } from "../Wolfie2D/Events/GameEventType";
+import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
+import Color from "../Wolfie2D/Utils/Color";
 import Level, { LevelLayers } from "./Level";
 import Level5 from "./Level5";
 
@@ -88,11 +90,24 @@ export default class Level4 extends Level {
         // rect.setGroup(PhysicsGroups.LEVEL_END);
         // rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
+        const levelEnd = new Vec2(29, 15.5).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
+        let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(2 * 8 * 6, 3 * 8 * 6));
+        rect.color = Color.TRANSPARENT;
+        rect.addPhysics();
+        rect.setGroup(PhysicsGroups.LEVEL_END);
+        rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
+
         this.viewport.setBounds(8 * 6, 8 * 6, 8 * 6 * 36, 8 * 6 * 19);
 
         this.nextLevel = Level5;
 
         this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
+    }
+
+    public unloadScene(): void {
+        super.unloadScene();
+        // TODO decide which resources to keep/cull
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, { key: this.levelMusicKey })
     }
 
     public updateScene(deltaT) {
@@ -106,9 +121,6 @@ export default class Level4 extends Level {
         }
 
         super.updateScene(deltaT);
-
-        if(allEnemiesDefeated)
-            this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
     }
 
     /**
@@ -119,6 +131,14 @@ export default class Level4 extends Level {
      */
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
+            case CustomGameEvents.PLAYER_ENTER_LEVEL_END: {
+                let allEnemiesDefeated = true
+                for(let i = 0; i < this.enemies.length; i++)
+                    if(this.enemies[i].visible) allEnemiesDefeated = false;
+
+                if(allEnemiesDefeated) this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
+                break;
+            }
             default:
                 super.handleEvent(event);
                 break;

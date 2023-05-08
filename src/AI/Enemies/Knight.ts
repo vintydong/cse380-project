@@ -91,6 +91,7 @@ class KnightDead extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         this.owner.animation.playIfNotAlready(KnightAnimations.DEAD, false);
         this.owner.tweens.play('DEAD');
+        this.owner.disablePhysics();
     }
 
     public update(deltaT: number): void {

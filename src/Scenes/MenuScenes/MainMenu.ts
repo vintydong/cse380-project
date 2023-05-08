@@ -67,15 +67,15 @@ export default class MainMenu extends Scene {
         play.backgroundColor = Color.TRANSPARENT;
         play.onClickEventId = "play";
 
-        const demo = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 75), text: "Demo"});
-        demo.size.set(200, 50);
-        demo.borderWidth = 2;
-        demo.borderColor = Color.WHITE;
-        demo.backgroundColor = Color.TRANSPARENT;
-        // this.mainMenu.disable();
-        demo.onClickEventId = "demo";
+        // const demo = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 75), text: "Demo"});
+        // demo.size.set(200, 50);
+        // demo.borderWidth = 2;
+        // demo.borderColor = Color.WHITE;
+        // demo.backgroundColor = Color.TRANSPARENT;
+        // // this.mainMenu.disable();
+        // demo.onClickEventId = "demo";
 
-        const levelSelect = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 150), text: "Select Level"})
+        const levelSelect = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 75), text: "Select Level"})
         levelSelect.size.set(200, 50);
         levelSelect.borderWidth = 2;
         levelSelect.borderColor = Color.WHITE;
@@ -83,7 +83,7 @@ export default class MainMenu extends Scene {
         // this.mainMenu.disable();
         levelSelect.onClickEventId = "level";
 
-        const controls = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 225), text: "Controls"})
+        const controls = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 150), text: "Controls"})
         controls.size.set(200, 50);
         controls.borderWidth = 2;
         controls.borderColor = Color.WHITE;
@@ -91,7 +91,7 @@ export default class MainMenu extends Scene {
         // this.mainMenu.disable();
         controls.onClickEventId = "controls";
 
-        const help = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 300), text: "Help"})
+        const help = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 225), text: "Help"})
         help.size.set(200, 50);
         help.borderWidth = 2;
         help.borderColor = Color.WHITE;
@@ -100,7 +100,7 @@ export default class MainMenu extends Scene {
         help.onClickEventId = "help";
 
         this.receiver.subscribe("play");
-        this.receiver.subscribe("demo");
+        // this.receiver.subscribe("demo");
         this.receiver.subscribe("level");
         this.receiver.subscribe("controls");
         this.receiver.subscribe("help");
@@ -118,9 +118,9 @@ export default class MainMenu extends Scene {
             case "play":
                 this.sceneManager.changeToScene(Level1);
                 break;
-            case "demo":
-                this.sceneManager.changeToScene(DemoLevel);
-                break;
+            // case "demo":
+            //     this.sceneManager.changeToScene(DemoLevel);
+            //     break;
             case "level":
                 this.sceneManager.changeToScene(LevelSelect);
                 break;
