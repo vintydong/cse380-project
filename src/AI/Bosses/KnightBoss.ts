@@ -3,6 +3,7 @@ import { PhysicsGroups } from "../../Physics";
 import Level, { LevelLayers } from "../../Scenes/Level";
 import Level2 from "../../Scenes/Level2";
 import Melee, { MeleeBehavior } from "../../Systems/Skills/Melee";
+import Slash from "../../Systems/Skills/Slash";
 import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
 import AI from "../../Wolfie2D/DataTypes/Interfaces/AI";
 import Spritesheet from "../../Wolfie2D/DataTypes/Spritesheet";
@@ -26,6 +27,7 @@ enum KnightAnimations {
     RUNNING = "RUNNING",
     TAKING_DAMAGE = "TAKING_DAMAGE",
     DEAD = "DEAD",
+    ATTACKING = "ATTACKING",
 }
 
 enum KnightBossStates {
@@ -40,6 +42,7 @@ enum KnightBossStates {
 class KnightGround extends EnemyState {
     private dir: number = null;
     private time: number = 0;
+    protected override parent: KnightBossController
 
     public onEnter(options: Record<string, any>): void {
         this.parent.speed = 500;
@@ -67,6 +70,10 @@ class KnightGround extends EnemyState {
         } 
         else if(this.time < 5){
             this.parent.velocity.x = 0;
+        }
+
+        if(this.parent.cooldown.isStopped()){
+            this.finished(KnightBossStates.ATTACKING);
         }
     }
     
@@ -143,17 +150,20 @@ class KnightAttack extends EnemyState {
     protected override parent: KnightBossController
 
     public onEnter(options: Record<string, any>): void {
-        this.owner.animation.playIfNotAlready(KnightAnimations.RUNNING);
+        this.owner.animation.play(KnightAnimations.ATTACKING);
     }
 
     public update(deltaT: number): void {
         super.update(deltaT);
 
         if (this.owner.getScene().getViewport().includes(this.owner)) {
-            console.log("knight firing slash")
             let player = this.parent.target.position
             let curPos = this.owner.position.clone()
-            this.parent.slash.activate({spawn: curPos, direction: curPos.dirTo(player)})
+
+            if(player.distanceTo(curPos) < 150)
+                this.parent.slash.activate({spawn: curPos, direction: this.parent.velocity})
+            else
+                this.parent.projectile.activate({spawn: curPos, direction: curPos.dirTo(player)})
         }
 
         this.finished(KnightBossStates.AIR)
@@ -161,7 +171,7 @@ class KnightAttack extends EnemyState {
 
     public onExit(): Record<string, any> {
         this.parent.cooldown.start();
-        this.owner.animation.stop();
+        // this.owner.animation.stop();
         return {};
     }
 }
@@ -184,23 +194,40 @@ export class KnightSlash{
     private initialize(){
         let scene = this.actor.getScene();
         this.hitbox = scene.add.sprite(Melee.MELEE_SPRITE_KEY, LevelLayers.PRIMARY)
-        this.hitbox.addAI(KnightProjectileAI);
+        this.hitbox.scale = new Vec2(3,3);
+        this.hitbox.addAI(KnightSlashAI);
         this.hitbox.addPhysics();
         this.hitbox.setGroup(PhysicsGroups.NPC);
         this.hitbox.setTrigger(PhysicsGroups.PLAYER, "KNIGHT_SLASH_HIT", null);
+        this.hitbox.visible = false;
+
+        this.hitbox.tweens.add("fadeout", {
+            startDelay: 0,
+            duration: 500,
+            effects: [
+                {
+                    property: "alpha",
+                    start: 1,
+                    end: 0,
+                    ease: EaseFunctionType.IN_OUT_SINE
+                }
+            ],
+            onEnd: 'KNIGHT_SLASH_END',
+        });
     }
 
     public activate(options?: Record<string, any>) {
         console.log("goes here");
         const { spawn, direction } = options;
         
-        // Bring this projectile to life
-        if (!this.hitbox.visible){
-            console.log("goes here again");
-            this.hitbox.visible = true;
-            this.hitbox.position = spawn;
-            this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
-        }
+        let newPosition = this.actor.position.clone();
+        let xOffset = this.hitbox.boundary.getHalfSize().x
+        newPosition.x += (direction.x < 0) ? -1 * xOffset : xOffset;
+        this.hitbox.position = newPosition;
+        this.hitbox.visible = true;
+        this.hitbox.alpha = 1;
+        this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
+        this.hitbox.tweens.play("fadeout");
     }
 
     /** Getters and Setters */
@@ -210,15 +237,39 @@ export class KnightSlash{
 export class KnightProjectile{
     private actor: KnightBossActor
     private controller: KnightBossController
-    private hitbox: AnimatedSprite
+    private hitbox: Sprite
     private damage: number;
 
     public constructor(controller: KnightBossController, actor: KnightBossActor) {
         this.actor = actor;
         this.controller = controller;
         this.damage = 10;
-        // this.initialize();
+        this.initialize();
     }
+
+    private initialize(){
+        let scene = this.actor.getScene();
+        this.hitbox = scene.add.sprite(Slash.SLASH_SPRITE_KEY, LevelLayers.PRIMARY)
+        this.hitbox.scale = new Vec2(2,2);
+        this.hitbox.addAI(KnightProjectileAI);
+        this.hitbox.addPhysics();
+        this.hitbox.setGroup(PhysicsGroups.NPC);
+        this.hitbox.setTrigger(PhysicsGroups.PLAYER, "KNIGHT_PROJECTILE_HIT", null);
+        this.hitbox.visible = false;
+    }
+
+    public activate(options?: Record<string, any>) {
+        const { spawn, direction } = options;
+        
+        // Bring this projectile to life
+        if (!this.hitbox.visible){
+            this.hitbox.visible = true;
+            this.hitbox.position = spawn;
+            this.hitbox.setAIActive(true, {direction: direction, damage: this.damage});
+        }
+    }
+
+    public getHitbox(): Sprite { return this.hitbox; }
 }
 
 export class KnightBossController extends BasicEnemyController {
@@ -251,7 +302,7 @@ export class KnightBossController extends BasicEnemyController {
         this.addState(KnightBossStates.ATTACKING, new KnightAttack(this, this.owner));
 
         this.receiver.subscribe(CustomGameEvents.ENEMY_DAMAGE);
-        this.initialize(KnightBossStates.ATTACKING);
+        this.initialize(KnightBossStates.GROUND);
     }
 
     public activate(options: Record<string, any>): void { }
@@ -376,11 +427,16 @@ export class KnightProjectileAI implements AI {
 
         this.currentXSpeed = 50;
         this.currentYSpeed = 50;
-        this.speedIncrement = 100;
+        this.speedIncrement = 150;
         this.minXSpeed = 100;
-        this.maxXSpeed = 300;
+        this.maxXSpeed = 500;
         this.minYSpeed = 100;
-        this.maxYSpeed = 300;
+        this.maxYSpeed = 500;
+
+        this.currentXSpeed = 300;
+        this.speedIncrement = 600;
+        this.minXSpeed = 300;
+        this.maxXSpeed = 1500;
 
         this.activate(options);
     }
@@ -396,6 +452,7 @@ export class KnightProjectileAI implements AI {
             this.direction = options.direction;
             this.currentXSpeed = 50;
             this.currentYSpeed = 50;
+            this.owner.invertX = (this.direction.x < 0) ? true : false;
         }
     }
 
@@ -426,7 +483,9 @@ export class KnightProjectileAI implements AI {
         // Update projectile behavior if visible
         if (this.owner.visible) {
             // Despawn if collided with environment
-            if (this.owner.onWall || this.owner.onCeiling || this.owner.onGround) {
+            let inScene = this.owner.getScene().getViewport().includes(this.owner);
+            if (this.owner.onWall || this.owner.onCeiling || !inScene) {
+            // if(!inScene) {
                 this.owner.position.copy(new Vec2(500, 0));
                 this.owner._velocity.copy(Vec2.ZERO);
                 this.owner.visible = false;
@@ -441,8 +500,74 @@ export class KnightProjectileAI implements AI {
             this.currentYSpeed = MathUtils.clamp(this.currentYSpeed, this.minYSpeed, this.maxYSpeed);
 
             // Move projectile towards target
-            let value = new Vec2(this.currentXSpeed * 30, this.currentYSpeed * 30);
+            let value = new Vec2(this.currentXSpeed * this.direction.x, this.currentYSpeed * 0);
             this.owner.move(value.scaled(deltaT));
         }
     }    
 }
+
+export class KnightSlashAI implements AI {
+    // The GameNode that owns this behavior
+    private owner: Sprite;
+    private receiver: Receiver;
+    private emitter: Emitter;
+
+    private direction: Vec2;
+    private damage: number;
+
+    public initializeAI(owner: Sprite, options: Record<string, any>): void {
+        this.owner = owner;
+
+        this.emitter = new Emitter();
+        this.receiver = new Receiver();
+        this.receiver.subscribe('KNIGHT_SLASH_HIT');
+        this.receiver.subscribe('KNIGHT_SLASH_END');
+
+        this.activate(options);
+    }
+
+    public destroy(): void {
+        
+    }
+
+    public activate(options: Record<string, any>): void {
+        // console.log(options);
+        if (options) {
+            this.damage = options.damage || 10;
+            this.direction = options.direction;
+            this.owner.invertX = (this.direction.x < 0) ? true : false;
+        }
+    }
+
+    public handleEvent(event: GameEvent): void {
+        switch(event.type) {
+            case 'KNIGHT_SLASH_END':
+                this.owner.position.copy(Vec2.ZERO);
+                this.owner._velocity.copy(Vec2.ZERO);
+                this.owner.visible = false;
+                break;
+            case 'KNIGHT_SLASH_HIT':
+                // console.log(event.data);
+                let id = event.data.get('other');
+                if(id === this.owner.id){
+                    console.log("Player hit with Knight slash", event.data);
+                    this.emitter.fireEvent(CustomGameEvents.PLAYER_ENEMY_PROJECTILE_COLLISION, {node: event.data.get('node'), damage: this.damage});
+                    this.owner.position.copy(new Vec2(500, 0));
+                    this.owner._velocity.copy(Vec2.ZERO);
+                    this.owner.visible = false;
+                }
+                break;
+            default: {
+                throw new Error("Unhandled event caught in MeleeBehavior! Event type: " + event.type);
+            }
+        }
+    }
+
+    public update(deltaT: number): void {
+        while (this.receiver.hasNextEvent()) {
+            this.handleEvent(this.receiver.getNextEvent());
+        }
+    }    
+}
+
+
