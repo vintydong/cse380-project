@@ -153,6 +153,7 @@ export class SkillManager {
 
     /** Called when the skillbook and all of its skills need to be drawn for the first time */
     private drawSkillBook(){
+        this.skillBookItems = []
         let center = this.scene.getViewport().getCenter();
         let dy = -400;
         let dx = -325;
@@ -446,6 +447,8 @@ export class SkillManager {
 
         // Add additional skill points
         let diff = this.maxSkillPoints - (this.skillPoints + this.skillPointsSpent);
+
+        console.log("Difference in total points", diff);
         if(diff > 0)
             this.skillPoints = this.skillPoints + diff;
 

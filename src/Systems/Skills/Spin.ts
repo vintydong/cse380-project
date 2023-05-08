@@ -33,6 +33,7 @@ export default class Spin extends Skill {
         let description = ['Slashes around', 'Increase DMG & slight knockback', 'Increase DMG & Decrease CD'];
 
         super(skill_manager, damage, cooldown, cost, description, Spin.SPIN_ICON_KEY);
+        this.level = -1;
     }
 
     public initialize(){
