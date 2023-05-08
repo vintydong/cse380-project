@@ -1,8 +1,9 @@
-import PlayerController from "../AI/Player/PlayerController";
+import PlayerController, { PlayerControls } from "../AI/Player/PlayerController";
 import PlayerParticleSystem from "../AI/Player/PlayerParticleSystem";
 import { CustomGameEvent, CustomGameEvents, MenuEvent, MenuEvents } from "../CustomGameEvents";
 import CustomFactoryManager from "../Factory/CustomFactoryManager";
 import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
+import CheatManager from "../Systems/CheatManager";
 import PlayerHUD from "../Systems/HUD/PlayerHUD";
 import { LayerManager } from "../Systems/LayerManager";
 import { SkillBookEvent, SkillBookEvents, SkillManager } from "../Systems/SkillManager";
@@ -17,13 +18,12 @@ import Input from "../Wolfie2D/Input/Input";
 import Graphic from "../Wolfie2D/Nodes/Graphic";
 import AnimatedSprite from "../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Label from "../Wolfie2D/Nodes/UIElements/Label";
-import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import Layer from "../Wolfie2D/Scene/Layer";
 import Scene from "../Wolfie2D/Scene/Scene";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
-import Color from "../Wolfie2D/Utils/Color";
+import LevelSelect from "./MenuScenes/LevelSelect";
 import MainMenu from "./MenuScenes/MainMenu";
 
 export const LevelLayers = {
@@ -69,8 +69,10 @@ export default abstract class Level extends Scene {
     public static readonly DASH_AUDIO_KEY = "DASH_AUDIO_KEY";
     public static readonly DASH_AUDIO_PATH = "assets/sounds/dash.wav";
 
+    // Sound Effect from 
+    // <a href="https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=36274">Pixabay</a>
     public static readonly ATTACK_AUDIO_KEY = "ATTACK_AUDIO_KEY";
-    public static readonly ATTACK_AUDIO_PATH = "assets/sounds/attack.wav";
+    public static readonly ATTACK_AUDIO_PATH = "assets/sounds/sword.mp3";
 
     public static readonly HURT_AUDIO_KEY = "HURT_AUDIO_KEY";
     public static readonly HURT_AUDIO_PATH = "assets/sounds/hurt.wav";
@@ -127,7 +129,7 @@ export default abstract class Level extends Scene {
         this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
         this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
         this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
-        
+
         /* UI */
         this.load.image(Melee.MELEE_ICON_KEY, Melee.MELEE_ICON_PATH);
         this.load.image(Slash.SLASH_ICON_KEY, Slash.SLASH_ICON_PATH);
@@ -135,7 +137,7 @@ export default abstract class Level extends Scene {
         this.load.image(Repel.REPEL_ICON_KEY, Repel.REPEL_ICON_PATH);
         this.load.spritesheet(Spin.SPIN_SPRITE_KEY, Spin.SPIN_SPRITE_PATH);
         this.load.image(Spin.SPIN_ICON_KEY, Spin.SPIN_ICON_PATH);
-        
+
         /* Audio and Sounds */
         this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
         this.load.audio(Level.DASH_AUDIO_KEY, Level.DASH_AUDIO_PATH);
@@ -145,7 +147,7 @@ export default abstract class Level extends Scene {
 
         /* Player */
         this.load.spritesheet(Level.PLAYER_SPRITE_KEY, Level.PLAYER_SPRITE_PATH);
-        
+
         /* Abilities */
         this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
         this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
@@ -154,7 +156,7 @@ export default abstract class Level extends Scene {
 
     /** Common resources that should be kept across all levels */
     public unloadScene(): void {
-        
+
         /* Menus */
         this.load.keepImage(LayerManager.PAUSE_SPRITE_KEY);
         this.load.keepImage(LayerManager.CONTROL_SPRITE_KEY);
@@ -166,7 +168,8 @@ export default abstract class Level extends Scene {
         this.load.keepImage(Melee.MELEE_ICON_KEY);
         this.load.keepImage(Slash.SLASH_ICON_KEY);
         this.load.keepImage(Repel.REPEL_ICON_KEY);
-        
+        this.load.keepImage(Spin.SPIN_ICON_KEY);
+
         /* Audio and Sounds */
         this.load.keepAudio(Level.JUMP_AUDIO_KEY);
         this.load.keepAudio(Level.DASH_AUDIO_KEY);
@@ -181,6 +184,7 @@ export default abstract class Level extends Scene {
         this.load.keepImage(Melee.MELEE_SPRITE_KEY);
         this.load.keepImage(Slash.SLASH_SPRITE_KEY);
         this.load.keepImage(Repel.REPEL_SPRITE_KEY);
+        this.load.keepSpritesheet(Spin.SPIN_SPRITE_KEY);
     }
 
     /** Common initializations between all levels */
@@ -229,8 +233,8 @@ export default abstract class Level extends Scene {
         // Fire events to start game (e.g. music)
         // this.emitter.fireEvent(CustomGameEvents.LEVEL_START)
         this.layer_manager.startLevel();
-        // Input.disableInput();
-        // this.ui.disable();
+        Input.disableInput();
+        this.ui.disable();
     }
 
     private subscribeEvents() {
@@ -238,7 +242,7 @@ export default abstract class Level extends Scene {
         this.receiver.subscribe(CustomGameEvents.SKILL_2_FIRED);
         this.receiver.subscribe(CustomGameEvents.SKILL_3_FIRED);
         this.receiver.subscribe(CustomGameEvents.SKILL_4_FIRED);
-        
+
         this.receiver.subscribe(CustomGameEvents.UPDATE_HEALTH);
         this.receiver.subscribe(CustomGameEvents.TOGGLE_SKILL_BOOK);
         this.receiver.subscribe(CustomGameEvents.CHANGED_ACTIVE_SKILLS);
@@ -265,8 +269,12 @@ export default abstract class Level extends Scene {
         this.receiver.subscribe(MenuEvents.HELP);
         this.receiver.subscribe(MenuEvents.EXIT);
 
+        this.receiver.subscribe("cheat_hp");
+        // this.receiver.subscribe("cheat_skills");
+        this.receiver.subscribe("cheat_damage");
+
         /** Skill Binding Events */
-        for(let i = 2; i < 6; i++){
+        for (let i = 2; i < 6; i++) {
             this.receiver.subscribe(`SET-Q-${i}`)
             this.receiver.subscribe(`SET-E-${i}`)
         }
@@ -283,7 +291,7 @@ export default abstract class Level extends Scene {
             this.emitter.fireEvent(CustomGameEvents.TOGGLE_SKILL_BOOK);
 
         if (escButton) {
-            switch (skillbookOpen){
+            switch (skillbookOpen) {
                 case true:
                     this.emitter.fireEvent(CustomGameEvents.TOGGLE_SKILL_BOOK);
                     break;
@@ -312,7 +320,7 @@ export default abstract class Level extends Scene {
         let type = event.type as MenuEvent | CustomGameEvent | SkillBookEvent;
         console.log("Handling event type", type);
 
-        if(type.startsWith('SET-Q-') || type.startsWith('SET-E-')){
+        if (type.startsWith('SET-Q-') || type.startsWith('SET-E-')) {
             return this.skill_manager.handleSetSkill(type);
         }
 
@@ -345,7 +353,7 @@ export default abstract class Level extends Scene {
                 this.playerHUD.updateHUD();
                 break;
             }
-            
+
             case CustomGameEvents.LEVEL_START: {
                 Input.enableInput();
                 this.ui.enable();
@@ -407,6 +415,19 @@ export default abstract class Level extends Scene {
             case MenuEvents.EXIT:
                 this.sceneManager.changeToScene(MainMenu);
                 break;
+            
+            case "cheat_hp" as any:
+                CheatManager.getInstance().toggleInfiniteHP();
+                this.layer_manager.updateHelpLayer();
+                break;
+            // case "cheat_skills" as any:
+            //     CheatManager.getInstance().toggleInfiniteSkills();
+            //     this.layer_manager.updateHelpLayer();
+            //     break;
+            case "cheat_damage" as any:
+                CheatManager.getInstance().toggleInfiniteDamage();
+                this.layer_manager.updateHelpLayer();
+                break;
 
             case SkillBookEvents.LEVEL_DOWN_MELEE:
             case SkillBookEvents.LEVEL_UP_MELEE:
@@ -427,7 +448,7 @@ export default abstract class Level extends Scene {
     }
 
     protected initUI() {
-        
+
     }
 
     protected freezeLevel() {
@@ -464,7 +485,7 @@ export default abstract class Level extends Scene {
     public getSkillManager() {
         return this.skill_manager;
     }
-    
+
     public getJumpAudioKey(): string {
         return this.jumpAudioKey
     }

@@ -15,6 +15,7 @@ import Timer from "../../Wolfie2D/Timing/Timer";
 import Color from "../../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
+import CheatManager from "../CheatManager";
 import { SkillManager } from "../SkillManager";
 import Skill from "./Skill";
 
@@ -43,6 +44,7 @@ export default class Slash extends Skill {
     public initialize() {
         let scene = this.skill_manager.getScene();
 
+        this.level = 0;
         this.cooldown = [new Timer(1000), new Timer(900), new Timer(800)];
 
         this.hitbox = scene.add.sprite(Slash.SLASH_SPRITE_KEY, LevelLayers.PRIMARY)
@@ -177,7 +179,8 @@ export class SlashBehavior implements AI {
                 let id = event.data.get('other');
                 if (id === this.owner.id) {
                     console.log("Hit an enemy with Slash", event.data);
-                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: this.damage});    
+                    let damage = CheatManager.getInstance().getInfiniteDamage() ? 999 : this.damage;
+                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: damage});    
                     this.owner.position.copy(Vec2.ZERO);
                     this.owner._velocity.copy(Vec2.ZERO);
                     this.owner.visible = false;

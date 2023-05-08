@@ -9,6 +9,7 @@ import Receiver from "../../Wolfie2D/Events/Receiver";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
+import CheatManager from "../CheatManager";
 import { SkillManager } from "../SkillManager";
 import Skill from "./Skill";
 
@@ -36,6 +37,7 @@ export default class Melee extends Skill {
     public initialize(){
         let scene = this.skill_manager.getScene();
 
+        this.level = 0;
         this.cooldown = [new Timer(800), new Timer(600), new Timer(400)];
         
         this.hitbox = scene.add.sprite(Melee.MELEE_SPRITE_KEY, LevelLayers.PRIMARY)
@@ -133,7 +135,8 @@ export class MeleeBehavior implements AI {
                 let id = event.data.get('other');
                 if(id === this.owner.id){
                     console.log("Hit an enemy with Melee", event.data);
-                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: this.damage});
+                    let damage = CheatManager.getInstance().getInfiniteDamage() ? 999 : this.damage;
+                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: damage});
                     this.owner.position.copy(Vec2.ZERO);
                     this.owner._velocity.copy(Vec2.ZERO);
                     this.owner.visible = false;

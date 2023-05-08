@@ -3,6 +3,7 @@ export default class CheatManager {
 
     private infiniteHP: boolean = false;
     private infiniteSkills: boolean = false;
+    private infiniteDamage: boolean = false;
     private unlockAllLevels: boolean = false;
 
     /**
@@ -12,7 +13,7 @@ export default class CheatManager {
      * @returns CheatManager
      */
     public static getInstance(): CheatManager {
-        if(!this.instance){
+        if (!this.instance) {
             this.instance = new CheatManager();
         }
 
@@ -40,7 +41,16 @@ export default class CheatManager {
     public toggleInfiniteSkills(): void { this.infiniteSkills = !this.infiniteSkills }
 
 
-    
+    /**
+         * Sets the cheat code for infinite HP
+         * @param active true to set this cheat code active, false inactive
+         */
+    public setInfiniteDamage(active: boolean): void { this.infiniteDamage = active }
+
+    public getInfiniteDamage(): boolean { return this.infiniteDamage }
+
+    public toggleInfiniteDamage(): void { this.infiniteDamage = !this.infiniteDamage }
+
     /**
      * Sets the cheat code for infinite HP
      * @param active true to set this cheat code active, false inactive

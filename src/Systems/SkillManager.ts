@@ -39,6 +39,8 @@ export type SkillBookEvent = typeof SkillBookEvents[keyof typeof SkillBookEvents
 
 interface SkillBookRow {
     icon: Sprite,
+    setQ: Button | null,
+    setE: Button | null,
     levelLabel: Label,
     levelDownButton: Button,
     levelUpButton: Button,
@@ -57,6 +59,8 @@ export class SkillManager {
     private player: AnimatedSprite;
 
     private skillPoints = 0;
+    private skillPointsSpent = 0;
+    private maxSkillPoints = 0;
     private allSkills: [Melee, Slash, Repel, Spin, Skill, Skill];
     private activeSkills: [Skill, Skill, Skill, Skill];
 
@@ -123,6 +127,10 @@ export class SkillManager {
         this.emitter = new Emitter();
 
         this.cheatManager = CheatManager.getInstance();
+        if(this.cheatManager.getInfiniteSkills()){
+            this.maxSkillPoints = 99;
+            this.skillPoints = 99;
+        }
     }
 
     /** Setups the layer and sprites */
@@ -170,11 +178,18 @@ export class SkillManager {
 
             let miniButtonProps = {size: new Vec2(15,15), fontSize: 15, backgroundColor: new Color(100,100,100)}
 
+            let setQ: Button = null;
+            let setE: Button = null;
             if(i > 1){
-                let setQ = this.scene.factory.addButton(layer, new Vec2(rowLeft - 10, rowCenterY + 20), 'Q', miniButtonProps)
+                setQ = this.scene.factory.addButton(layer, new Vec2(rowLeft - 10, rowCenterY + 20), 'Q', miniButtonProps)
                 setQ.onClickEventId = 'SET-Q-' + i
-                let setE = this.scene.factory.addButton(layer, new Vec2(rowLeft + 10, rowCenterY + 20), 'E', miniButtonProps)
+                setE = this.scene.factory.addButton(layer, new Vec2(rowLeft + 10, rowCenterY + 20), 'E', miniButtonProps)
                 setE.onClickEventId = 'SET-E-' + i
+
+                if(skill.getLevel() < 0){
+                    setQ.visible = false;
+                    setE.visible = false;
+                }
             }
 
             rowLeft = rowLeft + 65;
@@ -215,7 +230,7 @@ export class SkillManager {
             rowLeft = rowLeft + 180;
 
             let attributes = this.scene.factory.addLabel(layer, new Vec2(rowLeft, rowCenterY), `DMG: ${damage}\tCD: ${(cooldown / 1000).toFixed(1)}`)
-            attributes.backgroundColor = new Color(255, 0, 0, 0.5);
+            // attributes.backgroundColor = new Color(255, 0, 0, 0.5);
             attributes.size = new Vec2(200, rowHeight / 2);
             attributes.setHAlign(HAlign.CENTER)
             attributes.fontSize = 25;
@@ -224,7 +239,7 @@ export class SkillManager {
             let desc = this.scene.factory.addLabel(layer, new Vec2(rowLeft, rowCenterY), description)
             desc.size = new Vec2(275, rowHeight/2)
             desc.fontSize = 25;
-            desc.backgroundColor = new Color(255, 0, 0, 0.5);
+            // desc.backgroundColor = new Color(255, 0, 0, 0.5);
             desc.setHAlign(HAlign.LEFT);
             desc.setVAlign(VAlign.CENTER);
 
@@ -233,6 +248,8 @@ export class SkillManager {
             // Add to skillrow object
             let skillRow: SkillBookRow = {
                 icon: skillIcon,
+                setQ: setQ,
+                setE: setE,
                 levelLabel: levelText,
                 levelDownButton: subButton,
                 levelUpButton: addButton,
@@ -245,9 +262,15 @@ export class SkillManager {
         let pointsLabelPos = center.clone();
         pointsLabelPos.y = pointsLabelPos.y + 200;
         this.skillPointsLabel = this.scene.factory.addLabel(layer, pointsLabelPos, `Skill Points: ${this.skillPoints}`);
-        this.skillPointsLabel.backgroundColor = new Color(255, 0, 0, 0.5);
+        // this.skillPointsLabel.backgroundColor = new Color(255, 0, 0, 0.5);
         this.skillPointsLabel.size = new Vec2(200, rowHeight / 2);
         this.skillPointsLabel.fontSize = 25;
+
+        let warning = this.scene.factory.addLabel(layer, pointsLabelPos.clone().add(new Vec2(0, 25)), `Note: Once you learn a skill, you cannot unlearn it`);
+        // warning.backgroundColor = new Color(255, 0, 0, 0.5);
+        warning.textColor = Color.RED;
+        warning.size = new Vec2(200, rowHeight / 2);
+        warning.fontSize = 25;
     }
 
     /** Update each row of the skill book with the current skill attributes */
@@ -256,6 +279,11 @@ export class SkillManager {
             let skill = this.allSkills[index];
 
             if(!skill) return;
+
+            if(row.setQ && row.setE){
+                row.setQ.visible = !(skill.getLevel() < 1);
+                row.setE.visible = !(skill.getLevel() < 1);
+            }
 
             let skillAttr = skill.getAttributes();
 
@@ -326,17 +354,17 @@ export class SkillManager {
 
     private increaseLevel(skill: Skill){
         // console.log("Increase level");
-        if(skill && this.skillPoints > 0){
+        if(skill && this.skillPoints > 0 && skill.changeLevel(1)){
             this.skillPoints--;
-            skill.changeLevel(1);
+            this.skillPointsSpent++;
         }
     }
 
     private decreaseLevel(skill: Skill){
         // console.log("Decrease level");
-        if(skill){
+        if(skill && skill.changeLevel(-1)){
             this.skillPoints++;
-            skill.changeLevel(-1);
+            this.skillPointsSpent--;
         }
     }
 
@@ -346,7 +374,7 @@ export class SkillManager {
      * @returns true if the skill can be activated; false if on cooldown
     */
     public getSkillCooldown(index: number): boolean {
-        if (this.cheatManager.getInfiniteSkills())
+        if (this.cheatManager.getInfiniteSkills() && this.activeSkills[index])
             return true;
         if (index > 3 || index < 0) return false;
 
@@ -397,24 +425,30 @@ export class SkillManager {
         // console.log(scene.constructor);
         switch(scene.constructor.name){
             case 'Level1':
-                this.skillPoints = 0;
+                this.maxSkillPoints = 0;
                 break;
             case 'Level2':
-                this.skillPoints = 2;
+                this.maxSkillPoints = 2;
                 break;
             case 'Level3':
-                this.skillPoints = 4;
+                this.maxSkillPoints = 4;
                 break;
             case 'Level4':
-                this.skillPoints = 6;
+                this.maxSkillPoints = 6;
                 break;  
             case 'Level5':
-                this.skillPoints = 8;
+                this.maxSkillPoints = 8;
                 break;
             case 'Level6':
-                this.skillPoints = 10;
+                this.maxSkillPoints = 10;
                 break;
         }
+
+        // Add additional skill points
+        let diff = this.maxSkillPoints - (this.skillPoints + this.skillPointsSpent);
+        if(diff > 0)
+            this.skillPoints = this.skillPoints + diff;
+
     }
 
     public setPlayer(player: AnimatedSprite) { this.player = player; }

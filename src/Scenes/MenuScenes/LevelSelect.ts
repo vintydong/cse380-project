@@ -9,7 +9,6 @@ import Scene from "../../Wolfie2D/Scene/Scene";
 import Color from "../../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
 
-import DemoLevel from "../DemoLevel";
 import Level1 from "../Level1";
 import Level2 from "../Level2";
 import Level3 from "../Level3";
