@@ -1,0 +1,36 @@
+{
+	"name": "Lich_Projectile",
+	"spriteSheetImage": "Lich_Projectile.png",
+	"spriteWidth": 32,
+	"spriteHeight": 32,
+	"leftBuffer": 0,
+	"rightBuffer": 0,
+	"topBuffer": 0,
+	"bottomBuffer": 0,
+	"columns": 4,
+	"rows": 1,
+	"animations": [
+		{
+			"name": "ACTIVE",
+			"repeat": true,
+			"frames": [
+				{
+					"index": 0,
+					"duration": 5
+				},
+				{
+					"index": 1,
+					"duration": 5
+				},
+				{
+					"index": 2,
+					"duration": 5
+				},
+				{
+					"index": 3,
+					"duration": 5
+				}
+			]
+		}
+	]
+}

@@ -20,6 +20,7 @@ export const CustomGameEvents = {
   SKILL_2_FIRED: "SKILL_2_FIRED",
   SKILL_3_FIRED: "SKILL_3_FIRED",
   SKILL_4_FIRED: "SKILL_4_FIRED",
+  SKILL_KNOCKBACK: "SKILL_KNOCKBACK",
   UPDATE_HEALTH: "UPDATE_HEALTH",
   TOGGLE_SKILL_BOOK: "TOGGLE_SKILL_BOOK",
   /** Event emitted when active abilities are changes so that the HUD can be updated */

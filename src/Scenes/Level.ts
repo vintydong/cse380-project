@@ -120,34 +120,67 @@ export default abstract class Level extends Scene {
 
     /** Load common things for all levels */
     public loadScene(): void {
-        this.load.spritesheet(Level.PLAYER_SPRITE_KEY, Level.PLAYER_SPRITE_PATH);
 
+        /* Menus */
         this.load.image(LayerManager.PAUSE_SPRITE_KEY, LayerManager.PAUSE_SPRITE_PATH);
         this.load.image(LayerManager.CONTROL_SPRITE_KEY, LayerManager.CONTROL_SPRITE_PATH);
         this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
         this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
         this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
-
-        this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
+        
+        /* UI */
         this.load.image(Melee.MELEE_ICON_KEY, Melee.MELEE_ICON_PATH);
-        this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
         this.load.image(Slash.SLASH_ICON_KEY, Slash.SLASH_ICON_PATH);
         this.load.image(Repel.REPEL_SPRITE_KEY, Repel.REPEL_SPRITE_PATH);
         this.load.image(Repel.REPEL_ICON_KEY, Repel.REPEL_ICON_PATH);
         this.load.spritesheet(Spin.SPIN_SPRITE_KEY, Spin.SPIN_SPRITE_PATH);
         this.load.image(Spin.SPIN_ICON_KEY, Spin.SPIN_ICON_PATH);
-
+        
         /* Audio and Sounds */
         this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
         this.load.audio(Level.DASH_AUDIO_KEY, Level.DASH_AUDIO_PATH);
         this.load.audio(Level.ATTACK_AUDIO_KEY, Level.ATTACK_AUDIO_PATH);
         this.load.audio(Level.HURT_AUDIO_KEY, Level.HURT_AUDIO_PATH);
         this.load.audio(Level.DYING_AUDIO_KEY, Level.DYING_AUDIO_PATH);
+
+        /* Player */
+        this.load.spritesheet(Level.PLAYER_SPRITE_KEY, Level.PLAYER_SPRITE_PATH);
+        
+        /* Abilities */
+        this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
+        this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
+        this.load.image(Repel.REPEL_SPRITE_KEY, Repel.REPEL_SPRITE_PATH);
     }
 
     /** Common resources that should be kept across all levels */
     public unloadScene(): void {
         
+        /* Menus */
+        this.load.keepImage(LayerManager.PAUSE_SPRITE_KEY);
+        this.load.keepImage(LayerManager.CONTROL_SPRITE_KEY);
+        this.load.keepImage(LayerManager.HELP_SPRITE_KEY);
+        this.load.keepImage(SkillManager.SKILL_BOOK_SPRITE_KEY);
+        this.load.keepImage(Level.ABILITY_ICONS_KEY);
+
+        /* UI */
+        this.load.keepImage(Melee.MELEE_ICON_KEY);
+        this.load.keepImage(Slash.SLASH_ICON_KEY);
+        this.load.keepImage(Repel.REPEL_ICON_KEY);
+        
+        /* Audio and Sounds */
+        this.load.keepAudio(Level.JUMP_AUDIO_KEY);
+        this.load.keepAudio(Level.DASH_AUDIO_KEY);
+        this.load.keepAudio(Level.ATTACK_AUDIO_KEY);
+        this.load.keepAudio(Level.HURT_AUDIO_KEY);
+        this.load.keepAudio(Level.DYING_AUDIO_KEY);
+
+        /* Player */
+        this.load.keepSpritesheet(Level.PLAYER_SPRITE_KEY);
+
+        /* Abilities */
+        this.load.keepImage(Melee.MELEE_SPRITE_KEY);
+        this.load.keepImage(Slash.SLASH_SPRITE_KEY);
+        this.load.keepImage(Repel.REPEL_SPRITE_KEY);
     }
 
     /** Common initializations between all levels */
@@ -430,6 +463,7 @@ export default abstract class Level extends Scene {
     public getSkillManager() {
         return this.skill_manager;
     }
+    
     public getJumpAudioKey(): string {
         return this.jumpAudioKey
     }

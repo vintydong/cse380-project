@@ -44,13 +44,20 @@ export abstract class PlayerState extends State {
     }
 
     public update(deltaT: number): void {
-        // Update dash timer
-        this.parent.dashTimer.update(deltaT);
 
         // Do not update the direction the sprite is facing if DASHING
-        if (this instanceof Dash) { return; }
+        if (this instanceof Dash || this.owner.frozen) { return; }
 
-        // This updates player facing
+        // This updates player movement
+        this.updateMovement(deltaT);
+
+        // Handle attacks
+        this.handleAttacks();
+    }
+
+    public abstract onExit(): Record<string, any>;
+
+    public updateMovement(deltaT: number): void {
         let dir = this.parent.moveDir;
         if (dir.x !== 0) {
             this.owner.invertX = MathUtils.sign(dir.x) < 0;
@@ -61,14 +68,16 @@ export abstract class PlayerState extends State {
         this.parent.velocity.x = dir.x * this.parent.speed
         this.parent.velocity.y += this.gravity * deltaT;
         this.owner.move(this.parent.velocity.scaled(deltaT));
+    }
 
+    public handleAttacks(): void {
         let scene = this.owner.getScene() as Level;
         let skill_manager = scene.getSkillManager();
 
         // Attacking animations
-        if (Input.isJustPressed(PlayerControls.SKILL_ONE))
+        if (Input.isJustPressed(PlayerControls.SKILL_ONE) || Input.isMouseJustPressed(0) )
             this.skillFired = CustomGameEvents.SKILL_1_FIRED
-        else if (Input.isJustPressed(PlayerControls.SKILL_TWO))
+        else if (Input.isJustPressed(PlayerControls.SKILL_TWO) || Input.isMouseJustPressed(2))
             this.skillFired = CustomGameEvents.SKILL_2_FIRED
         else if (Input.isJustPressed(PlayerControls.SKILL_THREE))
             this.skillFired = CustomGameEvents.SKILL_3_FIRED
@@ -83,8 +92,6 @@ export abstract class PlayerState extends State {
         }
         this.skillFired = null
     }
-
-    public abstract onExit(): Record<string, any>;
 }
 
 export class Ground extends PlayerState {
@@ -205,7 +212,6 @@ export class Dash extends PlayerState {
     public onExit(): Record<string, any> {
         this.owner.animation.stop();
         this.parent.dashTimer.start();
-        this.parent.hit = false;
         return {fromGround: this.fromGround};
     }
 }
@@ -228,27 +234,43 @@ export class Dead extends PlayerState {
 }
 
 export class Knockback extends PlayerState {
-    private direction: string;
+    private knockback: Vec2;
+    private direction: number;
 
     public onEnter(options: Record<string, any>): void {
-        this.parent.speed = this.parent.MAX_SPEED;
         this.parent.velocity.y = 0;
-        this.direction = this.parent.facing;
+        this.knockback = this.parent.knockback;
+        this.parent.speed = this.parent.MAX_SPEED;
+
+        // Calculate knockback direction based on current user input / last facing direction
+        if(this.parent.moveDir.x) {
+            this.direction = -1 * this.parent.moveDir.x;
+        }
+        else {
+            this.direction = (this.parent.facing === "left")? 1 : -1
+        }
+        this.parent.velocity.x = this.direction * this.knockback.x;
+        this.parent.velocity.y += this.knockback.y;
+
+        this.owner.animation.play(PlayerAnimations.TAKING_DAMAGE);
+        let hurtAudio = (this.owner.getScene() as Level).getHurtAudioKey();
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: hurtAudio, loop: false, holdReference: false});
     }
 
     public handleInput(event: GameEvent): void { }
 
     public update(deltaT: number): void {
-        super.update(deltaT);
-        let dx = (this.direction == "left") ? 1 : -1
-
-        this.parent.velocity.x = dx * 2000
-        this.parent.velocity.y = -750;
-        this.owner.move(this.parent.velocity.scale(deltaT));
-        this.finished(PlayerStates.GROUND);
+        // Apply gravity after knockback
+        this.parent.velocity.y += this.gravity * deltaT;
+        this.owner.move(this.parent.velocity.scaled(deltaT));
+        
+        if (!this.owner.animation.isPlaying(PlayerAnimations.TAKING_DAMAGE)) {
+            this.finished(PlayerStates.AIR);
+        }
     }
 
     public onExit(): Record<string, any> { 
+        this.owner.animation.stop();
         return {}; 
     }
 }
