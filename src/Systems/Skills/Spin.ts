@@ -10,6 +10,7 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
+import CheatManager from "../CheatManager";
 import { SkillManager } from "../SkillManager";
 import Skill from "./Skill";
 
@@ -137,7 +138,8 @@ export class SpinBehavior implements AI {
                 let id = event.data.get('other');
                 if(id === this.owner.id){
                     console.log("Hit an enemy with Melee", event.data);
-                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: this.damage});
+                    let damage = CheatManager.getInstance().getInfiniteDamage() ? 9999 : this.damage;
+                    this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {node: event.data.get('node'), damage: damage});
                     this.owner.position.copy(Vec2.ZERO);
                     this.owner._velocity.copy(Vec2.ZERO);
                     this.owner.visible = false;

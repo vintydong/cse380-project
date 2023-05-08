@@ -9,6 +9,7 @@ import Receiver from "../../Wolfie2D/Events/Receiver";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
+import CheatManager from "../CheatManager";
 import { SkillManager } from "../SkillManager";
 import Skill from "./Skill";
 
@@ -167,9 +168,10 @@ export class RepelBehavior implements AI {
                     this.damagedEnemies[enemyId] = 1
 
                     let center = this.owner.position.clone();
+                    let damage = CheatManager.getInstance().getInfiniteDamage() ? 999 : this.damage;
                     this.emitter.fireEvent(CustomGameEvents.ENEMY_DAMAGE, {
                         node: event.data.get('node'), 
-                        damage: this.damage, 
+                        damage: damage, 
                         knockback: 1000,
                         center
                     });
