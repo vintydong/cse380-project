@@ -177,7 +177,7 @@ export default class Level6 extends Level {
     private initializeLevelEnd() {
         const levelEnd = new Vec2(15, 4.5).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
         let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(2 * 8 * 6, 3 * 8 * 6));
-        rect.color = Color.GRAY;
+        rect.color = Color.TRANSPARENT;
         rect.addPhysics();
         rect.setGroup(PhysicsGroups.LEVEL_END);
         rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);

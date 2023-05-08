@@ -133,7 +133,7 @@ class LichAttacking extends EnemyState {
         super.update(deltaT);
 
         var delay = 0;
-        // this.parent.currentAttack = LichAttacks.SWORDS;
+        // this.parent.currentAttack = LichAttacks.CUPS;
         switch(this.parent.currentAttack){
             case LichAttacks.WANDS:
                 console.log("lich firing WANDS")
@@ -166,17 +166,28 @@ class LichAttacking extends EnemyState {
             case LichAttacks.CUPS:
                 console.log("lich firing CUPS")
                 let newSpawn = Vec2.ZERO;
+                let spawns: Array<Vec2> = new Array(this.parent.maxProjectiles)
                 var left = 0 + this.offSet;
                 var right = (8 * 6 * 30) - this.offSet;
-                let chunk = (right - left)/this.parent.maxProjectiles;
-                newSpawn.add(new Vec2(this.offSet + chunk/2, this.offSet));
+                let gap = (right - left)/this.parent.maxProjectiles;
+                newSpawn.add(new Vec2(this.offSet + gap/2, this.offSet));
                 for (let i = 0; i < this.parent.maxProjectiles; i++) {
+                    spawns[i] = newSpawn.clone()
+                    newSpawn.x += gap
+                }
+                console.log(spawns)
+                for (let i = 0; i < (this.parent.maxProjectiles/2); i++) {
+                    console.log(i, spawns.length - i - 1)
                     this.parent.cupProjectiles[i].activate({
-                        spawn: newSpawn.clone(), 
+                        spawn: spawns[i], 
                         delay: delay,
                         direction: new Vec2(0, 1)
                     });
-                    newSpawn.x += chunk
+                    this.parent.cupProjectiles[spawns.length - i - 1].activate({
+                        spawn: spawns[spawns.length - i - 1], 
+                        delay: delay,
+                        direction: new Vec2(0, 1)
+                    });
                     delay += 500
                 }
                 break;
@@ -576,7 +587,7 @@ export class WandProjectile extends LichProjectile {
         this.hitbox.addAI(WandProjectileAI)
         // Add physics
         this.hitbox.addPhysics();
-        this.hitbox.setGroup(PhysicsGroups.NPC);
+        this.hitbox.setGroup(PhysicsGroups.NPC_PROJECTILE);
 
         // Customize AI and Events
         this.hitbox.setTrigger(PhysicsGroups.PLAYER, "WAND_HIT", null);
@@ -651,7 +662,7 @@ export class CupProjectile extends LichProjectile {
 
         // Add physics
         this.hitbox.addPhysics();
-        this.hitbox.setGroup(PhysicsGroups.NPC);
+        this.hitbox.setGroup(PhysicsGroups.NPC_PROJECTILE);
 
         // Customize AI and Events
         this.hitbox.addAI(CupProjectileAI)
@@ -724,7 +735,7 @@ export class SwordProjectile extends LichProjectile {
 
         // Add physics
         this.hitbox.addPhysics();
-        this.hitbox.setGroup(PhysicsGroups.NPC);
+        this.hitbox.setGroup(PhysicsGroups.NPC_PROJECTILE);
 
         // Customize AI and Events
         this.hitbox.addAI(SwordProjectileAI)
