@@ -26,17 +26,17 @@ export default class Level6 extends Level {
 
     // Lich Keys 
     public static readonly LICH_SPRITE_KEY = "LICH_SPRITE_KEY";
-    public static readonly LICH_SPRITE_PATH = "assets/spritesheets/Player/Shadow_Knight.json";  // Replace
+    public static readonly LICH_SPRITE_PATH = "assets/spritesheets/Bosses/Lich/Lich.json";
     public static readonly LICH_POSITION_KEY = "LICH_POSITION_KEY";
 
     public static readonly LICH_WAND_KEY = "LICH_WAND_KEY"
-    public static readonly LICH_WAND_PATH = "assets/spritesheets/Bosses/Lich/Lich_Projectile.json";   // Replace
+    public static readonly LICH_WAND_PATH = "assets/spritesheets/Bosses/Lich/Lich_Wand.json";   // Replace
 
     public static readonly LICH_CUP_KEY = "LICH_CUP_KEY"
-    public static readonly LICH_CUP_PATH = "assets/spritesheets/Bosses/Lich/Lich_Projectile.json";   // Replace
+    public static readonly LICH_CUP_PATH = "assets/spritesheets/Bosses/Lich/Lich_Cup.json";   // Replace
 
     public static readonly LICH_SWORD_KEY = "LICH_SWORD_KEY"
-    public static readonly LICH_SWORD_PATH = "assets/spritesheets/Bosses/Lich/Lich_Projectile.json";   // Replace
+    public static readonly LICH_SWORD_PATH = "assets/spritesheets/Bosses/Lich/Lich_Sword.json";   // Replace
 
     public static readonly LICH_DYING_AUDIO_KEY = "LICH_DYING_AUDIO_KEY";
     public static readonly LICH_DYING_AUDIO_PATH = "assets/sounds/lich_dying.wav";  // Replace

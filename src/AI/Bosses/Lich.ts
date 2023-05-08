@@ -447,8 +447,8 @@ export abstract class LichProjectile {
 
     public activate(options?: Record<string, any>) {
         const { spawn, delay, direction } = options;
-        // this.hitbox.invertX = (direction.x < 0) ? true : false;
-        // this.hitbox.invertY = (direction.y < 0) ? true : false;
+        this.hitbox.invertX = (direction.x < 0) ? true : false;
+        this.hitbox.invertY = (direction.y < 0) ? true : false;
         
         // Bring this projectile to life
         if (!this.hitbox.visible){
@@ -576,7 +576,7 @@ export class WandProjectile extends LichProjectile {
         this.hitbox.addAI(WandProjectileAI)
         // Add physics
         this.hitbox.addPhysics();
-        this.hitbox.setGroup(PhysicsGroups.NPC);
+        this.hitbox.setGroup(PhysicsGroups.NPC_PROJECTILE);
 
         // Customize AI and Events
         this.hitbox.setTrigger(PhysicsGroups.PLAYER, "WAND_HIT", null);
@@ -651,7 +651,7 @@ export class CupProjectile extends LichProjectile {
 
         // Add physics
         this.hitbox.addPhysics();
-        this.hitbox.setGroup(PhysicsGroups.NPC);
+        this.hitbox.setGroup(PhysicsGroups.NPC_PROJECTILE);
 
         // Customize AI and Events
         this.hitbox.addAI(CupProjectileAI)
@@ -724,7 +724,7 @@ export class SwordProjectile extends LichProjectile {
 
         // Add physics
         this.hitbox.addPhysics();
-        this.hitbox.setGroup(PhysicsGroups.NPC);
+        this.hitbox.setGroup(PhysicsGroups.NPC_PROJECTILE);
 
         // Customize AI and Events
         this.hitbox.addAI(SwordProjectileAI)
