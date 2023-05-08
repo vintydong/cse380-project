@@ -11,6 +11,8 @@ import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Level, { LevelLayers } from "./Level";
 import MainMenu from "./MenuScenes/MainMenu";
 import Level4 from "./Level4";
+import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
+import Color from "../Wolfie2D/Utils/Color";
 
 export default class Level3 extends Level {
     public static readonly ENEMY_SPRITE_KEY = "LEVEL3_ENEMY_KEY";
@@ -98,16 +100,12 @@ export default class Level3 extends Level {
             this.enemies.push(enemy);
         }
 
-        // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
-        // this.healthbars.set(npc.id, healthbar);
-
-        // Set level end
-        // const levelEnd = new Vec2(20.5, 14).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
-        // let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(3 * 8 * 6, 4 * 8 * 6));
-        // rect.color = Color.RED;
-        // rect.addPhysics();
-        // rect.setGroup(PhysicsGroups.LEVEL_END);
-        // rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
+        const levelEnd = new Vec2(50, 4.5).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
+        let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(2 * 8 * 6, 3 * 8 * 6));
+        rect.color = Color.TRANSPARENT;
+        rect.addPhysics();
+        rect.setGroup(PhysicsGroups.LEVEL_END);
+        rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
         this.viewport.setBounds(8 * 6, 8 * 6, 8 * 6 * 54, 8 * 6 * 29);
 
@@ -127,9 +125,6 @@ export default class Level3 extends Level {
         }
 
         super.updateScene(deltaT);
-
-        if (allEnemiesDefeated)
-            this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
     }
 
     /**
@@ -140,8 +135,12 @@ export default class Level3 extends Level {
      */
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
-            case CustomGameEvents.LEVEL_END:
-            case CustomGameEvents.LEVEL_NEXT: {
+            case CustomGameEvents.PLAYER_ENTER_LEVEL_END: {
+                let allEnemiesDefeated = true
+                for(let i = 0; i < this.enemies.length; i++)
+                    if(this.enemies[i].visible) allEnemiesDefeated = false;
+
+                if(allEnemiesDefeated) this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
                 break;
             }
             default:

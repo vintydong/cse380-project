@@ -86,7 +86,7 @@ export default class Level5 extends Level {
         /* Abilities */
         this.load.keepImage(Repel.REPEL_SPRITE_KEY);
 
-        // this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: this.levelMusicKey});
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: this.levelMusicKey});
     }
 
     public startScene(): void {

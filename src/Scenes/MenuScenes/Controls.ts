@@ -40,7 +40,7 @@ export default class Controls extends Scene{
             ]
         });
 
-        const goBack = this.add.uiElement(UIElementType.BUTTON, "controlMenu", {position: new Vec2(center.x, center.y + 200), text: "Go Back"});
+        const goBack = this.add.uiElement(UIElementType.BUTTON, "controlMenu", {position: new Vec2(center.x + 15, center.y + 275), text: "Go Back"});
         goBack.size.set(200, 50);
         goBack.borderWidth = 2;
         goBack.borderColor = Color.WHITE;

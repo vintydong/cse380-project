@@ -102,6 +102,7 @@ class KnightDead extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         this.owner.animation.playIfNotAlready(KnightAnimations.DEAD, false);
         this.owner.tweens.play('DEAD');
+        this.owner.disablePhysics();
     }
 
     public update(deltaT: number): void {
@@ -309,6 +310,16 @@ export class KnightBossController extends BasicEnemyController {
 
     public update(deltaT: number): void {
         super.update(deltaT);
+
+        // Freeze projectiles if paused
+        if (this.owner.frozen) { 
+            this._projectile.getHitbox().freeze(); 
+            this._slash.getHitbox().freeze();
+        }
+        else { 
+            this._projectile.getHitbox().unfreeze(); 
+            this._slash.getHitbox().unfreeze();
+        }
     }
 
     /**
