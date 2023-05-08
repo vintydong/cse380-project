@@ -65,32 +65,14 @@ export default class Level5 extends Level {
         
         /* Tilemap */
         this.load.tilemap(this.tilemapKey, Level5.TILEMAP_PATH);
-
-        /* Menus */
-        this.load.image(LayerManager.PAUSE_SPRITE_KEY, LayerManager.PAUSE_SPRITE_PATH);
-        this.load.image(LayerManager.CONTROL_SPRITE_KEY, LayerManager.CONTROL_SPRITE_PATH);
-        this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
-        this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
-        this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
                 
         /* Audio and Sounds */
-        this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
-        this.load.audio(Level.DASH_AUDIO_KEY, Level.DASH_AUDIO_PATH);
-        this.load.audio(Level.ATTACK_AUDIO_KEY, Level.ATTACK_AUDIO_PATH);
-        this.load.audio(Level.HURT_AUDIO_KEY, Level.HURT_AUDIO_PATH);
-        this.load.audio(Level.DYING_AUDIO_KEY, Level.DYING_AUDIO_PATH);
         // this.load.audio(this.levelMusicKey, Level5.LEVEL_MUSIC_PATH)
 
         /* AI */
-        this.load.spritesheet(Level.PLAYER_SPRITE_KEY, Level.PLAYER_SPRITE_PATH);
         this.load.spritesheet(Level5.ENEMY_SPRITE_KEY, Level5.ENEMY_SPRITE_PATH);
         this.load.spritesheet(Level5.TALON_PROJECTILE_KEY, Level5.TALON_PROJECTILE_PATH);
         this.load.object(Level5.ENEMY_POSITIONS_KEY, Level5.TILEMAP_PATH);
-
-        /* Abilities */
-        this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
-        this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
-        this.load.image(Repel.REPEL_SPRITE_KEY, Repel.REPEL_SPRITE_PATH);
     }
 
     /**
