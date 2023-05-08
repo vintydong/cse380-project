@@ -1,18 +1,12 @@
-import { TalonActor, TalonController, TalonProjectile, TalonProjectileAI } from "../AI/Enemies/Talon";
-import { CustomGameEvents, MenuEvents } from "../CustomGameEvents";
+import { TalonActor, TalonController } from "../AI/Enemies/Talon";
+import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
-import { LayerManager } from "../Systems/LayerManager";
-import { SkillManager } from "../Systems/SkillManager";
-import Melee from "../Systems/Skills/Melee";
 import Repel from "../Systems/Skills/Repel";
-import Slash from "../Systems/Skills/Slash";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
 import { GameEventType } from "../Wolfie2D/Events/GameEventType";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
-import AnimatedSprite from "../Wolfie2D/Nodes/Sprites/AnimatedSprite";
-import OrthogonalTilemap from "../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import RenderingManager from "../Wolfie2D/Rendering/RenderingManager";
 import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
@@ -21,9 +15,9 @@ import Level, { LevelLayers } from "./Level";
 import Level6 from "./Level6";
 
 export default class Level5 extends Level {    
-    public static readonly ENEMY_SPRITE_KEY = "LEVEL5_ENEMY_KEY";
-    public static readonly ENEMY_SPRITE_PATH = "assets/spritesheets/Enemies/Talon/Talon.json";
-    public static readonly ENEMY_POSITIONS_KEY = "LEVEL5_ENEMY_POSITIONS";
+    public static readonly TALON_SPRITE_KEY = "LEVEL5_ENEMY_KEY";
+    public static readonly TALON_SPRITE_PATH = "assets/spritesheets/Enemies/Talon/Talon.json";
+    public static readonly TALON_POSITIONS_KEY = "LEVEL5_ENEMY_POSITIONS";
 
     public static readonly TALON_PROJECTILE_KEY = "TALON_PROJECTILE_KEY"
     public static readonly TALON_PROJECTILE_PATH = "assets/spritesheets/Enemies/Talon/Talon_Projectile.json";
@@ -35,18 +29,10 @@ export default class Level5 extends Level {
     public static readonly TILEMAP_PATH = "assets/tilemaps/level5_tilemap.json";
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
-    public static readonly GROUND_LAYER_KEY = "Ground";
-    public static readonly WALLS_LAYER_KEY = "Walls";
-
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    public static readonly LEVEL_MUSIC_PATH = "assets/music/hw5_level_music.wav";
+    public static readonly LEVEL_MUSIC_PATH = "assets/music/level5_music.mp3"; // Royalty free music from https://www.chosic.com/free-music/dark/
 
     protected talonDyingAudioKey: string;
-    
-    /** The destrubtable layer of the tilemap */
-    protected ground: OrthogonalTilemap;
-    /** The wall layer of the tilemap */
-    protected walls: OrthogonalTilemap;
 
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);
@@ -72,33 +58,17 @@ export default class Level5 extends Level {
         
         /* Tilemap */
         this.load.tilemap(this.tilemapKey, Level5.TILEMAP_PATH);
-
-        /* Menus */
-        this.load.image(LayerManager.PAUSE_SPRITE_KEY, LayerManager.PAUSE_SPRITE_PATH);
-        this.load.image(LayerManager.CONTROL_SPRITE_KEY, LayerManager.CONTROL_SPRITE_PATH);
-        this.load.image(LayerManager.HELP_SPRITE_KEY, LayerManager.HELP_SPRITE_PATH);
-        this.load.image(SkillManager.SKILL_BOOK_SPRITE_KEY, SkillManager.SKILL_BOOK_SPRITE_PATH);
-        this.load.image(Level.ABILITY_ICONS_KEY, Level.ABILITY_ICONS_PATH);
                 
         /* Audio and Sounds */
-        this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
-        this.load.audio(Level.DASH_AUDIO_KEY, Level.DASH_AUDIO_PATH);
-        this.load.audio(Level.ATTACK_AUDIO_KEY, Level.ATTACK_AUDIO_PATH);
-        this.load.audio(Level.HURT_AUDIO_KEY, Level.HURT_AUDIO_PATH);
-        this.load.audio(Level.DYING_AUDIO_KEY, Level.DYING_AUDIO_PATH);
-
+        this.load.audio(this.levelMusicKey, Level5.LEVEL_MUSIC_PATH);
         this.load.audio(Level5.TALON_DYING_AUDIO_KEY, Level5.TALON_DYING_AUDIO_PATH);
-        // this.load.audio(this.levelMusicKey, Level5.LEVEL_MUSIC_PATH)
 
         /* AI */
-        this.load.spritesheet(Level.PLAYER_SPRITE_KEY, Level.PLAYER_SPRITE_PATH);
-        this.load.spritesheet(Level5.ENEMY_SPRITE_KEY, Level5.ENEMY_SPRITE_PATH);
+        this.load.spritesheet(Level5.TALON_SPRITE_KEY, Level5.TALON_SPRITE_PATH);
         this.load.spritesheet(Level5.TALON_PROJECTILE_KEY, Level5.TALON_PROJECTILE_PATH);
-        this.load.object(Level5.ENEMY_POSITIONS_KEY, Level5.TILEMAP_PATH);
+        this.load.object(Level5.TALON_POSITIONS_KEY, Level5.TILEMAP_PATH);
 
         /* Abilities */
-        this.load.image(Melee.MELEE_SPRITE_KEY, Melee.MELEE_SPRITE_PATH);
-        this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
         this.load.image(Repel.REPEL_SPRITE_KEY, Repel.REPEL_SPRITE_PATH);
     }
 
@@ -107,6 +77,16 @@ export default class Level5 extends Level {
      */
     public unloadScene(): void {
         super.unloadScene();
+
+        /* Audio and Sounds */
+        this.load.keepAudio(Level5.TALON_DYING_AUDIO_KEY);
+        // this.load.keepAudio(this.levelMusicKey);
+
+        /* AI */
+        this.load.keepSpritesheet(Level5.TALON_SPRITE_KEY);
+        this.load.keepSpritesheet(Level5.TALON_PROJECTILE_KEY);
+
+        /* Abilities */
         this.load.keepImage(Repel.REPEL_SPRITE_KEY);
 
         // this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: this.levelMusicKey});
@@ -116,14 +96,14 @@ export default class Level5 extends Level {
         super.startScene();
 
         // Initialize enemies
-        let tilemap_json = this.load.getObject(Level5.ENEMY_POSITIONS_KEY);
+        let tilemap_json = this.load.getObject(Level5.TALON_POSITIONS_KEY);
         let enemies = tilemap_json.layers.find(layer => layer.name === "Enemy")
 
         for (let i = 0; i < enemies.objects.length; i++) {
             // Initialize Enemy
-            let enemy = this.factory.addAnimatedSprite(TalonActor, Level5.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as TalonActor
+            let enemy = this.factory.addAnimatedSprite(TalonActor, Level5.TALON_SPRITE_KEY, LevelLayers.PRIMARY) as TalonActor
             enemy.scale.set(2, 2);
-            enemy.position.set(enemies.objects[i].x * this.tilemapScale.x, enemies.objects[i].y * this.tilemapScale.y);
+            // enemy.position.set(enemies.objects[i].x * this.tilemapScale.x, enemies.objects[i].y * this.tilemapScale.y);
             
             enemy.addPhysics(new AABB(enemy.position.clone(), enemy.boundary.getHalfSize().clone()));
             enemy.setGroup(PhysicsGroups.NPC);
@@ -131,22 +111,17 @@ export default class Level5 extends Level {
             enemy.navkey = "navmesh";
 
             enemy.addAI(TalonController, { tilemap: this.tilemapKey });
+            enemy.ai.activate({spawn: new Vec2(enemies.objects[i].x * this.tilemapScale.x, enemies.objects[i].y * this.tilemapScale.y)})
             enemy.animation.play("IDLE");
             this.enemies.push(enemy);
         }
-
-        // Set Level End
-        const levelEnd = new Vec2(23, 55.5).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
-        let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(2 * 8 * 6, 3 * 8 * 6));
-        rect.color = Color.TRANSPARENT;
-        rect.addPhysics();
-        rect.setGroup(PhysicsGroups.LEVEL_END);
-        rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
-
+        
+        // Initialize Viewport
         this.viewport.setBounds(0, 0, 8 * 6 * 30, 8 * 6 * 60);
-
-        this.nextLevel = Level6;
-        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, { key: this.levelMusicKey, loop: true, holdReference: true });
+        
+        // Set Level End
+        this.initializeLevelEnd();
+        
     }
 
     public updateScene(deltaT) {
@@ -165,13 +140,11 @@ export default class Level5 extends Level {
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
             case CustomGameEvents.PLAYER_ENTER_LEVEL_END: {
-                let allEnemiesDefeated = true
                 for (let i = 0; i < this.enemies.length; i++) {
-                    if (this.enemies[i].visible) allEnemiesDefeated = false;
+                    if (this.enemies[i].visible) return;
                 }
-
-                if (allEnemiesDefeated)
-                    this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
+                this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
+                break;
             }
             // Let Level.ts handle it by default
             default:
@@ -180,23 +153,16 @@ export default class Level5 extends Level {
         }
     }
 
-    /**
-     * Initializes the tilemaps
-     * @param key the key for the tilemap data
-     * @param scale the scale factor for the tilemap
-     */
-    protected initializeTilemap(): void {
-        // Get the ground and wall layers 
-        this.ground = this.getTilemap(Level5.GROUND_LAYER_KEY) as OrthogonalTilemap;
-        this.walls = this.getTilemap(Level5.WALLS_LAYER_KEY) as OrthogonalTilemap;
+    private initializeLevelEnd() {
+        const levelEnd = new Vec2(23, 55.5).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
+        let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(2 * 8 * 6, 3 * 8 * 6));
+        rect.color = Color.TRANSPARENT;
+        rect.addPhysics();
+        rect.setGroup(PhysicsGroups.LEVEL_END);
+        rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
-        // Add physics to the ground layer
-        this.ground.addPhysics();
-        this.ground.setGroup(PhysicsGroups.GROUND);
-
-        // Add physicss to the wall layer
-        this.walls.addPhysics();
-        this.walls.setGroup(PhysicsGroups.GROUND);
+        this.nextLevel = Level6;
+        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, { key: this.levelMusicKey, loop: true, holdReference: true });
     }
 
     /* Getters */

@@ -25,8 +25,8 @@ import BasicAttackShaderType from "./Shaders/BasicAttackShaderType";
             {name: PlayerControls.SKILL_BOOK, keys: ["k"]},
             {name: PlayerControls.SKILL_ONE, keys: ["u"]},
             {name: PlayerControls.SKILL_TWO, keys: ["i"]},
-            {name: PlayerControls.SKILL_THREE, keys: ["o"]},
-            {name: PlayerControls.SKILL_FOUR, keys: ["p"]},
+            {name: PlayerControls.SKILL_THREE, keys: ["o", "q"]},
+            {name: PlayerControls.SKILL_FOUR, keys: ["p", "e"]},
         ],
         useWebGL: false,                        // Tell the game we want to use webgl
         showDebug: false                      // Whether to show debug messages. You can change this to true if you want

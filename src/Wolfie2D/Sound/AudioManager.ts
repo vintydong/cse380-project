@@ -198,15 +198,16 @@ export default class AudioManager {
                 let holdReference = event.data.get("holdReference");
 
                 let channel = AudioChannelType.DEFAULT;
+                AudioManager.setVolume(channel, 1);
 
                 if(event.type === GameEventType.PLAY_MUSIC){
                     channel = AudioChannelType.MUSIC;
+                    AudioManager.setVolume(channel, 0.2);
                 } else if(GameEventType.PLAY_SFX){
                     channel = AudioChannelType.SFX;
                 } else if(event.data.has("channel")){
                     channel = event.data.get("channel");
                 }
-
                 this.playSound(soundKey, loop, holdReference, channel, event.data);
             }
 

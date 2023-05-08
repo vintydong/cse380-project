@@ -2,6 +2,7 @@ import { CustomGameEvents } from "../../CustomGameEvents";
 import { PhysicsGroups } from "../../Physics";
 import Level, { LevelLayers } from "../../Scenes/Level";
 import Level5 from "../../Scenes/Level5";
+import Level6 from "../../Scenes/Level6";
 import AI from "../../Wolfie2D/DataTypes/Interfaces/AI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Emitter from "../../Wolfie2D/Events/Emitter";
@@ -124,19 +125,22 @@ class TalonDead extends EnemyState {
         // Non collidable dead body
         this.owner.disablePhysics();
         this.owner.animation.play(TalonAnimations.DEAD);
-        let dashAudio = (this.owner.getScene() as Level5).getTalonDyingAudioKey()
-        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: dashAudio, loop: false, holdReference: false});
+        let dyingAudio = (this.owner.getScene() as Level5).getTalonDyingAudioKey()
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: dyingAudio, loop: false, holdReference: false});
     }
 
     public update(deltaT: number): void { 
         if (!this.owner.animation.isPlaying(TalonAnimations.DEAD)){
             this.deathCleanup()
+            this.finished(TalonStates.AIR)
         }
     }
     
     public deathCleanup(): void {
         this.owner.position = new Vec2(3000, 3000);
         this.owner.visible = false;
+        (this.parent as TalonController).resetStats();
+        this.owner.enablePhysics();
     }
 
     public onExit(): Record<string, any> {
@@ -152,18 +156,20 @@ export class TalonController extends BasicEnemyController {
     protected _cooldown: Timer;
 
     public initializeAI(owner: TalonActor, options: Record<string, any>): void {
+        // Initialize Talon
         super.initializeAI(owner, options);
-        this._projectile = new TalonProjectile(this, this.owner);
-        this._target = this.owner.getScene().getPlayer();
-        this._cooldown = new Timer(2000);
+        this.projectile = new TalonProjectile(this, this.owner);
+        this.target = this.owner.getScene().getPlayer();
+        this.cooldown = new Timer(2000);
         
-        this.health = 50;
+        //Initialize Stats
+        this.health = 40;
         this.MIN_SPEED = 50;
         this.MAX_SPEED = 50;
         this.velocity = Vec2.ZERO;
         this.speed = this.MIN_SPEED;
 
-
+        //Initialize States
         this.addState(TalonStates.AIR, new TalonAir(this, this.owner));
         this.addState(TalonStates.ATTACKING, new TalonAttacking(this, this.owner));
         this.addState(TalonStates.TAKING_DAMAGE, new TalonTakingDamage(this, this.owner));
@@ -175,7 +181,15 @@ export class TalonController extends BasicEnemyController {
         console.log(this);
     }
 
-    public activate(options: Record<string, any>): void { }
+    public activate(options: Record<string, any>): void { 
+        if (options.delay) { 
+            let owner = this.owner
+            var spawnDelay = function() { owner.position.set(options.spawn.x, options.spawn.y); }
+            let timer = new Timer(options.delay, spawnDelay)
+            timer.start();
+        }
+        else this.owner.position.set(options.spawn.x, options.spawn.y)
+    }
 
     public update(deltaT: number): void {
         super.update(deltaT);
@@ -219,6 +233,14 @@ export class TalonController extends BasicEnemyController {
         else {
             this.changeState(TalonStates.TAKING_DAMAGE)
         }
+    }
+
+    public resetStats(): void {
+        this.health = 40;
+        this.MIN_SPEED = 50;
+        this.MAX_SPEED = 50;
+        this.velocity = Vec2.ZERO;
+        this.speed = this.MIN_SPEED;
     }
 
     /** Getters and Setters to enable access in PlayerStates */

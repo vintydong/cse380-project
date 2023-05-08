@@ -4,6 +4,7 @@ export const PhysicsGroups = {
     GROUND: "GROUND",
     DESTRUCTIBLE: "DESTRUCTIBLE",
     NPC: "NPC",
+    NPC_PROJECTILE: "NPC_PROJECTILE",
     NPC_WALLS: "NPC_WALLS",
     LEVEL_END: "LEVEL_END",
 } as const;
@@ -17,14 +18,15 @@ export type PhysicOptions = {
 
 /**
  * Collision map between Physics groups
- *              Ground  Player  Weapon  Destructible    NPC NPC_Walls   LEVEL_END
- * Ground       0       1       1       0               1   0           0
- * Player       1       0       0       1               0   0           0
- * Weapon       1       0       0       1               1   0           0
- * Destructible 0       1       1       0               0   0           0
- * NPC          1       0       1       0               0   1           0
- * NPC_Walls    0       0       0       0               1   1           0
- * LEVEL_END    0       0       0       0               0   0           0
+ *              Ground  Player  Weapon  Destructible    NPC NPC Projectile  NPC_Walls   LEVEL_END
+ * Ground       0       1       1       0               1   0               0           0
+ * Player       1       0       0       1               0   0               0           0
+ * Weapon       1       0       0       1               1   0               0           0
+ * Destructible 0       1       1       0               0   0               0           0
+ * NPC          1       0       1       0               0   0               1           0
+ * NPC Projectil0       0       0       0               0   0               0           0
+ * NPC_Walls    0       0       0       0               1   0               1           0
+ * LEVEL_END    0       0       0       0               0   0               0           0
  */
 export const PhysicsCollisionMap: PhysicOptions = {
         groupNames: [
@@ -33,17 +35,19 @@ export const PhysicsCollisionMap: PhysicOptions = {
             PhysicsGroups.WEAPON, 
             PhysicsGroups.DESTRUCTIBLE,
             PhysicsGroups.NPC,
+            PhysicsGroups.NPC_PROJECTILE,
             PhysicsGroups.NPC_WALLS,
             PhysicsGroups.LEVEL_END,
         ],
         collisions:
         [
-            [0, 1, 1, 0, 1, 0, 0],
-            [1, 0, 0, 1, 0, 0, 0],
-            [1, 0, 0, 1, 1, 0, 0],
-            [0, 1, 1, 0, 0, 0, 0],
-            [1, 0, 1, 0, 0, 1, 0],
-            [0, 0, 0, 0, 1, 1, 0],
-            [0, 0, 0, 0 ,0 ,0, 0]
+            [0, 1, 1, 0, 1, 0, 0, 0],
+            [1, 0, 0, 1, 0, 0, 0, 0],
+            [1, 0, 0, 1, 1, 0, 0, 0],
+            [0, 1, 1, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 1, 0],
+            [0, 0, 0, 0 ,0 ,0, 0, 0]
         ]
 }
