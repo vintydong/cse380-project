@@ -137,6 +137,7 @@ export default class PlayerHUD implements Updateable {
             if(!skill) continue;
 
             let abilityIcon = this.abilityIcons[skill.iconKey];
+            if(!abilityIcon) continue;
             let cd = skill.getCooldownTime();
             if(cd > 0){
                 abilityIcon.alpha = 0.2;
