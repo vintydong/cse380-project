@@ -293,6 +293,7 @@ export class KnightBossController extends BasicEnemyController {
         this.MAX_SPEED = 500;
         this.MIN_SPEED = 500;
         this._health = 150;
+        this._maxHealth = 150;
         this.speed = this.MIN_SPEED
 
         this.addState(KnightBossStates.AIR, new Air(this, this.owner));

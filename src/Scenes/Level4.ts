@@ -1,7 +1,9 @@
+import { BasicEnemyController } from "../AI/BasicEnemyController";
 import { KnightBossActor, KnightBossController } from "../AI/Bosses/KnightBoss";
 import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
 import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
+import BossHUD from "../Systems/HUD/BossHUD";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
@@ -29,6 +31,8 @@ export default class Level4 extends Level {
 
     // The padding of the world
 	private worldPadding: Vec2;
+
+    private bossHP: BossHUD;
 
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);
@@ -90,6 +94,8 @@ export default class Level4 extends Level {
         // rect.setGroup(PhysicsGroups.LEVEL_END);
         // rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
+        this.bossHP = new BossHUD(this, enemy._ai as BasicEnemyController, LevelLayers.UI);
+
         const levelEnd = new Vec2(29, 15.5).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
         let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(2 * 8 * 6, 3 * 8 * 6));
         rect.color = Color.TRANSPARENT;
@@ -115,10 +121,7 @@ export default class Level4 extends Level {
             this.handleEvent(this.receiver.getNextEvent());
         }
 
-        let allEnemiesDefeated = true
-        for(let i = 0; i < this.enemies.length; i++){
-            if(this.enemies[i].visible) allEnemiesDefeated = false;
-        }
+        this.bossHP.update(deltaT);
 
         super.updateScene(deltaT);
     }
