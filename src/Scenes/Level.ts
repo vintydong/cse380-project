@@ -166,6 +166,7 @@ export default abstract class Level extends Scene {
         this.load.keepImage(Melee.MELEE_ICON_KEY);
         this.load.keepImage(Slash.SLASH_ICON_KEY);
         this.load.keepImage(Repel.REPEL_ICON_KEY);
+        this.load.keepImage(Spin.SPIN_ICON_KEY);
         
         /* Audio and Sounds */
         this.load.keepAudio(Level.JUMP_AUDIO_KEY);
@@ -181,6 +182,7 @@ export default abstract class Level extends Scene {
         this.load.keepImage(Melee.MELEE_SPRITE_KEY);
         this.load.keepImage(Slash.SLASH_SPRITE_KEY);
         this.load.keepImage(Repel.REPEL_SPRITE_KEY);
+        this.load.keepSpritesheet(Spin.SPIN_SPRITE_KEY);
     }
 
     /** Common initializations between all levels */

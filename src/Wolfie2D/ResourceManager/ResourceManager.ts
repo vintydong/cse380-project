@@ -172,6 +172,8 @@ export default class ResourceManager {
      * @param path The path to the image to load
      */
     public image(key: string, path: string): void {
+        if(this.images.has(key)) return console.log("Skipping ", key);
+        console.log("Loading", key, path);
         this.loadonly_imageLoadingQueue.enqueue({key: key, path: path});
     }
 
@@ -202,6 +204,7 @@ export default class ResourceManager {
      * @param path The path to the spritesheet to load
      */
     public spritesheet(key: string, path: string): void {
+        if(this.spritesheets.has(key)) return console.log("Skipping ", key);
         this.loadonly_spritesheetLoadingQueue.enqueue({key: key, path: path});
     }
 
@@ -228,6 +231,7 @@ export default class ResourceManager {
      * @param path The path to the audio file to load
      */
     public audio(key: string, path: string): void {
+        if(this.audioBuffers.has(key)) return console.log("Skipping ", key);
         this.loadonly_audioLoadingQueue.enqueue({key: key, path: path});
     }
 
@@ -254,6 +258,7 @@ export default class ResourceManager {
      * @param path The path to the tilemap to load
      */
     public tilemap(key: string, path: string): void {
+        if(this.tilemaps.has(key)) return console.log("Skipping ", key);
         this.loadonly_tilemapLoadingQueue.enqueue({key: key, path: path});
     }
 
@@ -280,6 +285,7 @@ export default class ResourceManager {
      * @param path The path to the json file to load
      */
     public object(key: string, path: string){
+        if(this.jsonObjects.has(key)) return console.log("Skipping ", key);
         this.loadonly_jsonLoadingQueue.enqueue({key: key, path: path});
     }
 
