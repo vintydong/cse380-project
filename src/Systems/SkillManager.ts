@@ -25,8 +25,15 @@ export type LevelUILayer = typeof SkillBookLayers[keyof typeof SkillBookLayers]
 export const SkillBookEvents = {
     LEVEL_UP_MELEE: 'LEVEL_UP_MELEE',
     LEVEL_DOWN_MELEE: 'LEVEL_DOWN_MELEE',
-
+    LEVEL_UP_SLASH: 'LEVEL_UP_SLASH',
+    LEVEL_DOWN_SLASH: 'LEVEL_DOWN_SLASH',
+    LEVEL_UP_REPEL: 'LEVEL_UP_REPEL',
+    LEVEL_DOWN_REPEL: 'LEVEL_DOWN_REPEL',
+    LEVEL_UP_SPIN: 'LEVEL_UP_SPIN',
+    LEVEL_DOWN_SPIN: 'LEVEL_DOWN_SPIN',
 } as const;
+
+const SkillBookEventSuffix = ['MELEE', 'SLASH', 'REPEL', 'SPIN', ''];
 
 export type SkillBookEvent = typeof SkillBookEvents[keyof typeof SkillBookEvents]
 
@@ -50,7 +57,7 @@ export class SkillManager {
     private player: AnimatedSprite;
 
     private skillPoints = 0;
-    private allSkills: [Melee, Slash, Skill, Skill, Skill, Skill];
+    private allSkills: [Melee, Slash, Repel, Spin, Skill, Skill];
     private activeSkills: [Skill, Skill, Skill, Skill];
 
     public static readonly SKILL_BOOK_SPRITE_KEY = "SKILL_BOOK_BG";
@@ -95,6 +102,7 @@ export class SkillManager {
         this.scene = scene;
         this.player = player;
 
+        this.skillPoints = 0;
         this.initSkillBook();
         this.skillBookItems = [];
 
@@ -189,14 +197,14 @@ export class SkillManager {
             }
 
             let subButton = this.scene.factory.addButton(layer, new Vec2(rowLeft, rowCenterY), '-', buttonOptions)
-            subButton.onClickEventId = 'LEVEL_DOWN_MELEE';
+            subButton.onClickEventId = 'LEVEL_DOWN_' + SkillBookEventSuffix[i];
             subButton.font = 'Arial';
             subButton.fontSize = 25;
             subButton.setHAlign(HAlign.CENTER);
             subButton.setVAlign(VAlign.CENTER);
 
             let addButton = this.scene.factory.addButton(layer, new Vec2(rowLeft + 50, rowCenterY), '+', buttonOptions)
-            addButton.onClickEventId = 'LEVEL_UP_MELEE';
+            addButton.onClickEventId = 'LEVEL_UP_' + SkillBookEventSuffix[i];
             addButton.font = 'Arial';
             addButton.fontSize = 25;
             addButton.setHAlign(HAlign.CENTER);
@@ -255,6 +263,24 @@ export class SkillManager {
                 break;
             case SkillBookEvents.LEVEL_UP_MELEE:
                 this.increaseLevel(this.allSkills[0]);
+                break;
+            case SkillBookEvents.LEVEL_DOWN_SLASH:
+                this.decreaseLevel(this.allSkills[1]);
+                break;
+            case SkillBookEvents.LEVEL_UP_SLASH:
+                this.increaseLevel(this.allSkills[1]);
+                break;
+            case SkillBookEvents.LEVEL_DOWN_REPEL:
+                this.decreaseLevel(this.allSkills[2]);
+                break;
+            case SkillBookEvents.LEVEL_UP_REPEL:
+                this.increaseLevel(this.allSkills[2]);
+                break;
+            case SkillBookEvents.LEVEL_DOWN_SPIN:
+                this.decreaseLevel(this.allSkills[3]);
+                break;
+            case SkillBookEvents.LEVEL_UP_SPIN:
+                this.increaseLevel(this.allSkills[3]);
                 break;
         }
         // Redraw skillbook layer on updates

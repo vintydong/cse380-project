@@ -218,6 +218,12 @@ export default abstract class Level extends Scene {
 
         this.receiver.subscribe(SkillBookEvents.LEVEL_DOWN_MELEE);
         this.receiver.subscribe(SkillBookEvents.LEVEL_UP_MELEE);
+        this.receiver.subscribe(SkillBookEvents.LEVEL_DOWN_SLASH);
+        this.receiver.subscribe(SkillBookEvents.LEVEL_UP_SLASH);
+        this.receiver.subscribe(SkillBookEvents.LEVEL_DOWN_REPEL);
+        this.receiver.subscribe(SkillBookEvents.LEVEL_UP_REPEL);
+        this.receiver.subscribe(SkillBookEvents.LEVEL_DOWN_SPIN);
+        this.receiver.subscribe(SkillBookEvents.LEVEL_UP_SPIN);
 
         this.receiver.subscribe(MenuEvents.RESUME);
         this.receiver.subscribe(MenuEvents.PAUSE);
@@ -370,6 +376,12 @@ export default abstract class Level extends Scene {
 
             case SkillBookEvents.LEVEL_DOWN_MELEE:
             case SkillBookEvents.LEVEL_UP_MELEE:
+            case SkillBookEvents.LEVEL_DOWN_SLASH:
+            case SkillBookEvents.LEVEL_UP_SLASH:
+            case SkillBookEvents.LEVEL_DOWN_REPEL:
+            case SkillBookEvents.LEVEL_UP_REPEL:
+            case SkillBookEvents.LEVEL_DOWN_SPIN:
+            case SkillBookEvents.LEVEL_UP_SPIN:
                 this.skill_manager.handleLevelEvent(event.type as SkillBookEvent);
                 break;
 
