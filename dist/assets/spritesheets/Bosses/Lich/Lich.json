@@ -19,6 +19,36 @@
 					"duration": 20
 				}
 			]
+		},
+		{
+			"name": "ATTACKING",
+			"repeat": true,
+			"frames": [
+				{
+					"index": 0,
+					"duration": 20
+				}
+			]
+		},
+		{
+			"name": "TAKING_DAMAGE",
+			"repeat": true,
+			"frames": [
+				{
+					"index": 0,
+					"duration": 20
+				}
+			]
+		},
+		{
+			"name": "DEAD",
+			"repeat": true,
+			"frames": [
+				{
+					"index": 0,
+					"duration": 20
+				}
+			]
 		}
 	]
 }
