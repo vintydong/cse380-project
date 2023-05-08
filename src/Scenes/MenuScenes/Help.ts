@@ -22,6 +22,7 @@ export default class Help extends Scene{
     private cheatHPButton: Button;
     private cheatSkillsButton: Button;
     private cheatDamageButton: Button;
+    private cheatLevelButton: Button;
 
     
     public loadScene(): void {
@@ -58,7 +59,7 @@ export default class Help extends Scene{
         goBack.backgroundColor = Color.TRANSPARENT;
         goBack.onClickEventId = "goBack";
 
-        const cheatHealth = this.add.uiElement(UIElementType.BUTTON, "helpMenu", {position: new Vec2(center.x - 300, center.y + 200), text: "No Damage"});
+        const cheatHealth = this.add.uiElement(UIElementType.BUTTON, "helpMenu", {position: new Vec2(center.x - 450, center.y + 200), text: "No Damage"});
         cheatHealth.size.set(200, 50);
         cheatHealth.borderWidth = 2;
         cheatHealth.borderColor = cheatManager.getInfiniteHP() ? Color.BLACK: Color.WHITE;
@@ -66,7 +67,7 @@ export default class Help extends Scene{
         cheatHealth.onClickEventId = "cheat_hp";
         this.cheatHPButton = cheatHealth as Button;
 
-        const cheatSkills = this.add.uiElement(UIElementType.BUTTON, "helpMenu", {position: new Vec2(center.x, center.y + 200), text: "Infinite Skills"});
+        const cheatSkills = this.add.uiElement(UIElementType.BUTTON, "helpMenu", {position: new Vec2(center.x - 150, center.y + 200), text: "Infinite Skills"});
         cheatSkills.size.set(200, 50);
         cheatSkills.borderWidth = 2;
         cheatSkills.borderColor = cheatManager.getInfiniteSkills() ? Color.BLACK: Color.WHITE;
@@ -74,7 +75,7 @@ export default class Help extends Scene{
         cheatSkills.onClickEventId = "cheat_skills";
         this.cheatSkillsButton = cheatSkills as Button;
 
-        const cheatDamage = this.add.uiElement(UIElementType.BUTTON, "helpMenu", {position: new Vec2(center.x + 300, center.y + 200), text: "One-Shot Enemy"});
+        const cheatDamage = this.add.uiElement(UIElementType.BUTTON, "helpMenu", {position: new Vec2(center.x + 150, center.y + 200), text: "One-Shot Enemy"});
         cheatDamage.size.set(200, 50);
         cheatDamage.borderWidth = 2;
         cheatDamage.borderColor = cheatManager.getInfiniteDamage() ? Color.BLACK: Color.WHITE;
@@ -82,10 +83,19 @@ export default class Help extends Scene{
         cheatDamage.onClickEventId = "cheat_damage";
         this.cheatDamageButton = cheatDamage as Button;
 
+        const cheatLevel = this.add.uiElement(UIElementType.BUTTON, "helpMenu", {position: new Vec2(center.x + 450, center.y + 200), text: "Unlock all Levels"});
+        cheatLevel.size.set(200, 50);
+        cheatLevel.borderWidth = 2;
+        cheatLevel.borderColor = cheatManager.getUnlockAllLevels() ? Color.BLACK: Color.WHITE;
+        cheatLevel.backgroundColor = cheatManager.getUnlockAllLevels() ? Color.BLACK: Color.TRANSPARENT;
+        cheatLevel.onClickEventId = "cheat_level";
+        this.cheatLevelButton = cheatLevel as Button;
+
         this.receiver.subscribe("goBack");
         this.receiver.subscribe("cheat_hp");
         this.receiver.subscribe("cheat_skills");
         this.receiver.subscribe("cheat_damage");
+        this.receiver.subscribe("cheat_level");
     }
 
     public updateScene(){
@@ -96,6 +106,8 @@ export default class Help extends Scene{
             this.cheatSkillsButton.backgroundColor = this.cheatManager.getInfiniteSkills() ? Color.GRAY: Color.TRANSPARENT;
             this.cheatDamageButton.borderColor = this.cheatManager.getInfiniteDamage() ? Color.BLACK: Color.WHITE;
             this.cheatDamageButton.backgroundColor = this.cheatManager.getInfiniteDamage() ? Color.GRAY: Color.TRANSPARENT;
+            this.cheatLevelButton.borderColor = this.cheatManager.getUnlockAllLevels() ? Color.BLACK: Color.WHITE;
+            this.cheatLevelButton.backgroundColor = this.cheatManager.getUnlockAllLevels() ? Color.GRAY: Color.TRANSPARENT;
         }
 
         while(this.receiver.hasNextEvent()){
@@ -118,6 +130,9 @@ export default class Help extends Scene{
                 break;
             case 'cheat_damage':
                 this.cheatManager.toggleInfiniteDamage();
+                break;
+            case 'cheat_level':
+                this.cheatManager.toggleUnlockAllLevels();
                 break;
             default:
                 throw new Error(`Event handler not implemented for event type ${event.type}`)
