@@ -46,23 +46,23 @@
 			"frames": [
 				{
 					"index": 8,
-					"duration": 5
+					"duration": 10
 				},
 				{
 					"index": 9,
-					"duration": 5
+					"duration": 10
 				},
 				{
 					"index": 10,
-					"duration": 5
+					"duration": 10
 				},
 				{
 					"index": 11,
-					"duration": 5
+					"duration": 10
 				},
 				{
 					"index": 12,
-					"duration": 5
+					"duration": 30
 				}
 			]
 		},
@@ -90,39 +90,39 @@
 		},
 		{
 			"name": "DEAD",
-			"repeat": true,
+			"repeat": false,
 			"frames": [
 				{
 					"index": 24,
-					"duration": 5
+					"duration": 10
 				},
 				{
 					"index": 25,
-					"duration": 5
+					"duration": 10
 				},
 				{
 					"index": 26,
-					"duration": 5
+					"duration": 10
 				},
 				{
 					"index": 27,
-					"duration": 5
+					"duration": 10
 				},
 				{
 					"index": 28,
-					"duration": 5
+					"duration": 10
 				},
 				{
 					"index": 29,
-					"duration": 5
+					"duration": 10
 				},
 				{
 					"index": 30,
-					"duration": 5
+					"duration": 10
 				},
 				{
 					"index": 31,
-					"duration": 5
+					"duration": 10
 				}
 			]
 		}
