@@ -1,5 +1,4 @@
-import demoEnemyActor from "../AI/demo_enemy/demoEnemyActor";
-import demoEnemyController from "../AI/demo_enemy/demoEnemyController";
+import { KnightActor, KnightController } from "../AI/Enemies/Knight";
 import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
@@ -11,6 +10,7 @@ import SceneManager from "../Wolfie2D/Scene/SceneManager";
 import Viewport from "../Wolfie2D/SceneGraph/Viewport";
 import Level, { LevelLayers } from "./Level";
 import MainMenu from "./MenuScenes/MainMenu";
+import Level4 from "./Level4";
 
 export default class Level3 extends Level {
     public static readonly ENEMY_SPRITE_KEY = "LEVEL3_ENEMY_KEY";
@@ -82,7 +82,7 @@ export default class Level3 extends Level {
         let enemies = tilemap_json.layers.find(layer => layer.name === "Enemy")
 
         for (let i = 0; i < enemies.objects.length; i++) {
-            let enemy = this.factory.addAnimatedSprite(demoEnemyActor, Level3.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as demoEnemyActor
+            let enemy = this.factory.addAnimatedSprite(KnightActor, Level3.ENEMY_SPRITE_KEY, LevelLayers.PRIMARY) as KnightActor
             enemy.position.set(enemies.objects[i].x * 6, enemies.objects[i].y * 6);
             enemy.addPhysics(new AABB(enemy.position, new Vec2(16 * 2.5, 16 * 2.5)));
             enemy.setGroup(PhysicsGroups.NPC);
@@ -93,7 +93,7 @@ export default class Level3 extends Level {
             // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
             // this.healthbars.set(npc.id, healthbar);
 
-            enemy.addAI(demoEnemyController, { tilemap: this.tilemapKey });
+            enemy.addAI(KnightController, { tilemap: this.tilemapKey });
             enemy.animation.play("IDLE");
             this.enemies.push(enemy);
         }
@@ -110,6 +110,9 @@ export default class Level3 extends Level {
         // rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
         this.viewport.setBounds(8 * 6, 8 * 6, 8 * 6 * 54, 8 * 6 * 29);
+
+        this.nextLevel = Level4;
+
         this.emitter.fireEvent(GameEventType.PLAY_MUSIC, { key: this.levelMusicKey, loop: true, holdReference: true });
     }
 
@@ -139,7 +142,6 @@ export default class Level3 extends Level {
         switch (event.type) {
             case CustomGameEvents.LEVEL_END:
             case CustomGameEvents.LEVEL_NEXT: {
-                this.sceneManager.changeToScene(MainMenu);
                 break;
             }
             default:
