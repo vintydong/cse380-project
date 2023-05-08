@@ -137,7 +137,8 @@ export class SlimeController extends BasicEnemyController {
         this.velocity = Vec2.ZERO;
         this.MAX_SPEED = 400;
         this.MIN_SPEED = 400;
-        this._health = 100;
+        this._maxHealth = 40;
+        this._health = 40;
         this.speed = this.MIN_SPEED
 
         this.addState(SlimeStates.AIR, new Air(this, this.owner));

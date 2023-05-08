@@ -393,6 +393,7 @@ export default abstract class Level extends Scene {
                 this.layer_manager.hidePauseMenu();
                 this.unfreezeLevel();
                 this.sceneManager.changeToScene(MainMenu);
+                // this.sceneManager.changeToScene(this.constructor as any);
                 break;
 
             case MenuEvents.CONTROLS:

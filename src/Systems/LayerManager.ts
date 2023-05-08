@@ -128,7 +128,7 @@ export class LayerManager {
             borderColor: Color.WHITE,
             backgroundColor: Color.WHITE,
             textColor: Color.BLACK,
-            fontSize: 14,
+            fontSize: 20,
         };
 
         const resume = this.scene.factory.addButton(LevelUILayers.PAUSE, new Vec2(center.x, center.y - 120), "Resume", {...escMenuButtonProps, onClickEventId: MenuEvents.RESUME});
