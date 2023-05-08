@@ -23,7 +23,7 @@ export default class Level1 extends Level {
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    public static readonly LEVEL_MUSIC_PATH = "assets/music/area1_music.mp3";
+    public static readonly LEVEL_MUSIC_PATH = "assets/music/exploration.mp3";
 
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);
@@ -88,7 +88,7 @@ export default class Level1 extends Level {
         }
 
         // Set level end
-        const levelEnd = new Vec2(54.5, 14).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
+        const levelEnd = new Vec2(75.5, 14).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
         let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(3 * 8 * 6, 4 * 8 * 6));
         rect.color = Color.TRANSPARENT;
         rect.addPhysics();

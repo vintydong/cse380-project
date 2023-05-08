@@ -27,7 +27,7 @@ export default class Level2 extends Level {
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    public static readonly LEVEL_MUSIC_PATH = "assets/music/area1_music.mp3";
+    public static readonly LEVEL_MUSIC_PATH = "assets/music/exploration.mp3";
     
     // The padding of the world
 	private worldPadding: Vec2;
@@ -44,7 +44,7 @@ export default class Level2 extends Level {
         this.levelMusicKey = Level2.LEVEL_MUSIC_KEY;
 
         // Set the player's spawn
-        this.playerSpawn = new Vec2(164 * 6, 112 * 6);
+        this.playerSpawn = new Vec2(2 * 8 * 6, 2 * 8 * 6);
         // Music and sound
     }
 
@@ -106,7 +106,8 @@ export default class Level2 extends Level {
         // Set level end
         const levelEnd = new Vec2(20.5, 14).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
         let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(3 * 8 * 6, 4 * 8 * 6));
-        rect.color = Color.RED;
+        // rect.color = Color.RED;
+        rect.color = Color.TRANSPARENT;
         rect.addPhysics();
         rect.setGroup(PhysicsGroups.LEVEL_END);
         rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
@@ -171,7 +172,7 @@ export default class Level2 extends Level {
 
             // let healthbar = new HealthbarHUD(this, npc, "primary", {size: npc.size.clone().scaled(2, 1/2), offset: npc.size.clone().scaled(0, -1/2)});
             // this.healthbars.set(npc.id, healthbar);
-            enemy.addAI(SlimeBossController, { tilemap: this.tilemapKey });
+            enemy.addAI(SlimeBossController, { tilemap: this.tilemapKey, hp: 50 });
 
             enemy.visible = true;
         }
