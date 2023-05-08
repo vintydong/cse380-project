@@ -80,7 +80,7 @@ class LichIdle extends EnemyState {
     public onEnter(options: Record<string, any>): void {
         this.owner.animation.play(LichAnimations.IDLE);
         // Delay before hitting player
-        if (this.parent.cooldown.hasRun() === false) { this.parent.cooldown.start(); }
+        // if (this.parent.cooldown.hasRun() === false) { this.parent.cooldown.start(); }
 
         // Up the difficulty >:)
         if (this.parent.health <= this.parent.maxHealth/2) { this.parent.maxProjectiles = 8; }
@@ -281,6 +281,7 @@ export class LichController extends BasicEnemyController {
     protected _target: AnimatedSprite;
     protected _currentAttack: number;
     protected _cooldown: Timer;
+    protected _startPause: Timer;
     protected _maxProjectiles: number;
     protected _wandProjectiles: Array<WandProjectile>;
     protected _pentacleProjectiles: Array<AnimatedSprite>;
@@ -292,6 +293,9 @@ export class LichController extends BasicEnemyController {
         super.initializeAI(owner, options);
         this.target = this.owner.getScene().getPlayer();
         this.cooldown = new Timer(5000);
+        this.startPause = new Timer(5000, () => this.owner.unfreeze());
+        this.owner.freeze();
+        this.startPause.start();
 
         // Initialize Stats
         this.maxHealth = 200;
@@ -356,7 +360,7 @@ export class LichController extends BasicEnemyController {
     public update(deltaT: number): void {
         super.update(deltaT);
 
-        // this.handleFreeze(); 
+        this.handleFreeze(); 
     }
 
     /**
@@ -390,19 +394,42 @@ export class LichController extends BasicEnemyController {
     }
 
     public handleFreeze(): void {
-        // this.owner.getScene().getLayer(LevelLayers.PRIMARY).isPaused()
         // Freeze projectiles if paused
         if (this.owner.frozen) { 
-            // for (let i = 0; i < this.projectiles.length; i++) {
-            //     this.projectiles[i].getHitbox().freeze(); 
-            //     this.projectiles[i].getHitbox().animation.pause();
-            // }
+            for (let i = 0; i < this.wandProjectiles.length; i++) {
+                this.wandProjectiles[i].getHitbox().freeze(); 
+                this.wandProjectiles[i].getHitbox().animation.pause();
+            }
+            for (let i = 0; i < this.pentacleProjectiles.length; i++) {
+                this.pentacleProjectiles[i].freeze(); 
+                this.pentacleProjectiles[i].animation.pause();
+            }
+            for (let i = 0; i < this.cupProjectiles.length; i++) {
+                this.cupProjectiles[i].getHitbox().freeze(); 
+                this.cupProjectiles[i].getHitbox().animation.pause();
+            }
+            for (let i = 0; i < this.swordProjectiles.length; i++) {
+                this.swordProjectiles[i].getHitbox().freeze(); 
+                this.swordProjectiles[i].getHitbox().animation.pause();
+            }
         }
         else { 
-            // for (let i = 0; i < this.projectiles.length; i++) {
-            //     this.projectiles[i].getHitbox().unfreeze(); 
-            //     this.projectiles[i].getHitbox().animation.resume();
-            // }
+            for (let i = 0; i < this.wandProjectiles.length; i++) {
+                this.wandProjectiles[i].getHitbox().unfreeze(); 
+                this.wandProjectiles[i].getHitbox().animation.resume();
+            }
+            for (let i = 0; i < this.pentacleProjectiles.length; i++) {
+                this.pentacleProjectiles[i].unfreeze(); 
+                this.pentacleProjectiles[i].animation.resume();
+            }
+            for (let i = 0; i < this.cupProjectiles.length; i++) {
+                this.cupProjectiles[i].getHitbox().unfreeze(); 
+                this.cupProjectiles[i].getHitbox().animation.resume();
+            }
+            for (let i = 0; i < this.swordProjectiles.length; i++) {
+                this.swordProjectiles[i].getHitbox().unfreeze(); 
+                this.swordProjectiles[i].getHitbox().animation.resume();
+            }
         }
     }
 
@@ -415,6 +442,9 @@ export class LichController extends BasicEnemyController {
     
     public get cooldown(): Timer { return this._cooldown; }
     public set cooldown(cooldown: Timer) { this._cooldown = cooldown; }
+
+    public get startPause(): Timer { return this._startPause; }
+    public set startPause(startPause: Timer) { this._startPause = startPause; }
     
     public get maxProjectiles(): number { return this._maxProjectiles; }
     public set maxProjectiles(maxProjetiles: number) { this._maxProjectiles = maxProjetiles; }
@@ -465,7 +495,6 @@ export abstract class LichProjectile {
     public activate(options?: Record<string, any>) {
         const { spawn, delay, direction } = options;
         this.hitbox.invertX = (direction.x < 0) ? true : false;
-        this.hitbox.invertY = (direction.y < 0) ? true : false;
         
         // Bring this projectile to life
         if (!this.hitbox.visible){
