@@ -36,6 +36,7 @@ export default class Melee extends Skill {
     public initialize(){
         let scene = this.skill_manager.getScene();
 
+        this.level = 0;
         this.cooldown = [new Timer(800), new Timer(600), new Timer(400)];
         
         this.hitbox = scene.add.sprite(Melee.MELEE_SPRITE_KEY, LevelLayers.PRIMARY)

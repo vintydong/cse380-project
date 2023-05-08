@@ -29,7 +29,7 @@ export default abstract class Skill {
     public constructor(skill_manager: SkillManager, damage, cooldown, cost, description, iconKey){
         this.skill_manager = skill_manager;
 
-        this.level = 0;
+        this.level = -1;
         this.damage = damage;
         this.cooldown = cooldown;
         this.cost = cost;
@@ -79,4 +79,8 @@ export default abstract class Skill {
         return true;
     }
 
+    /** Get the currentlevel of this skill */
+    public getLevel(): number {
+        return this.level + 1;
+    }
 }
