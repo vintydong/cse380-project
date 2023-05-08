@@ -127,6 +127,10 @@ export class SkillManager {
         this.emitter = new Emitter();
 
         this.cheatManager = CheatManager.getInstance();
+        if(this.cheatManager.getInfiniteSkills()){
+            this.maxSkillPoints = 99;
+            this.skillPoints = 99;
+        }
     }
 
     /** Setups the layer and sprites */
@@ -226,7 +230,7 @@ export class SkillManager {
             rowLeft = rowLeft + 180;
 
             let attributes = this.scene.factory.addLabel(layer, new Vec2(rowLeft, rowCenterY), `DMG: ${damage}\tCD: ${(cooldown / 1000).toFixed(1)}`)
-            attributes.backgroundColor = new Color(255, 0, 0, 0.5);
+            // attributes.backgroundColor = new Color(255, 0, 0, 0.5);
             attributes.size = new Vec2(200, rowHeight / 2);
             attributes.setHAlign(HAlign.CENTER)
             attributes.fontSize = 25;
@@ -235,7 +239,7 @@ export class SkillManager {
             let desc = this.scene.factory.addLabel(layer, new Vec2(rowLeft, rowCenterY), description)
             desc.size = new Vec2(275, rowHeight/2)
             desc.fontSize = 25;
-            desc.backgroundColor = new Color(255, 0, 0, 0.5);
+            // desc.backgroundColor = new Color(255, 0, 0, 0.5);
             desc.setHAlign(HAlign.LEFT);
             desc.setVAlign(VAlign.CENTER);
 
@@ -258,9 +262,15 @@ export class SkillManager {
         let pointsLabelPos = center.clone();
         pointsLabelPos.y = pointsLabelPos.y + 200;
         this.skillPointsLabel = this.scene.factory.addLabel(layer, pointsLabelPos, `Skill Points: ${this.skillPoints}`);
-        this.skillPointsLabel.backgroundColor = new Color(255, 0, 0, 0.5);
+        // this.skillPointsLabel.backgroundColor = new Color(255, 0, 0, 0.5);
         this.skillPointsLabel.size = new Vec2(200, rowHeight / 2);
         this.skillPointsLabel.fontSize = 25;
+
+        let warning = this.scene.factory.addLabel(layer, pointsLabelPos.clone().add(new Vec2(0, 25)), `Note: Once you learn a skill, you cannot unlearn it`);
+        // warning.backgroundColor = new Color(255, 0, 0, 0.5);
+        warning.textColor = Color.RED;
+        warning.size = new Vec2(200, rowHeight / 2);
+        warning.fontSize = 25;
     }
 
     /** Update each row of the skill book with the current skill attributes */
@@ -344,10 +354,9 @@ export class SkillManager {
 
     private increaseLevel(skill: Skill){
         // console.log("Increase level");
-        if(skill && this.skillPoints > 0){
+        if(skill && this.skillPoints > 0 && skill.changeLevel(1)){
             this.skillPoints--;
             this.skillPointsSpent++;
-            skill.changeLevel(1);
         }
     }
 
@@ -365,7 +374,7 @@ export class SkillManager {
      * @returns true if the skill can be activated; false if on cooldown
     */
     public getSkillCooldown(index: number): boolean {
-        if (this.cheatManager.getInfiniteSkills())
+        if (this.cheatManager.getInfiniteSkills() && this.activeSkills[index])
             return true;
         if (index > 3 || index < 0) return false;
 

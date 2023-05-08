@@ -1,17 +1,14 @@
 import { CustomGameEvents } from "../../CustomGameEvents";
-import { PhysicsGroups } from "../../Physics";
 import CheatManager from "../../Systems/CheatManager";
-import Level from "../../Scenes/Level";
 import StateMachineAI from "../../Wolfie2D/AI/StateMachineAI";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
-import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Input from "../../Wolfie2D/Input/Input";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
-import { Ground, Air, Dash, Dead, Knockback, PlayerState } from './PlayerStates';
+import { Air, Dash, Dead, Ground, Knockback } from './PlayerStates';
 
 /**
  * Specify any keybindings needed for the player
@@ -29,6 +26,15 @@ export enum PlayerControls {
     SKILL_FOUR = "SKILL_FOUR",
     SKILL_BOOK = "SKILL_BOOK",
     PAUSE_GAME = "PAUSE_GAME",
+
+    // Cheat code keybinds
+    INVULNERABLE = "INVULNERABLE",
+    LEVEL_ONE = "LEVEL_ONE",
+    LEVEL_TWO = "LEVEL_TWO",
+    LEVEL_THREE = "LEVEL_THREE",
+    LEVEL_FOUR = "LEVEL_FOUR",
+    LEVEL_FIVE = "LEVEL_FIVE",
+    LEVEL_SIX = "LEVEL_SIX",
 }
 
 export enum PlayerStates {

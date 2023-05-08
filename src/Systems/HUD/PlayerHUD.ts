@@ -5,6 +5,7 @@ import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import Color from "../../Wolfie2D/Utils/Color";
+import CheatManager from "../CheatManager";
 
 /**
  * A UI component representing the player's hp, resource, etc.
@@ -56,6 +57,9 @@ export default class PlayerHUD implements Updateable {
         this.healthBarBg.borderWidth = 1;
         this.healthBarBg.borderColor = Color.BLACK;
         this.healthBarBg.backgroundColor = Color.TRANSPARENT;
+
+        if(CheatManager.getInstance().getInfiniteHP())
+            this.healthBarBg.borderColor = Color.MAGENTA
 
         // Resource Bar
         // this.resourceBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 105), "");

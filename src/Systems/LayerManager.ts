@@ -8,12 +8,15 @@ import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import { TweenableProperties } from "../Wolfie2D/Nodes/GameNode";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Rect from "../Wolfie2D/Nodes/Graphics/Rect";
+import Button from "../Wolfie2D/Nodes/UIElements/Button";
 import Label, { HAlign, VAlign } from "../Wolfie2D/Nodes/UIElements/Label";
+import { UIElementType } from "../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import Layer from "../Wolfie2D/Scene/Layer";
 import UILayer from "../Wolfie2D/Scene/Layers/UILayer";
 import Timer from "../Wolfie2D/Timing/Timer";
 import Color from "../Wolfie2D/Utils/Color";
 import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
+import CheatManager from "./CheatManager";
 
 export const LevelUILayers = {
     PAUSE: "PAUSE",
@@ -32,7 +35,7 @@ export class LayerManager {
     private scene: Level;
 
     public static readonly PAUSE_SPRITE_KEY = "PAUSE_MENU";
-    public static readonly PAUSE_SPRITE_PATH = "assets/sprites/menus/escMenu.png";
+    public static readonly PAUSE_SPRITE_PATH = "assets/sprites/menus/esc_menu_2.png";
     
     public static readonly CONTROL_SPRITE_KEY = "CONTROL_MENU";
     public static readonly CONTROL_SPRITE_PATH = "assets/sprites/menus/controls.png";
@@ -49,6 +52,9 @@ export class LayerManager {
     private transitionScreen: Rect;
     private transitionLabel: Label;
     private endLevelTimer: Timer;
+    cheatHPButton: Button;
+    cheatSkillsButton: Button;
+    cheatDamageButton: Button;
 
     public constructor(scene: Level){
         this.scene = scene;
@@ -94,7 +100,20 @@ export class LayerManager {
     public showHelpLayer(){
         this.pauseLayer.disable();
         this.controlLayer.disable();
+
+        this.updateHelpLayer();
+
         this.helpLayer.enable();
+    }
+
+    updateHelpLayer() {
+        let cheatManager = CheatManager.getInstance();
+        this.cheatHPButton.borderColor = cheatManager.getInfiniteHP() ? Color.BLACK: Color.WHITE;
+        this.cheatHPButton.backgroundColor = cheatManager.getInfiniteHP() ? Color.GRAY: Color.TRANSPARENT;
+        this.cheatSkillsButton.borderColor = cheatManager.getInfiniteSkills() ? Color.BLACK: Color.WHITE;
+        this.cheatSkillsButton.backgroundColor = cheatManager.getInfiniteSkills() ? Color.GRAY: Color.TRANSPARENT;
+        this.cheatDamageButton.borderColor = cheatManager.getInfiniteDamage() ? Color.BLACK: Color.WHITE;
+        this.cheatDamageButton.backgroundColor = cheatManager.getInfiniteDamage() ? Color.GRAY: Color.TRANSPARENT;
     }
 
     public togglePauseLayer(){
@@ -108,7 +127,7 @@ export class LayerManager {
         // INITIALIZE SPRITE FOR THE PAUSE MENU
         let center = this.scene.getViewport().getCenter();
         escMenu.position.set(center.x, center.y);
-        escMenu.scale = new Vec2(0.71, 0.71);
+        escMenu.scale = new Vec2(4.5, 6.5);
         escMenu.tweens.add('fadeOut', {
             startDelay: 0,
             duration: 750,
@@ -123,10 +142,10 @@ export class LayerManager {
         });
 
         const escMenuButtonProps = {
-            size: new Vec2(150, 50),
-            borderWidth: 2,
-            borderColor: Color.WHITE,
-            backgroundColor: Color.WHITE,
+            size: new Vec2(100, 50),
+            borderWidth: 0,
+            borderColor: Color.TRANSPARENT,
+            backgroundColor: new Color(255,255,255,0.2),
             textColor: Color.BLACK,
             fontSize: 20,
         };
@@ -200,6 +219,36 @@ export class LayerManager {
             fontSize: 14,
             onClickEventId: MenuEvents.PAUSE
         })
+
+        let cheatManager = CheatManager.getInstance();
+
+        const cheatHealth = this.scene.add.uiElement(UIElementType.BUTTON, LevelUILayers.HELP, {position: new Vec2(center.x - 300, center.y + 200), text: "No Damage"});
+        cheatHealth.size.set(200, 50);
+        cheatHealth.borderWidth = 2;
+        cheatHealth.borderColor = cheatManager.getInfiniteHP() ? Color.BLACK: Color.WHITE;
+        cheatHealth.backgroundColor = cheatManager.getInfiniteHP() ? Color.BLACK: Color.TRANSPARENT;
+        cheatHealth.onClickEventId = "cheat_hp";
+        this.cheatHPButton = cheatHealth as Button;
+
+        const cheatSkills = this.scene.add.uiElement(UIElementType.BUTTON, LevelUILayers.HELP, {position: new Vec2(center.x, center.y + 200), text: "Infinite Skills"});
+        cheatSkills.size.set(200, 50);
+        cheatSkills.borderWidth = 2;
+        cheatSkills.borderColor = cheatManager.getInfiniteSkills() ? Color.BLACK: Color.WHITE;
+        cheatSkills.backgroundColor = cheatManager.getInfiniteSkills() ? Color.BLACK: Color.TRANSPARENT;
+        // cheatSkills.onClickEventId = "cheat_skills";
+        let note = this.scene.add.uiElement(UIElementType.LABEL, LevelUILayers.HELP, {position: new Vec2(center.x, center.y + 250), text: "Note: Activate in main menu"}) as Label;
+        note.textColor = Color.RED;
+        note.fontSize = 25;
+        
+        this.cheatSkillsButton = cheatSkills as Button;
+
+        const cheatDamage = this.scene.add.uiElement(UIElementType.BUTTON, LevelUILayers.HELP, {position: new Vec2(center.x + 300, center.y + 200), text: "One-Shot Enemy"});
+        cheatDamage.size.set(200, 50);
+        cheatDamage.borderWidth = 2;
+        cheatDamage.borderColor = cheatManager.getInfiniteDamage() ? Color.BLACK: Color.WHITE;
+        cheatDamage.backgroundColor = cheatManager.getInfiniteDamage() ? Color.BLACK: Color.TRANSPARENT;
+        cheatDamage.onClickEventId = "cheat_damage";
+        this.cheatDamageButton = cheatDamage as Button;
     }
 
     private initTransitionLayer() {
@@ -276,7 +325,7 @@ export class LayerManager {
         })
         this.transitionLabel.visible = false;
 
-        this.endLevelTimer = new Timer(2000, () => { this.transitionScreen.tweens.play("fadeIn"); })
+        this.endLevelTimer = new Timer(3000, () => { this.transitionScreen.tweens.play("fadeIn"); })
     }
 
     public startLevel(){

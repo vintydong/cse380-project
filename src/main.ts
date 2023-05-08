@@ -27,6 +27,15 @@ import BasicAttackShaderType from "./Shaders/BasicAttackShaderType";
             {name: PlayerControls.SKILL_TWO, keys: ["i"]},
             {name: PlayerControls.SKILL_THREE, keys: ["o", "q"]},
             {name: PlayerControls.SKILL_FOUR, keys: ["p", "e"]},
+            // Cheat codes
+            {name: PlayerControls.INVULNERABLE, keys: ['i']},
+            {name: PlayerControls.LEVEL_ONE, keys: ['1']},
+            {name: PlayerControls.LEVEL_TWO, keys: ['2']},
+            {name: PlayerControls.LEVEL_THREE, keys: ['3']},
+            {name: PlayerControls.LEVEL_FOUR, keys: ['4']},
+            {name: PlayerControls.LEVEL_FIVE, keys: ['5']},
+            {name: PlayerControls.LEVEL_SIX, keys: ['6']},
+
         ],
         useWebGL: false,                        // Tell the game we want to use webgl
         showDebug: false                      // Whether to show debug messages. You can change this to true if you want

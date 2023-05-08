@@ -77,7 +77,7 @@ export abstract class PlayerState extends State {
         // Attacking animations
         if (Input.isJustPressed(PlayerControls.SKILL_ONE) || (Input.isMouseJustPressed(0) && !scene.getSkillManager().isOpen()))
             this.skillFired = CustomGameEvents.SKILL_1_FIRED
-        else if (Input.isJustPressed(PlayerControls.SKILL_TWO) || (Input.isMouseJustPressed(0) && !scene.getSkillManager().isOpen()))
+        else if (Input.isJustPressed(PlayerControls.SKILL_TWO) || (Input.isMouseJustPressed(2) && !scene.getSkillManager().isOpen()))
             this.skillFired = CustomGameEvents.SKILL_2_FIRED
         else if (Input.isJustPressed(PlayerControls.SKILL_THREE))
             this.skillFired = CustomGameEvents.SKILL_3_FIRED
