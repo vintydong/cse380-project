@@ -335,7 +335,7 @@ export class KnightController extends BasicEnemyController {
         this.velocity = Vec2.ZERO;
         this.MAX_SPEED = 400;
         this.MIN_SPEED = 400;
-        this._health = 35;
+        this._health = 50;
         this.speed = this.MIN_SPEED
 
         this.addState(KnightStates.AIR, new Air(this, this.owner));

@@ -27,7 +27,7 @@ export default class Level4 extends Level {
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
-    public static readonly LEVEL_MUSIC_PATH = "assets/music/area2_music.wav";
+    public static readonly LEVEL_MUSIC_PATH = "assets/music/level4_music.mp3";
 
     // The padding of the world
 	private worldPadding: Vec2;

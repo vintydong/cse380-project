@@ -15,12 +15,15 @@ import LevelSelect from "./LevelSelect";
 import Controls from "./Controls";
 import Level1 from "../Level1";
 import { SkillManager } from "../../Systems/SkillManager";
+import CheatManager from "../../Systems/CheatManager";
 
 export default class MainMenu extends Scene {
     // Need layers for multiple scenes such as mainMenu, about, control, help, levels, etc.
     private mainMenu: Layer;
 
     private menu: Sprite;
+
+    private cheat: CheatManager;
     
     public loadScene(): void {
         /** Audio */
@@ -38,6 +41,8 @@ export default class MainMenu extends Scene {
     public startScene(): void {
         const center = this.viewport.getCenter();
         const {x: halfX, y: halfY} = this.viewport.getHalfSize();
+
+        this.cheat = CheatManager.getInstance();
 
         // Reset skill manager levels when you reach the main menu
         SkillManager.resetSkills();
@@ -74,14 +79,22 @@ export default class MainMenu extends Scene {
         // demo.backgroundColor = Color.TRANSPARENT;
         // // this.mainMenu.disable();
         // demo.onClickEventId = "demo";
-
         const levelSelect = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 75), text: "Select Level"})
         levelSelect.size.set(200, 50);
         levelSelect.borderWidth = 2;
-        levelSelect.borderColor = Color.WHITE;
-        levelSelect.backgroundColor = Color.TRANSPARENT;
-        // this.mainMenu.disable();
-        levelSelect.onClickEventId = "level";
+        
+        console.log(this.cheat.getUnlockAllLevels());
+
+        if (this.cheat.getUnlockAllLevels()){
+            levelSelect.borderColor = Color.WHITE;
+            levelSelect.backgroundColor = Color.TRANSPARENT;
+            // this.mainMenu.disable();
+            levelSelect.onClickEventId = "level";
+        }
+        else{
+            levelSelect.borderColor = Color.WHITE;
+            levelSelect.backgroundColor = Color.BLACK;
+        }
 
         const controls = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 150), text: "Controls"})
         controls.size.set(200, 50);
