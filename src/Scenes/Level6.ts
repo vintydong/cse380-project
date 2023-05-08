@@ -78,7 +78,7 @@ export default class Level6 extends Level {
         this.talonDyingAudioKey = Level6.TALON_DYING_AUDIO_KEY;
 
         //Extras
-        this.platFormPositions = [new Vec2(720, 544), new Vec2(336, 400), new Vec2(1104, 400), new Vec2(720, 256)]
+        this.platFormPositions = [new Vec2(720, 496), new Vec2(336, 352), new Vec2(1104, 352), new Vec2(720, 205)]
     }
 
     /**
@@ -141,7 +141,7 @@ export default class Level6 extends Level {
         this.enemies.push(lich);
 
         // Initialize Viewport
-        this.viewport.setBounds(0, 0, 8 * 6 * 30, 8 * 6 * 18);
+        this.viewport.setBounds(0, 0, 8 * 6 * 30, 8 * 6 * 16);
 
         // Play music
         this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});

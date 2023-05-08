@@ -185,7 +185,7 @@ export class Dash extends PlayerState {
         this.parent.speed = this.parent.MAX_SPEED;
         this.timestepsLeft = 15;
         this.direction = this.parent.facing;
-        this.parent.iFrameTimer.start();
+        // this.parent.iFrameTimer.start();
         this.parent.hit = true;
         this.owner.animation.play(PlayerAnimations.DASH);
         let dashAudio = (this.owner.getScene() as Level).getDashAudioKey()
@@ -212,6 +212,7 @@ export class Dash extends PlayerState {
     public onExit(): Record<string, any> {
         this.owner.animation.stop();
         this.parent.dashTimer.start();
+        this.parent.hit = false;
         return {fromGround: this.fromGround};
     }
 }
