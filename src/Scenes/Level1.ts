@@ -95,7 +95,7 @@ export default class Level1 extends Level {
         rect.setGroup(PhysicsGroups.LEVEL_END);
         rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
 
-        this.viewport.setBounds(8 * 6, 0, 8 * 6 * 58, 8 * 6 * 30);
+        this.viewport.setBounds(8 * 6, 0, 8 * 6 * 78, 8 * 6 * 21);
 
         this.nextLevel = Level2;
         this.emitter.fireEvent(GameEventType.PLAY_MUSIC, { key: this.levelMusicKey, loop: true, holdReference: true });
