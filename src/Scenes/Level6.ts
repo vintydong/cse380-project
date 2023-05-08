@@ -30,16 +30,21 @@ export default class Level6 extends Level {
     public static readonly LICH_POSITION_KEY = "LICH_POSITION_KEY";
 
     public static readonly LICH_WAND_KEY = "LICH_WAND_KEY"
-    public static readonly LICH_WAND_PATH = "assets/spritesheets/Bosses/Lich/Lich_Wand.json";   // Replace
+    public static readonly LICH_WAND_PATH = "assets/spritesheets/Bosses/Lich/Lich_Wand.json";
 
     public static readonly LICH_CUP_KEY = "LICH_CUP_KEY"
-    public static readonly LICH_CUP_PATH = "assets/spritesheets/Bosses/Lich/Lich_Cup.json";   // Replace
+    public static readonly LICH_CUP_PATH = "assets/spritesheets/Bosses/Lich/Lich_Cup.json";
 
     public static readonly LICH_SWORD_KEY = "LICH_SWORD_KEY"
-    public static readonly LICH_SWORD_PATH = "assets/spritesheets/Bosses/Lich/Lich_Sword.json";   // Replace
+    public static readonly LICH_SWORD_PATH = "assets/spritesheets/Bosses/Lich/Lich_Sword.json";
+    
+    //Sound Effect from <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=80368">Pixabay</a>
+    public static readonly LICH_ATTACK_AUDIO_KEY = "LICH_DYING_AUDIO_KEY";
+    public static readonly LICH_ATTACK_AUDIO_PATH = "assets/sounds/lich_attack.mp3";
 
+    //Sound Effect from <a href="https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=88481">Pixabay</a>
     public static readonly LICH_DYING_AUDIO_KEY = "LICH_DYING_AUDIO_KEY";
-    public static readonly LICH_DYING_AUDIO_PATH = "assets/sounds/lich_dying.wav";  // Replace
+    public static readonly LICH_DYING_AUDIO_PATH = "assets/sounds/lich_dying.mp3";  
 
     // Talon Keys
     public static readonly TALON_SPRITE_KEY = "TALON_SPRITE_KEY";
@@ -52,6 +57,7 @@ export default class Level6 extends Level {
     public static readonly TALON_DYING_AUDIO_PATH = "assets/sounds/talon_dying.wav";
 
     protected platFormPositions: Array<Vec2>;
+    protected lichAttackAudioKey: string;
     protected lichDyingAudioKey: string;
     protected talonDyingAudioKey: string;
     
@@ -67,6 +73,7 @@ export default class Level6 extends Level {
         this.playerSpawn = new Vec2(8 * 6 * 7, 8 * 6 * 8);
 
         // Music and sound
+        this.lichAttackAudioKey = Level6.LICH_ATTACK_AUDIO_KEY;
         this.lichDyingAudioKey = Level6.LICH_DYING_AUDIO_KEY;
         this.talonDyingAudioKey = Level6.TALON_DYING_AUDIO_KEY;
 
@@ -86,6 +93,8 @@ export default class Level6 extends Level {
                 
         /* Audio and Sounds */
         this.load.audio(this.levelMusicKey, Level6.LEVEL_MUSIC_PATH)
+        this.load.audio(Level6.LICH_ATTACK_AUDIO_KEY, Level6.LICH_ATTACK_AUDIO_PATH);
+        this.load.audio(Level6.LICH_DYING_AUDIO_KEY, Level6.LICH_DYING_AUDIO_PATH);
         this.load.audio(Level6.TALON_DYING_AUDIO_KEY, Level6.TALON_DYING_AUDIO_PATH);
 
         /* AI */
@@ -133,9 +142,6 @@ export default class Level6 extends Level {
         // Initialize Viewport
         this.viewport.setBounds(0, 0, 8 * 6 * 30, 8 * 6 * 18);
 
-        // Set Level End
-        this.initializeLevelEnd();
-
         // Play music
         this.emitter.fireEvent(GameEventType.PLAY_MUSIC, {key: this.levelMusicKey, loop: true, holdReference: true});
     }
@@ -145,6 +151,7 @@ export default class Level6 extends Level {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
+        if (!this.enemies[0].visible) { this.emitter.fireEvent(CustomGameEvents.LEVEL_END); }
         super.updateScene(deltaT);
     }
 
@@ -163,7 +170,7 @@ export default class Level6 extends Level {
                 this.emitter.fireEvent(CustomGameEvents.LEVEL_END)
                 break;
             }
-            case CustomGameEvents.LEVEL_NEXT: {
+            case CustomGameEvents.LEVEL_END: {
                 this.sceneManager.changeToScene(MainMenu);
                 break;
             }
@@ -172,18 +179,6 @@ export default class Level6 extends Level {
                 super.handleEvent(event);
                 break;
         }
-    }
-
-    private initializeLevelEnd() {
-        const levelEnd = new Vec2(15, 4.5).scale(this.tilemapScale.x * 8, this.tilemapScale.y * 8);
-        let rect = this.factory.addGraphic(GraphicType.RECT, LevelLayers.PRIMARY, levelEnd, new Vec2(2 * 8 * 6, 3 * 8 * 6));
-        rect.color = Color.TRANSPARENT;
-        rect.addPhysics();
-        rect.setGroup(PhysicsGroups.LEVEL_END);
-        rect.setTrigger(PhysicsGroups.PLAYER, CustomGameEvents.PLAYER_ENTER_LEVEL_END, null);
-
-        this.nextLevel = Level6;
-        this.emitter.fireEvent(GameEventType.PLAY_MUSIC, { key: this.levelMusicKey, loop: true, holdReference: true });
     }
 
     /* Getters */
@@ -201,6 +196,10 @@ export default class Level6 extends Level {
             newIndex = Math.floor(Math.random() * this.platFormPositions.length)
         }
         return {index: newIndex, position: this.platFormPositions[newIndex]}
+    }
+
+    public getLichAttackAudioKey(): string {
+        return this.lichAttackAudioKey
     }
 
     public getLichDyingAudioKey(): string {

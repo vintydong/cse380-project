@@ -79,6 +79,8 @@ class LichIdle extends EnemyState {
 
     public onEnter(options: Record<string, any>): void {
         this.owner.animation.play(LichAnimations.IDLE);
+        // Delay before hitting player
+        if (this.parent.cooldown.hasRun() === false) { this.parent.cooldown.start(); }
 
         // Up the difficulty >:)
         if (this.parent.health <= this.parent.maxHealth/2) { this.parent.maxProjectiles = 8; }
@@ -124,6 +126,8 @@ class LichAttacking extends EnemyState {
 
     public onEnter(options: Record<string, any>): void {
         this.owner.animation.playIfNotAlready(LichAnimations.ATTACKING);
+        let attackAudio = (this.owner.getScene() as Level6).getLichAttackAudioKey();
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: attackAudio, loop: false, holdReference: false});
         this.player = this.parent.target.position
         this.curPos = this.owner.position.clone()
         this.offSet = (8 * 6 * 3);  // Tile pixels * scale * # tiles
@@ -131,6 +135,8 @@ class LichAttacking extends EnemyState {
 
     public update(deltaT: number): void {
         super.update(deltaT);
+
+        if (this.owner.animation.isPlaying(LichAnimations.ATTACKING)) { return; }
 
         var delay = 0;
         // this.parent.currentAttack = LichAttacks.CUPS;
@@ -581,7 +587,7 @@ export class WandProjectile extends LichProjectile {
         
         // Add projectile to scene
         this.hitbox = scene.add.animatedSprite("LICH_WAND_KEY", LevelLayers.PRIMARY)
-        this.hitbox.scale = new Vec2(1, 1);
+        this.hitbox.scale = new Vec2(2, 2);
         this.hitbox.visible = false;
 
         this.hitbox.addAI(WandProjectileAI)
@@ -730,7 +736,7 @@ export class SwordProjectile extends LichProjectile {
         
         // Add projectile to scene
         this.hitbox = scene.add.animatedSprite("LICH_SWORD_KEY", LevelLayers.PRIMARY)
-        this.hitbox.scale = new Vec2(1, 1);
+        this.hitbox.scale = new Vec2(2, 2);
         this.hitbox.visible = false;
 
         // Add physics
@@ -758,9 +764,9 @@ export class SwordProjectileAI extends LichProjectileAI {
         this.currentYSpeed = 50;
         this.speedIncrement = 100;
         this.minXSpeed = 100;
-        this.maxXSpeed = 300;
+        this.maxXSpeed = 200;
         this.minYSpeed = 100;
-        this.maxYSpeed = 300;
+        this.maxYSpeed = 200;
     }
 
     public activate(options: Record<string, any>): void {
