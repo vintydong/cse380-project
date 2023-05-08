@@ -48,7 +48,9 @@ export default abstract class Skill {
      * 
      * true if the skill can now be activated; false otherwise
      */
-    public getCooldown(): boolean { return this.cooldown[this.level].isStopped() }
+    public getCooldown(): boolean { return this.cooldown[this.level].isStopped(); }
+
+    public getCooldownTime(): number { return this.cooldown[this.level].timeRemaining(); }
 
     public getAttributes(): SkillAttributes {
         let level = this.level;

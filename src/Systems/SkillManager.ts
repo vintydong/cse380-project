@@ -2,6 +2,7 @@ import { CustomGameEvents } from "../CustomGameEvents";
 import { uiElementProps } from "../Factory/CustomFactoryManager";
 import Level from "../Scenes/Level";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
+import Emitter from "../Wolfie2D/Events/Emitter";
 import AnimatedSprite from "../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Sprite from "../Wolfie2D/Nodes/Sprites/Sprite";
 import Button from "../Wolfie2D/Nodes/UIElements/Button";
@@ -14,7 +15,6 @@ import Repel from "./Skills/Repel";
 import Skill from "./Skills/Skill";
 import Slash from "./Skills/Slash";
 import Spin from "./Skills/Spin";
-import Emitter from "../Wolfie2D/Events/Emitter";
 
 export const SkillBookLayers = {
     background: "SKILL_BOOK_BACKGROUND"
@@ -65,6 +65,7 @@ export class SkillManager {
 
     private skillBookLayer: UILayer;
     private skillBookItems: SkillBookRow[];
+    private skillPointsLabel: Label;
 
     private emitter: Emitter;
     private cheatManager: CheatManager;
@@ -99,10 +100,11 @@ export class SkillManager {
     }
 
     private constructor(scene: Level, player?: AnimatedSprite) {
-        this.scene = scene;
+        // this.scene = scene;
+        this.setScene(scene);
         this.player = player;
 
-        this.skillPoints = 0;
+        // this.skillPoints = 0;
         this.initSkillBook();
         this.skillBookItems = [];
 
@@ -149,6 +151,8 @@ export class SkillManager {
 
         let rowHeight = 150;
 
+        let layer = SkillBookLayers.background as any
+
         // for(let skill of this.allSkills){
         for (let i = 0; i < this.allSkills.length; i++) {
             let skill = this.allSkills[i];
@@ -163,8 +167,6 @@ export class SkillManager {
             let skillIcon = this.scene.add.sprite(skill.iconKey, SkillBookLayers.background);
             skillIcon.position.set(rowLeft, rowCenterY);
             skillIcon.scale = new Vec2(3.5, 3.5);
-
-            let layer = SkillBookLayers.background as any
 
             let miniButtonProps = {size: new Vec2(15,15), fontSize: 15, backgroundColor: new Color(100,100,100)}
 
@@ -239,6 +241,13 @@ export class SkillManager {
             };
             this.skillBookItems.push(skillRow);
         }
+
+        let pointsLabelPos = center.clone();
+        pointsLabelPos.y = pointsLabelPos.y + 200;
+        this.skillPointsLabel = this.scene.factory.addLabel(layer, pointsLabelPos, `Skill Points: ${this.skillPoints}`);
+        this.skillPointsLabel.backgroundColor = new Color(255, 0, 0, 0.5);
+        this.skillPointsLabel.size = new Vec2(200, rowHeight / 2);
+        this.skillPointsLabel.fontSize = 25;
     }
 
     /** Update each row of the skill book with the current skill attributes */
@@ -254,6 +263,7 @@ export class SkillManager {
             row.attributeLabel.text = `DMG: ${skillAttr.damage}\tCD: ${(skillAttr.cooldown / 1000).toFixed(1)}`
             row.descLabel.text = skillAttr.description;
         })
+        this.skillPointsLabel.text = `Skill Points ${this.skillPoints}`;
     }
 
     public handleLevelEvent(event: SkillBookEvent) {
@@ -316,12 +326,18 @@ export class SkillManager {
 
     private increaseLevel(skill: Skill){
         // console.log("Increase level");
-        if(skill) skill.changeLevel(1);
+        if(skill && this.skillPoints > 0){
+            this.skillPoints--;
+            skill.changeLevel(1);
+        }
     }
 
     private decreaseLevel(skill: Skill){
         // console.log("Decrease level");
-        if(skill) skill.changeLevel(-1);
+        if(skill){
+            this.skillPoints++;
+            skill.changeLevel(-1);
+        }
     }
 
     /** Returns the cooldown of the skill at position index 
@@ -376,7 +392,30 @@ export class SkillManager {
 
     public getPlayer() { return this.player; }
 
-    public setScene(scene: Level) { this.scene = scene; }
+    public setScene(scene: Level) {
+        this.scene = scene;
+        // console.log(scene.constructor);
+        switch(scene.constructor.name){
+            case 'Level1':
+                this.skillPoints = 0;
+                break;
+            case 'Level2':
+                this.skillPoints = 2;
+                break;
+            case 'Level3':
+                this.skillPoints = 4;
+                break;
+            case 'Level4':
+                this.skillPoints = 6;
+                break;  
+            case 'Level5':
+                this.skillPoints = 8;
+                break;
+            case 'Level6':
+                this.skillPoints = 10;
+                break;
+        }
+    }
 
     public setPlayer(player: AnimatedSprite) { this.player = player; }
 }

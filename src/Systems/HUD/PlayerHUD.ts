@@ -96,15 +96,17 @@ export default class PlayerHUD implements Updateable {
 
             if(!skill) continue;
 
+            let ability = null;
             if(this.abilityIcons[skill.iconKey]){
-                let ability = this.abilityIcons[skill.iconKey];
+                ability = this.abilityIcons[skill.iconKey];
                 ability.position = squarePos;
             } else {
-                let ability = this.scene.factory.addSprite(skill.iconKey, LevelLayers.UI);
-                this.abilityIcons[skill.iconKey] = ability;
+                ability = this.scene.factory.addSprite(skill.iconKey, LevelLayers.UI);
                 ability.position = squarePos;
                 ability.size = new Vec2(16, 16);
                 ability.scale = new Vec2(2.5, 2.5);
+
+                this.abilityIcons[skill.iconKey] = ability;
             }
         }
     }
@@ -127,5 +129,20 @@ export default class PlayerHUD implements Updateable {
 		this.healthBar.position.set(this.healthBarBg.position.x - (unit / 2) * (this.owner.maxHealth - this.owner.health), this.healthBarBg.position.y);
 		// this.healthBar.backgroundColor = Color.RED;
         this.healthBar.backgroundColor = currentHealth < maxHealth * 1 / 4 ? Color.RED : currentHealth < maxHealth * 3 / 4 ? Color.YELLOW : Color.GREEN;
+
+        // Update ability bar with CDs
+        let skill_manager = this.scene.getSkillManager();
+        let activeSkills = skill_manager.getActiveSkills();
+        for (let skill of activeSkills){
+            if(!skill) continue;
+
+            let abilityIcon = this.abilityIcons[skill.iconKey];
+            let cd = skill.getCooldownTime();
+            if(cd > 0){
+                abilityIcon.alpha = 0.2;
+            } else {
+                abilityIcon.alpha = 1;
+            }
+        }
     }
 }

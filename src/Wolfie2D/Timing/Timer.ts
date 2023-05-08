@@ -104,6 +104,10 @@ export default class Timer implements Updateable {
     length(): number {
         return this.totalTime;
     }
+
+    timeRemaining(): number {
+        return this.timeLeft;
+    }
 }
 
 export enum TimerState {
