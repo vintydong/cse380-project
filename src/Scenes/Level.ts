@@ -3,11 +3,13 @@ import PlayerParticleSystem from "../AI/Player/PlayerParticleSystem";
 import { CustomGameEvent, CustomGameEvents, MenuEvent, MenuEvents } from "../CustomGameEvents";
 import CustomFactoryManager from "../Factory/CustomFactoryManager";
 import { PhysicsCollisionMap, PhysicsGroups } from "../Physics";
+import PlayerHUD from "../Systems/HUD/PlayerHUD";
 import { LayerManager } from "../Systems/LayerManager";
 import { SkillBookEvent, SkillBookEvents, SkillManager } from "../Systems/SkillManager";
 import Melee from "../Systems/Skills/Melee";
 import Repel from "../Systems/Skills/Repel";
 import Slash from "../Systems/Skills/Slash";
+import Spin from "../Systems/Skills/Spin";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../Wolfie2D/Events/GameEvent";
@@ -90,6 +92,7 @@ export default abstract class Level extends Scene {
     /** Attributes for the UI */
     protected healthBar: Label;
     protected healthBarBg: Label;
+    protected playerHUD: PlayerHUD;
 
     protected resourceBar: Label;
     protected abilityBar: Label;
@@ -130,8 +133,9 @@ export default abstract class Level extends Scene {
         this.load.image(Slash.SLASH_SPRITE_KEY, Slash.SLASH_SPRITE_PATH);
         this.load.image(Slash.SLASH_ICON_KEY, Slash.SLASH_ICON_PATH);
         this.load.image(Repel.REPEL_SPRITE_KEY, Repel.REPEL_SPRITE_PATH);
-        this.load.image(Repel.REPEL_ICON_KEY, Repel.REPEL_SPRITE_PATH);
-
+        this.load.image(Repel.REPEL_ICON_KEY, Repel.REPEL_ICON_PATH);
+        this.load.spritesheet(Spin.SPIN_SPRITE_KEY, Spin.SPIN_SPRITE_PATH);
+        this.load.image(Spin.SPIN_ICON_KEY, Spin.SPIN_ICON_PATH);
 
         /* Audio and Sounds */
         this.load.audio(Level.JUMP_AUDIO_KEY, Level.JUMP_AUDIO_PATH);
@@ -160,8 +164,6 @@ export default abstract class Level extends Scene {
             throw new Error("Missing tilemap key or scale");
         this.factory.tilemap(this.tilemapKey, this.tilemapScale);
 
-        // Initialize UI layer components such as health bar, ability bar, etc.
-        this.initUI();
 
         // Initialize player
         if (this.playerSpawn === undefined) throw new Error("Player spawn missing!");
@@ -177,6 +179,9 @@ export default abstract class Level extends Scene {
         // Initialize Skill Manager
         console.log("Initializing skil manager");
         this.skill_manager = SkillManager.getInstance(this, this.player);
+
+        // Initialize UI layer components such as health bar, ability bar, etc.
+        this.playerHUD = new PlayerHUD(this, this.player._ai as PlayerController, LevelLayers.UI);
 
         // Initialize viewport
         if (this.player === undefined) {
@@ -203,6 +208,7 @@ export default abstract class Level extends Scene {
         
         this.receiver.subscribe(CustomGameEvents.UPDATE_HEALTH);
         this.receiver.subscribe(CustomGameEvents.TOGGLE_SKILL_BOOK);
+        this.receiver.subscribe(CustomGameEvents.CHANGED_ACTIVE_SKILLS);
 
         this.receiver.subscribe(CustomGameEvents.LEVEL_START);
         this.receiver.subscribe(CustomGameEvents.PLAYER_ENTER_LEVEL_END);
@@ -250,6 +256,9 @@ export default abstract class Level extends Scene {
             }
         }
 
+        // Update player HUD
+        this.playerHUD.update(deltaT);
+
         // Handle all game events
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
@@ -293,6 +302,10 @@ export default abstract class Level extends Scene {
                 this.skill_manager.activateSkill(3, { direction: event.data.get("direction") })
                 break;
             }
+            case CustomGameEvents.CHANGED_ACTIVE_SKILLS: {
+                this.playerHUD.updateHUD();
+                break;
+            }
             
             case CustomGameEvents.LEVEL_START: {
                 Input.enableInput();
@@ -318,13 +331,6 @@ export default abstract class Level extends Scene {
 
             case CustomGameEvents.LEVEL_FAILED: {
                 this.sceneManager.changeToScene(MainMenu);
-                break;
-            }
-
-            case CustomGameEvents.UPDATE_HEALTH: {
-                let currentHealth = event.data.get('currentHealth');
-                let maxHealth = event.data.get('maxHealth');
-                this.handleHealthChange(currentHealth, maxHealth);
                 break;
             }
 
@@ -375,56 +381,7 @@ export default abstract class Level extends Scene {
     }
 
     protected initUI() {
-        // this.healthLabel = this.factory.addLabel(LevelLayers.UI, new Vec2(50, 20), "HP");
-        // this.healthLabel.size.set(300, 30);
-        // this.healthLabel.textColor = Color.RED;
-        // this.healthLabel.fontSize = 24;
-        // this.healthLabel.font = "Courier";
-
-        this.healthBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 60), "");
-        this.healthBar.size = new Vec2(200, 25);
-        this.healthBar.backgroundColor = Color.GREEN;
-
-        // HealthBar Border
-        this.healthBarBg = <Label>this.add.uiElement(UIElementType.LABEL, LevelLayers.UI, { position: new Vec2(125, 60), text: "" });
-        this.healthBarBg.size = new Vec2(200, 25);
-        this.healthBarBg.borderColor = Color.BLACK;
-
-        // Resource Bar
-        // this.resourceBar = this.factory.addLabel(LevelLayers.UI, new Vec2(125, 105), "");
-        // this.resourceBar.size = new Vec2(200, 25);
-        // this.resourceBar.backgroundColor = Color.BLACK;
-        // this.resourceBar.borderColor = Color.MAGENTA;
-
-        // Ability Bar
-        const abilityBarCenter = new Vec2(150, 735);
-        const abilityBarSize = new Vec2(300, 50);
-        this.abilityBar = this.factory.addLabel(LevelLayers.UI, abilityBarCenter, "");
-        this.abilityBar.size = abilityBarSize;
-        this.abilityBar.backgroundColor = Color.TRANSPARENT;
-        // this.abilityBar.borderColor = Color.MAGENTA
-
-        const abilityBarPadding = 15;
-        const abilitySquareSize = 40;
-        const abilityBarStart = new Vec2(abilityBarCenter.x - abilityBarSize.x / 2, abilityBarCenter.y - abilityBarSize.y / 2);
-
-        const abilityPositions = [new Vec2(0, 0), new Vec2(16, 0), new Vec2(0, 16), new Vec2(16, 16)]
-        const abilityLabel = ['', 'U', 'I', 'O', 'P'];
-
-        for (let i = 1; i < 6; i++) {
-            let squarePos = new Vec2(abilityBarStart.x + abilitySquareSize * i + abilityBarPadding * (i - 1), abilityBarCenter.y)
-            let square = this.factory.addLabel(LevelLayers.UI, squarePos, '')
-            square.size = new Vec2(abilitySquareSize, abilitySquareSize);
-            square.backgroundColor = new Color(115, 115, 115);
-
-            let offset = i < abilityPositions.length ? abilityPositions[i - 1] : abilityPositions[abilityPositions.length - 1]
-            let ability = this.factory.addSprite(this.abilityIconsKey, LevelLayers.UI, offset);
-            ability.position = squarePos;
-            ability.size = new Vec2(16, 16);
-            ability.scale = new Vec2(2.5, 2.5);
-
-            let text = this.factory.addLabel(LevelLayers.UI, squarePos.clone().sub(new Vec2(0, 30)), abilityLabel[i - 1]) as Label;
-        }
+        
     }
 
     protected freezeLevel() {
@@ -446,12 +403,12 @@ export default abstract class Level extends Scene {
     }
 
     protected handleHealthChange(currentHealth: number, maxHealth: number): void {
-        let unit = this.healthBarBg.size.x / maxHealth;
+        // let unit = this.healthBarBg.size.x / maxHealth;
 
-        this.healthBar.size.set(this.healthBarBg.size.x - unit * (maxHealth - currentHealth), this.healthBarBg.size.y);
-        this.healthBar.position.set(this.healthBarBg.position.x - (unit / 2) * (maxHealth - currentHealth), this.healthBarBg.position.y);
+        // this.healthBar.size.set(this.healthBarBg.size.x - unit * (maxHealth - currentHealth), this.healthBarBg.size.y);
+        // this.healthBar.position.set(this.healthBarBg.position.x - (unit / 2) * (maxHealth - currentHealth), this.healthBarBg.position.y);
 
-        this.healthBar.backgroundColor = currentHealth < maxHealth * 1 / 4 ? Color.RED : currentHealth < maxHealth * 3 / 4 ? Color.YELLOW : Color.GREEN;
+        // this.healthBar.backgroundColor = currentHealth < maxHealth * 1 / 4 ? Color.RED : currentHealth < maxHealth * 3 / 4 ? Color.YELLOW : Color.GREEN;
     }
 
     public getPlayer() {

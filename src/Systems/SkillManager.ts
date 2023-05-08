@@ -13,6 +13,8 @@ import Melee from "./Skills/Melee";
 import Repel from "./Skills/Repel";
 import Skill from "./Skills/Skill";
 import Slash from "./Skills/Slash";
+import Spin from "./Skills/Spin";
+import Emitter from "../Wolfie2D/Events/Emitter";
 
 export const SkillBookLayers = {
     background: "SKILL_BOOK_BACKGROUND"
@@ -57,6 +59,7 @@ export class SkillManager {
     private skillBookLayer: UILayer;
     private skillBookItems: SkillBookRow[];
 
+    private emitter: Emitter;
     private cheatManager: CheatManager;
 
     /** Instance for the singleton */
@@ -66,7 +69,7 @@ export class SkillManager {
      * Singleton
      * 
      * Returns the current instance of this class or a new instance if none exist
-     * @returns CheatManager
+     * @returns SkillManager
      */
     public static getInstance(scene?: Level, player?: AnimatedSprite): SkillManager {
         if(!scene || !player) return null; 
@@ -80,8 +83,7 @@ export class SkillManager {
             this.instance.drawSkillBook();
         }
 
-        console.log("ACTIVE KSKILLS", this.instance.activeSkills);
-
+        // console.log("ACTIVE KSKILLS", this.instance.activeSkills);
         return this.instance;
     }
 
@@ -105,7 +107,10 @@ export class SkillManager {
 
         this.activeSkills[0] = this.allSkills[0];
         this.activeSkills[1] = this.allSkills[1];
-        this.activeSkills[2] = this.allSkills[2];
+        // this.activeSkills[2] = this.allSkills[2];
+        // this.activeSkills[3] = this.allSkills[3];
+
+        this.emitter = new Emitter();
 
         this.cheatManager = CheatManager.getInstance();
     }
@@ -125,7 +130,7 @@ export class SkillManager {
     }
 
     private loadAllSkills() {
-        this.allSkills = [new Melee(this), new Slash(this), new Repel(this), null, null, null];
+        this.allSkills = [new Melee(this), new Slash(this), new Repel(this), new Spin(this), null, null];
     }
 
     /** Called when the skillbook and all of its skills need to be drawn for the first time */
@@ -147,7 +152,7 @@ export class SkillManager {
             let rowLeft = center.x + dx;
             let rowCenterY = center.y + dy / 2;
 
-            let skillIcon = this.scene.add.sprite(skill.spriteKey, SkillBookLayers.background);
+            let skillIcon = this.scene.add.sprite(skill.iconKey, SkillBookLayers.background);
             skillIcon.position.set(rowLeft, rowCenterY);
             skillIcon.scale = new Vec2(3.5, 3.5);
 
@@ -279,6 +284,8 @@ export class SkillManager {
             this.activeSkills[2] = this.allSkills[index];
         else if(key == 'E')
             this.activeSkills[3] = this.allSkills[index];
+        
+        this.emitter.fireEvent(CustomGameEvents.CHANGED_ACTIVE_SKILLS);
     }
 
     private increaseLevel(skill: Skill){
@@ -336,6 +343,8 @@ export class SkillManager {
             this.skillBookLayer.enable() :
             this.skillBookLayer.disable();
     }
+
+    public getActiveSkills() { return this.activeSkills; }
 
     public getScene() { return this.scene; }
 

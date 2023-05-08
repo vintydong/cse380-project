@@ -22,6 +22,8 @@ export const CustomGameEvents = {
   SKILL_4_FIRED: "SKILL_4_FIRED",
   UPDATE_HEALTH: "UPDATE_HEALTH",
   TOGGLE_SKILL_BOOK: "TOGGLE_SKILL_BOOK",
+  /** Event emitted when active abilities are changes so that the HUD can be updated */
+  CHANGED_ACTIVE_SKILLS: "CHANGED_ACTIVE_SKILLS",
 
   /** Event emitted when level should start */
   LEVEL_START: "LEVEL_START",
