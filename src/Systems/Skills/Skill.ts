@@ -18,7 +18,7 @@ export interface SkillAttributes {
 export default abstract class Skill {
     protected skill_manager: SkillManager;
 
-    public spriteKey: string;
+    public iconKey: string;
 
     protected level: number;
     protected damage: number[];
@@ -26,7 +26,7 @@ export default abstract class Skill {
     protected cost: number[];
     protected description: string[];
 
-    public constructor(skill_manager: SkillManager, damage, cooldown, cost, description, spriteKey){
+    public constructor(skill_manager: SkillManager, damage, cooldown, cost, description, iconKey){
         this.skill_manager = skill_manager;
 
         this.level = 0;
@@ -34,7 +34,7 @@ export default abstract class Skill {
         this.cooldown = cooldown;
         this.cost = cost;
         this.description = description;
-        this.spriteKey = spriteKey;
+        this.iconKey = iconKey;
         // this.initialize();
     }
 

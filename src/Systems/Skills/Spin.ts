@@ -6,6 +6,7 @@ import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import Emitter from "../../Wolfie2D/Events/Emitter";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import Receiver from "../../Wolfie2D/Events/Receiver";
+import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Sprite from "../../Wolfie2D/Nodes/Sprites/Sprite";
 import Timer from "../../Wolfie2D/Timing/Timer";
 import { EaseFunctionType } from "../../Wolfie2D/Utils/EaseFunctions";
@@ -17,18 +18,18 @@ import Skill from "./Skill";
  * @author vintydong
  */
 export default class Spin extends Skill {
-    private hitbox: Sprite;
+    private hitbox: AnimatedSprite;
     public static readonly SPIN_SPRITE_KEY = "SPIN_SPRITE_KEY";
-    public static readonly SPIN_SPRITE_PATH = "assets/sprites/attacks/spin.png";
+    public static readonly SPIN_SPRITE_PATH = "assets/spritesheets/Player/spin.json";
 
     public static readonly SPIN_ICON_KEY = "SPIN_ICON_KEY";
     public static readonly SPIN_ICON_PATH = "assets/sprites/icons/spin_icon.png";
 
     public constructor(skill_manager: SkillManager) {
         let damage = [20, 30, 40];
-        let cooldown = [new Timer(800), new Timer(600), new Timer(400)];
+        let cooldown = [new Timer(2000), new Timer(2000), new Timer(1000)];
         let cost = [0, 0, 0];
-        let description = ['Swings sword at enemy', 'Increase DMG and reduce CD', 'Greatly increase DMG'];
+        let description = ['Slashes around', 'Increase DMG & slight knockback', 'Increase DMG & Decrease CD'];
 
         super(skill_manager, damage, cooldown, cost, description, Spin.SPIN_ICON_KEY);
     }
@@ -36,7 +37,7 @@ export default class Spin extends Skill {
     public initialize(){
         let scene = this.skill_manager.getScene();
         
-        this.hitbox = scene.add.sprite(Spin.SPIN_SPRITE_KEY, LevelLayers.PRIMARY)
+        this.hitbox = scene.add.animatedSprite(Spin.SPIN_SPRITE_KEY, LevelLayers.PRIMARY)
         this.hitbox.scale = new Vec2(3,3);
         this.hitbox.visible = false;
 
@@ -69,21 +70,26 @@ export default class Spin extends Skill {
         this.hitbox.alpha = 1;
 
         // Calculate basic attack offset from player center
-        let newPosition = this.skill_manager.getPlayer().position.clone();
-        let xOffset = this.hitbox.boundary.getHalfSize().x
-        newPosition.x += (direction == "left") ? -1 * xOffset : xOffset;
-        this.hitbox.position = newPosition;
+        // let newPosition = this.skill_manager.getPlayer().position.clone();
+        // let xOffset = this.hitbox.boundary.getHalfSize().x
+        // newPosition.x += (direction == "left") ? -1 * xOffset : xOffset;
+        // this.hitbox.position = newPosition;
+
+        this.hitbox.position = this.skill_manager.getPlayer().position.clone();
 
         this.cooldown[this.level].start();
 
+        this.hitbox.invertX = direction != "left";
+
         this.hitbox.setAIActive(true, {direction: direction, damage: this.damage[this.level]});
-        this.hitbox.tweens.play("fadeout");
+        this.hitbox.animation.play('ACTIVE', false, 'SPIN_ATTACK_END')
+        // this.hitbox.tweens.play("fadeout");
     }
 }
 
 /**
  * A class that represents the behavior of the melee attack in the HW2Scene
- * @author HenryLam
+ * @author vintydong
  */
 export class SpinBehavior implements AI {
     // The GameNode that owns this behavior
