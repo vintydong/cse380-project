@@ -5,6 +5,7 @@
 import { CustomGameEvents, MenuEvents } from "../CustomGameEvents";
 import Level from "../Scenes/Level";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
+import Input from "../Wolfie2D/Input/Input";
 import { TweenableProperties } from "../Wolfie2D/Nodes/GameNode";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Rect from "../Wolfie2D/Nodes/Graphics/Rect";
@@ -338,7 +339,10 @@ export class LayerManager {
         })
         this.transitionLabel.visible = false;
 
-        this.endLevelTimer = new Timer(3000, () => { this.transitionScreen.tweens.play("fadeIn"); })
+        this.endLevelTimer = new Timer(3000, () => { 
+            this.transitionScreen.tweens.play("fadeIn");
+            Input.enableInput();
+        })
     }
 
     public startLevel(){

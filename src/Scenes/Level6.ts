@@ -1,7 +1,9 @@
+import { BasicEnemyController } from "../AI/BasicEnemyController";
 import { LichActor, LichController } from "../AI/Bosses/Lich";
 import { TalonActor, TalonController } from "../AI/Enemies/Talon";
 import { CustomGameEvents } from "../CustomGameEvents";
 import { PhysicsGroups } from "../Physics";
+import BossHUD from "../Systems/HUD/BossHUD";
 import Repel from "../Systems/Skills/Repel";
 import AABB from "../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
@@ -19,7 +21,7 @@ import MainMenu from "./MenuScenes/MainMenu";
 export default class Level6 extends Level {   
     // Level Keys
     public static readonly TILEMAP_KEY = "Level6";
-    public static readonly TILEMAP_PATH = "assets/tilemaps/Level6_tilemap.json";
+    public static readonly TILEMAP_PATH = "assets/tilemaps/level6_tilemap.json";
     public static readonly TILEMAP_SCALE = new Vec2(6, 6);
 
     public static readonly LEVEL_MUSIC_KEY = "LEVEL_MUSIC";
@@ -61,6 +63,8 @@ export default class Level6 extends Level {
     protected lichAttackAudioKey: string;
     protected lichDyingAudioKey: string;
     protected talonDyingAudioKey: string;
+
+    private bossHP: BossHUD;
     
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);
@@ -141,6 +145,8 @@ export default class Level6 extends Level {
         lich.animation.play("IDLE");
         this.enemies.push(lich);
 
+        this.bossHP = new BossHUD(this, lich._ai as BasicEnemyController, LevelLayers.UI);
+
         // Initialize Viewport
         this.viewport.setBounds(0, 0, 8 * 6 * 30, 8 * 6 * 16);
 
@@ -154,6 +160,7 @@ export default class Level6 extends Level {
             this.handleEvent(this.receiver.getNextEvent());
         }
         if (!this.enemies[0].visible) { this.emitter.fireEvent(CustomGameEvents.LEVEL_END); }
+        this.bossHP.update(deltaT);
         super.updateScene(deltaT);
     }
 
@@ -174,7 +181,7 @@ export default class Level6 extends Level {
             }
             case CustomGameEvents.LEVEL_END: {
                 // super.handleEvent(event);
-                Input.disableInput();
+                // Input.disableInput();
                 this.ui.disable();
                 this.layer_manager.endGame();
                 break;

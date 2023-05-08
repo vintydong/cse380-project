@@ -300,8 +300,8 @@ export class LichController extends BasicEnemyController {
         this.startPause.start();
 
         // Initialize Stats
-        this.maxHealth = 200;
-        this.health = 200;
+        this.maxHealth = 500;
+        this.health = 500;
         this.MIN_SPEED = 50;
         this.MAX_SPEED = 50;
         this.velocity = Vec2.ZERO;
