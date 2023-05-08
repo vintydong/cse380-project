@@ -3,19 +3,17 @@
  */
 
 import { CustomGameEvents, MenuEvents } from "../CustomGameEvents";
-import CustomFactoryManager from "../Factory/CustomFactoryManager";
+import Level from "../Scenes/Level";
 import Vec2 from "../Wolfie2D/DataTypes/Vec2";
 import { TweenableProperties } from "../Wolfie2D/Nodes/GameNode";
-import Layer from "../Wolfie2D/Scene/Layer"
-import UILayer from "../Wolfie2D/Scene/Layers/UILayer";
-import Scene from "../Wolfie2D/Scene/Scene";
-import Color from "../Wolfie2D/Utils/Color";
-import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
-import Level from "../Scenes/Level";
 import { GraphicType } from "../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Rect from "../Wolfie2D/Nodes/Graphics/Rect";
 import Label, { HAlign, VAlign } from "../Wolfie2D/Nodes/UIElements/Label";
+import Layer from "../Wolfie2D/Scene/Layer";
+import UILayer from "../Wolfie2D/Scene/Layers/UILayer";
 import Timer from "../Wolfie2D/Timing/Timer";
+import Color from "../Wolfie2D/Utils/Color";
+import { EaseFunctionType } from "../Wolfie2D/Utils/EaseFunctions";
 
 export const LevelUILayers = {
     PAUSE: "PAUSE",

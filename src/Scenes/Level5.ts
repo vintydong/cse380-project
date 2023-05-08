@@ -67,9 +67,6 @@ export default class Level5 extends Level {
         this.load.spritesheet(Level5.TALON_SPRITE_KEY, Level5.TALON_SPRITE_PATH);
         this.load.spritesheet(Level5.TALON_PROJECTILE_KEY, Level5.TALON_PROJECTILE_PATH);
         this.load.object(Level5.TALON_POSITIONS_KEY, Level5.TILEMAP_PATH);
-
-        /* Abilities */
-        this.load.image(Repel.REPEL_SPRITE_KEY, Repel.REPEL_SPRITE_PATH);
     }
 
     /**

@@ -14,6 +14,7 @@ import Help from "./Help";
 import LevelSelect from "./LevelSelect";
 import Controls from "./Controls";
 import Level1 from "../Level1";
+import { SkillManager } from "../../Systems/SkillManager";
 
 export default class MainMenu extends Scene {
     // Need layers for multiple scenes such as mainMenu, about, control, help, levels, etc.
@@ -37,6 +38,9 @@ export default class MainMenu extends Scene {
     public startScene(): void {
         const center = this.viewport.getCenter();
         const {x: halfX, y: halfY} = this.viewport.getHalfSize();
+
+        // Reset skill manager levels when you reach the main menu
+        SkillManager.resetSkills();
 
         /** Main Menu Layer */
         this.mainMenu = this.addUILayer("mainMenu");
